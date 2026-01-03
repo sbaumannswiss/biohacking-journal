@@ -44,7 +44,7 @@ export function BottomNav() {
                                 "p-2.5 rounded-xl transition-all duration-300",
                                 isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
                             )}>
-                                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
+                                <Icon size={28} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
                             </div>
                             <span className={clsx(
                                 "text-[11px] font-medium transition-colors leading-none",
