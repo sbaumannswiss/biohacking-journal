@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { getUserStack, getUserXP, getUserStreak, getMetricsHistory, getTodayCheckIns, getCheckInHistory } from '@/lib/supabaseService';
 import { SUPPLEMENT_LIBRARY } from '@/data/supplements';
-import { createRecommendationService, Recommendation, JournalEntry, CheckInData } from '@/lib/recommendations';
+import { createRecommendationService, Recommendation, JournalEntry, CheckInData, findStackWarnings, SupplementWarning } from '@/lib/recommendations';
 import { calculateLevel } from '@/lib/xpSystem';
 
 export interface UserContext {
@@ -47,6 +47,12 @@ export interface UserContext {
     title: string;
     message: string;
     supplement?: string;
+  }[];
+  warnings: {
+    type: string;
+    severity: string;
+    message: string;
+    supplements?: string[];
   }[];
   today: {
     date: string;
@@ -205,6 +211,43 @@ export async function buildUserContext(userId: string): Promise<UserContext> {
     // Silently fail - recommendations are optional
   }
   
+  // Generate warnings for dangerous combinations or dosages
+  let warnings: UserContext['warnings'] = [];
+  try {
+    const warningContext = {
+      userId,
+      journalHistory: metricsRaw.map(m => ({
+        date: m.date,
+        sleep: m.sleep || 5,
+        energy: m.energy || 5,
+        focus: m.focus || 5,
+        mood: m.energy || 5,
+      })),
+      checkInHistory: checkInHistoryRaw.map((c: { supplementId: string; checkedAt: string }) => ({
+        supplementId: c.supplementId,
+        supplementName: formattedStack.find(s => s.id === c.supplementId)?.name || c.supplementId,
+        checkedAt: c.checkedAt,
+        time: getTimeOfDayFromDate(c.checkedAt),
+      })),
+      currentStack: formattedStack.map(s => ({
+        supplementId: s.id,
+        supplementName: s.name,
+        dosage: s.dosage,
+        time: s.time,
+      })),
+    };
+    
+    const stackWarnings = findStackWarnings(warningContext);
+    warnings = stackWarnings.map(w => ({
+      type: w.type,
+      severity: w.severity,
+      message: w.message,
+      supplements: w.affectedSupplements,
+    }));
+  } catch (e) {
+    // Silently fail - warnings are optional
+  }
+  
   // Check if first session
   const isFirstSession = stack.length === 0 && metricsRaw.length === 0;
   
@@ -223,6 +266,7 @@ export async function buildUserContext(userId: string): Promise<UserContext> {
     averages,
     patterns,
     recommendations,
+    warnings,
     today: {
       date: now.toISOString().split('T')[0],
       time: now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
@@ -286,6 +330,14 @@ ${context.recommendations.length > 0
       `- [${r.priority.toUpperCase()}] ${r.title}: ${r.message}`
     ).join('\n')
   : '- Noch nicht genug Daten für personalisierte Empfehlungen'
+}
+
+WARNUNGEN (WICHTIG - User muss informiert werden!):
+${context.warnings.length > 0
+  ? context.warnings.map(w => 
+      `- [${w.severity.toUpperCase()}] ${w.type}: ${w.message}${w.supplements ? ` (betrifft: ${w.supplements.join(', ')})` : ''}`
+    ).join('\n')
+  : '- Keine Warnungen für den aktuellen Stack'
 }
 
 HEUTE:
