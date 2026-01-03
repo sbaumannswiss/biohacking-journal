@@ -60,21 +60,22 @@ export interface UserContext {
 function calculateAverages(metrics: any[]): UserContext['averages'] {
   if (metrics.length === 0) return null;
   
+  // Note: mood and stress are not tracked in current schema, use energy as proxy
   const sum = metrics.reduce((acc, m) => ({
     sleep: acc.sleep + (m.sleep || 0),
     energy: acc.energy + (m.energy || 0),
     focus: acc.focus + (m.focus || 0),
-    mood: acc.mood + (m.mood || 0),
-    stress: acc.stress + (m.stress || 0),
-  }), { sleep: 0, energy: 0, focus: 0, mood: 0, stress: 0 });
+  }), { sleep: 0, energy: 0, focus: 0 });
   
   const count = metrics.length;
+  const avgEnergy = Math.round((sum.energy / count) * 10) / 10;
+  
   return {
     sleep: Math.round((sum.sleep / count) * 10) / 10,
-    energy: Math.round((sum.energy / count) * 10) / 10,
+    energy: avgEnergy,
     focus: Math.round((sum.focus / count) * 10) / 10,
-    mood: Math.round((sum.mood / count) * 10) / 10,
-    stress: Math.round((sum.stress / count) * 10) / 10,
+    mood: avgEnergy, // Use energy as proxy for mood
+    stress: Math.max(1, 10 - avgEnergy), // Inverse of energy as proxy for stress
   };
 }
 
@@ -149,14 +150,14 @@ export async function buildUserContext(userId: string): Promise<UserContext> {
     };
   });
   
-  // Format metrics
+  // Format metrics (mood and stress not stored in daily_metrics, use defaults)
   const metrics = metricsRaw.map(m => ({
     date: m.date,
     sleep: m.sleep || 0,
     energy: m.energy || 0,
     focus: m.focus || 0,
-    mood: m.mood || 0,
-    stress: m.stress || 0,
+    mood: 5, // Default - not tracked in current schema
+    stress: 5, // Default - not tracked in current schema
   }));
   
   // Calculate averages
@@ -173,7 +174,7 @@ export async function buildUserContext(userId: string): Promise<UserContext> {
       sleep: m.sleep || 5,
       energy: m.energy || 5,
       focus: m.focus || 5,
-      mood: m.mood || 5,
+      mood: m.energy || 5, // Use energy as proxy for mood
     }));
     
     const checkInHistory: CheckInData[] = checkInHistoryRaw.map((c: { supplementId: string; checkedAt: string }) => ({
