@@ -51,5 +51,9 @@ export {
 } from './interactionWarner';
 
 // Re-export the main service
-export { RecommendationService } from './recommendationService';
+export { 
+  RecommendationService, 
+  createRecommendationService,
+  getQuickRecommendation 
+} from './recommendationService';
 
