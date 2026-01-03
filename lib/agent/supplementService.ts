@@ -110,8 +110,8 @@ export function parseSupplementFromMessage(message: string): ParsedSupplementSug
   const emojiMatch = message.match(/🎨\s*\*\*Emoji:\*\*\s*(.+?)(?=\n|$)/i);
   const emoji = emojiMatch?.[1]?.trim() || '💊';
   
-  // Extract agent notes
-  const notesMatch = message.match(/🧬\s*\*\*Helix-Analyse:\*\*\s*(.+?)(?=\n\n|$)/is);
+  // Extract agent notes (use [\s\S] instead of . with s flag for ES2017 compatibility)
+  const notesMatch = message.match(/🧬\s*\*\*Helix-Analyse:\*\*\s*([\s\S]+?)(?=\n\n|$)/i);
   const agent_notes = notesMatch?.[1]?.trim();
 
   if (!name || !description) return null;
