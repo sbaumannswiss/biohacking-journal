@@ -75,8 +75,8 @@ export function generateSupplementId(name: string): string {
  * Parse a supplement suggestion from the agent's response
  */
 export function parseSupplementFromMessage(message: string): ParsedSupplementSuggestion | null {
-  // Look for structured supplement format
-  const supplementMatch = message.match(/🧪\s*\*\*(?:Supplement-Analyse|Neues Supplement):\s*(.+?)\*\*/i);
+  // Look for structured supplement format (supports both emoji and [SUPP] marker)
+  const supplementMatch = message.match(/(?:🧪|\[SUPP\])\s*\*\*(?:Supplement-Analyse|Neues Supplement):\s*(.+?)\*\*/i);
   
   if (!supplementMatch) return null;
 
