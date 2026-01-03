@@ -380,8 +380,8 @@ export default function Home() {
       />
 
       {/* Header Section */}
-      <header className="px-6 pt-8 pb-4 relative">
-        <div className="flex justify-between items-start mb-6">
+      <header className="px-4 pt-8 pb-4 relative">
+        <div className="flex justify-between items-start mb-4">
           <div>
             <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-primary/80">
               Good {timeOfDay.charAt(0).toUpperCase() + timeOfDay.slice(1)},
@@ -485,7 +485,7 @@ export default function Home() {
       </div>
 
       {/* Stack Header Row */}
-      <div className="px-6 flex justify-between items-center mb-2">
+      <div className="px-4 flex justify-between items-center mb-2">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Clock size={14} />
           <h2 className="text-xs font-semibold uppercase tracking-wider">
@@ -515,7 +515,7 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 px-6 space-y-6">
+      <div className="flex-1 px-4 space-y-4">
         {dataLoading ? (
           <div className="flex items-center justify-center p-8">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
