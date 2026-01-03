@@ -500,18 +500,18 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowScanModal(true)}
-            className="p-1.5 bg-cyan-500/10 text-cyan-400 rounded-lg hover:bg-cyan-500/20 transition-colors"
+            className="p-3 min-w-11 min-h-11 bg-cyan-500/10 text-cyan-400 rounded-xl hover:bg-cyan-500/20 active:scale-95 transition-all flex items-center justify-center"
             title="Supplement scannen"
             aria-label="Supplement mit Kamera scannen"
           >
-            <Camera size={16} aria-hidden="true" />
+            <Camera size={22} aria-hidden="true" />
           </button>
           <Link 
             href="/library" 
-            className="p-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+            className="p-3 min-w-11 min-h-11 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 active:scale-95 transition-all flex items-center justify-center"
             aria-label="Supplement zur Library hinzufügen"
           >
-            <Plus size={16} aria-hidden="true" />
+            <Plus size={22} aria-hidden="true" />
           </Link>
         </div>
       </div>
