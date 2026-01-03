@@ -217,12 +217,12 @@ export function FloatingChat() {
 
   return (
     <>
-      {/* Floating Helix Button */}
+      {/* Floating Helix Button - Top Right */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed z-50 w-14 h-14 rounded-full cursor-pointer"
+        className="fixed z-50 w-12 h-12 rounded-full cursor-pointer"
         style={{ 
-          bottom: 'calc(80px + env(safe-area-inset-bottom, 0px) + 16px)',
+          top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
           right: '16px',
         }}
         whileHover={{ scale: 1.1 }}
@@ -347,17 +347,17 @@ export function FloatingChat() {
         )}
       </AnimatePresence>
 
-      {/* Chat Window */}
+      {/* Chat Window - Opens below button */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className="fixed z-40 glass-panel border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
             style={{
-              bottom: 'calc(80px + env(safe-area-inset-bottom, 0px) + 80px)',
+              top: 'calc(env(safe-area-inset-top, 0px) + 70px)',
               right: '16px',
               width: 'calc(100% - 32px)',
               maxWidth: '360px',
