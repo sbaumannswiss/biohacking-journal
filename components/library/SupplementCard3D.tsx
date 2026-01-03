@@ -2,9 +2,64 @@
 
 import { useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { Plus, Check, Clock, Beaker, Star, Minus, Trash2 } from 'lucide-react';
+import { 
+    Plus, Check, Clock, Beaker, Star, Minus, Trash2,
+    Zap, Moon, Droplet, Sun, Anchor, Wind, Shield, Feather, Brain, Flame,
+    Sunrise, Layers, Hexagon, Mountain, Flower2, Circle, Infinity, Sprout,
+    Coffee, Lightbulb, Leaf, Wine, Heart, Battery, Bone, Sparkles, Citrus,
+    ArrowUp, Activity, Book, Smile, Pill, Package, FlaskConical,
+    type LucideIcon
+} from 'lucide-react';
 import { Supplement } from '@/data/supplements';
 import { cn } from '@/lib/utils';
+
+// Icon mapping for supplements
+const ICON_MAP: Record<string, LucideIcon> = {
+    'Zap': Zap,
+    'Moon': Moon,
+    'Droplet': Droplet,
+    'Sun': Sun,
+    'Anchor': Anchor,
+    'Wind': Wind,
+    'Shield': Shield,
+    'Feather': Feather,
+    'Brain': Brain,
+    'Flame': Flame,
+    'Sunrise': Sunrise,
+    'Layers': Layers,
+    'Hexagon': Hexagon,
+    'Mountain': Mountain,
+    'Flower': Flower2,
+    'Flower2': Flower2,
+    'Circle': Circle,
+    'Infinity': Infinity,
+    'Sprout': Sprout,
+    'Coffee': Coffee,
+    'Lightbulb': Lightbulb,
+    'Leaf': Leaf,
+    'Wine': Wine,
+    'Heart': Heart,
+    'Battery': Battery,
+    'Bone': Bone,
+    'Sparkle': Sparkles,
+    'Sparkles': Sparkles,
+    'Citrus': Citrus,
+    'ArrowUp': ArrowUp,
+    'Activity': Activity,
+    'Book': Book,
+    'Smile': Smile,
+    'Pill': Pill,
+    'Package': Package,
+    'Flask': FlaskConical,
+    // Fallbacks for icons that don't exist in Lucide
+    'Bull': Flame,
+    'Mushroom': Sprout,
+    'Bacteria': Circle,
+};
+
+function getSupplementIcon(iconName: string): LucideIcon {
+    return ICON_MAP[iconName] || Pill;
+}
 
 interface SupplementCard3DProps {
     supplement: Supplement;
@@ -206,9 +261,12 @@ export function SupplementCard3D({
                             </div>
                         )}
 
-                        {/* Emoji */}
-                        <div className="text-6xl mb-4 mt-2">
-                            {supplement.emoji}
+                        {/* Icon */}
+                        <div className="mb-4 mt-2 p-4 rounded-2xl bg-primary/10 border border-primary/20">
+                            {(() => {
+                                const IconComponent = getSupplementIcon(supplement.icon);
+                                return <IconComponent size={48} className="text-primary" strokeWidth={1.5} />;
+                            })()}
                         </div>
 
                         {/* Name */}
@@ -276,7 +334,10 @@ export function SupplementCard3D({
                     {/* Top Bar with Name */}
                     <div className="bg-primary/10 px-4 py-3 border-b border-white/5">
                         <div className="flex items-center gap-2">
-                            <span className="text-xl">{supplement.emoji}</span>
+                            {(() => {
+                                const IconComponent = getSupplementIcon(supplement.icon);
+                                return <IconComponent size={18} className="text-primary" strokeWidth={1.5} />;
+                            })()}
                             <h3 className="text-sm font-bold text-white truncate flex-1">
                                 {supplement.name}
                             </h3>

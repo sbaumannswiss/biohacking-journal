@@ -1,16 +1,41 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Check, Pill, Clock } from 'lucide-react';
+import { 
+    X, Check, Pill, Clock,
+    Zap, Moon, Droplet, Sun, Anchor, Wind, Shield, Feather, Brain, Flame,
+    Sunrise, Layers, Hexagon, Mountain, Flower2, Circle, Infinity, Sprout,
+    Coffee, Lightbulb, Leaf, Wine, Heart, Battery, Bone, Sparkles, Citrus,
+    ArrowUp, Activity, Book, Smile, Package, FlaskConical,
+    type LucideIcon
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
+// Icon mapping for supplements
+const ICON_MAP: Record<string, LucideIcon> = {
+    'Zap': Zap, 'Moon': Moon, 'Droplet': Droplet, 'Sun': Sun, 'Anchor': Anchor,
+    'Wind': Wind, 'Shield': Shield, 'Feather': Feather, 'Brain': Brain, 'Flame': Flame,
+    'Sunrise': Sunrise, 'Layers': Layers, 'Hexagon': Hexagon, 'Mountain': Mountain,
+    'Flower': Flower2, 'Flower2': Flower2, 'Circle': Circle, 'Infinity': Infinity,
+    'Sprout': Sprout, 'Coffee': Coffee, 'Lightbulb': Lightbulb, 'Leaf': Leaf,
+    'Wine': Wine, 'Heart': Heart, 'Battery': Battery, 'Bone': Bone,
+    'Sparkle': Sparkles, 'Sparkles': Sparkles, 'Citrus': Citrus, 'ArrowUp': ArrowUp,
+    'Activity': Activity, 'Book': Book, 'Smile': Smile,
+    'Package': Package, 'Flask': FlaskConical,
+    'Bull': Flame, 'Mushroom': Sprout, 'Bacteria': Circle,
+};
+
+function getSupplementIcon(iconName?: string): LucideIcon {
+    return iconName ? (ICON_MAP[iconName] || Pill) : Pill;
+}
 
 interface DosageModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (dosage: string, time?: string) => void;
     supplementName: string;
-    supplementEmoji?: string;
+    supplementIcon?: string;
     defaultDosage: string;
     defaultTime?: string;
     mode: 'add' | 'edit';
@@ -46,7 +71,7 @@ export function DosageModal({
     onClose,
     onSave,
     supplementName,
-    supplementEmoji,
+    supplementIcon,
     defaultDosage,
     defaultTime,
     mode,
@@ -105,9 +130,14 @@ export function DosageModal({
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
-                                {supplementEmoji && (
-                                    <span className="text-3xl">{supplementEmoji}</span>
-                                )}
+                                {(() => {
+                                    const IconComponent = getSupplementIcon(supplementIcon);
+                                    return (
+                                        <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
+                                            <IconComponent size={24} className="text-primary" strokeWidth={1.5} />
+                                        </div>
+                                    );
+                                })()}
                                 <div>
                                     <h2 className="text-lg font-bold text-foreground">
                                         {mode === 'add' ? 'Zum Stack hinzufügen' : 'Dosierung bearbeiten'}

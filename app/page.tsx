@@ -538,7 +538,7 @@ export default function Home() {
                         supplementId={item.supplement_id}
                         supplementName={item.supplement?.name || 'Unknown'}
                         dosage={item.custom_dosage || item.supplement?.optimal_dosage || ''}
-                        emoji={item.supplement?.emoji}
+                        icon={item.supplement?.icon}
                         isCompleted={completedSupplements.has(item.supplement_id)}
                         defaultTime={item.custom_time}
                         onCheckIn={() => handleXPUpdate(item.supplement?.name, item.supplement_id)}

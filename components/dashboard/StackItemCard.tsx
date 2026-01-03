@@ -2,17 +2,42 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Trash2, Loader2, AlertTriangle, Pencil } from 'lucide-react';
+import { 
+    Check, Trash2, Loader2, AlertTriangle, Pencil,
+    Zap, Moon, Droplet, Sun, Anchor, Wind, Shield, Feather, Brain, Flame,
+    Sunrise, Layers, Hexagon, Mountain, Flower2, Circle, Infinity, Sprout,
+    Coffee, Lightbulb, Leaf, Wine, Heart, Battery, Bone, Sparkles, Citrus,
+    ArrowUp, Activity, Book, Smile, Pill, Package, FlaskConical,
+    type LucideIcon
+} from 'lucide-react';
 import { clsx } from 'clsx';
 import { logCheckIn, removeFromStack, undoCheckIn, updateStackItem } from '@/lib/supabaseService';
 import { getAnonymousUserId } from '@/hooks/useAnonymousUser';
 import { DosageModal } from '@/components/ui/DosageModal';
 
+// Icon mapping for supplements
+const ICON_MAP: Record<string, LucideIcon> = {
+    'Zap': Zap, 'Moon': Moon, 'Droplet': Droplet, 'Sun': Sun, 'Anchor': Anchor,
+    'Wind': Wind, 'Shield': Shield, 'Feather': Feather, 'Brain': Brain, 'Flame': Flame,
+    'Sunrise': Sunrise, 'Layers': Layers, 'Hexagon': Hexagon, 'Mountain': Mountain,
+    'Flower': Flower2, 'Flower2': Flower2, 'Circle': Circle, 'Infinity': Infinity,
+    'Sprout': Sprout, 'Coffee': Coffee, 'Lightbulb': Lightbulb, 'Leaf': Leaf,
+    'Wine': Wine, 'Heart': Heart, 'Battery': Battery, 'Bone': Bone,
+    'Sparkle': Sparkles, 'Sparkles': Sparkles, 'Citrus': Citrus, 'ArrowUp': ArrowUp,
+    'Activity': Activity, 'Book': Book, 'Smile': Smile, 'Pill': Pill,
+    'Package': Package, 'Flask': FlaskConical,
+    'Bull': Flame, 'Mushroom': Sprout, 'Bacteria': Circle,
+};
+
+function getSupplementIcon(iconName?: string): LucideIcon {
+    return iconName ? (ICON_MAP[iconName] || Pill) : Pill;
+}
+
 interface StackItemCardProps {
     supplementId: string;
     supplementName: string;
     dosage: string;
-    emoji?: string;
+    icon?: string;
     isCompleted?: boolean;
     defaultTime?: string;
     onCheckIn?: () => void;
@@ -25,7 +50,7 @@ export function StackItemCard({
     supplementId, 
     supplementName, 
     dosage, 
-    emoji,
+    icon,
     isCompleted = false,
     defaultTime,
     onCheckIn,
@@ -175,7 +200,13 @@ export function StackItemCard({
                 {/* Content */}
                 <div className="flex-1 text-left">
                     <div className="flex items-center gap-2">
-                        {emoji && <span className="text-lg">{emoji}</span>}
+                        {(() => {
+                            const IconComponent = getSupplementIcon(icon);
+                            return <IconComponent size={18} className={clsx(
+                                "transition-colors duration-300",
+                                isChecked ? "text-primary" : "text-primary/60"
+                            )} strokeWidth={1.5} />;
+                        })()}
                         <span className={clsx(
                             "font-semibold transition-colors duration-300",
                             isChecked ? "text-primary" : "text-foreground"
@@ -227,7 +258,7 @@ export function StackItemCard({
                     }
                 }}
                 supplementName={supplementName}
-                supplementEmoji={emoji}
+                supplementIcon={icon}
                 defaultDosage={currentDosage}
                 defaultTime={defaultTime}
                 mode="edit"
