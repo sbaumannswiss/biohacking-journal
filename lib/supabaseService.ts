@@ -43,6 +43,24 @@ export interface DailyMetrics {
 // ============================================
 
 /**
+ * Konvertiert Zeit-Slot zu lesbarem Stack-Namen
+ */
+export function getStackDisplayName(time?: string): string {
+    const timeMap: Record<string, string> = {
+        'morning': 'Morning Stack',
+        'Morning': 'Morning Stack',
+        'noon': 'Noon Stack',
+        'Noon': 'Noon Stack',
+        'With Meals': 'Noon Stack',
+        'evening': 'Evening Stack',
+        'Evening': 'Evening Stack',
+        'bedtime': 'Bedtime Stack',
+        'Bedtime': 'Bedtime Stack',
+    };
+    return timeMap[time || ''] || 'Stack';
+}
+
+/**
  * Supplement zum persönlichen Stack hinzufügen
  */
 export async function addToStack(
@@ -50,7 +68,7 @@ export async function addToStack(
     supplementId: string,
     customDosage?: string,
     customTime?: string
-): Promise<{ success: boolean; error?: string; data?: StackItem }> {
+): Promise<{ success: boolean; error?: string; data?: StackItem; stackName?: string }> {
     if (!supabase) {
         return { success: false, error: 'Supabase nicht konfiguriert' };
     }
@@ -96,7 +114,8 @@ export async function addToStack(
             return { success: false, error: 'Supplement konnte nicht hinzugefügt werden' };
         }
 
-        return { success: true, data: data[0] };
+        const stackName = getStackDisplayName(customTime);
+        return { success: true, data: data[0], stackName };
     } catch (error: any) {
         console.error('addToStack error:', error);
         const errorMessage = error.code === '23505' 

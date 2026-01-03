@@ -28,6 +28,7 @@ function LibraryContent() {
     const [customSupplements, setCustomSupplements] = useState<CustomSupplement[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [initialIndex, setInitialIndex] = useState<number | undefined>(undefined);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Supplement-Typ Kategorien (basierend auf Namen/ID)
     const CATEGORY_RULES: { name: string; match: (s: Supplement) => boolean }[] = [
@@ -183,13 +184,24 @@ function LibraryContent() {
             if (result.success) {
                 setUserStackIds(prev => new Set([...prev, selectedForAdd.id]));
                 if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+                
+                // Toast mit Stack-Name anzeigen
+                const stackName = result.stackName || 'Stack';
+                setToast({ 
+                    message: `${selectedForAdd.name} zum ${stackName} hinzugefügt`, 
+                    type: 'success' 
+                });
+                setTimeout(() => setToast(null), 3000);
+                
                 triggerMessage('supplementAdded', { supplement: selectedForAdd.name });
             } else {
-                triggerMessage('error');
+                setToast({ message: result.error || 'Fehler', type: 'error' });
+                setTimeout(() => setToast(null), 3000);
             }
         } catch (error) {
             console.error('Error adding to stack:', error);
-            triggerMessage('error');
+            setToast({ message: 'Fehler beim Hinzufügen', type: 'error' });
+            setTimeout(() => setToast(null), 3000);
         } finally {
             setIsProcessing(false);
             setSelectedForAdd(null);
@@ -558,13 +570,18 @@ function LibraryContent() {
                 onAddToStack={async (supplementId, dosage) => {
                     if (!userId) return;
                     try {
-                        await addToStack(userId, supplementId, dosage);
-                        setUserStackIds(prev => new Set([...prev, supplementId]));
-                        triggerMessage('supplementAdded', { supplement: supplementId });
-                        if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+                        const result = await addToStack(userId, supplementId, dosage);
+                        if (result.success) {
+                            setUserStackIds(prev => new Set([...prev, supplementId]));
+                            const stackName = result.stackName || 'Stack';
+                            setToast({ message: `Supplement zum ${stackName} hinzugefügt`, type: 'success' });
+                            setTimeout(() => setToast(null), 3000);
+                            if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+                        }
                     } catch (error) {
                         console.error('Error adding from scan:', error);
-                        triggerMessage('error');
+                        setToast({ message: 'Fehler beim Hinzufügen', type: 'error' });
+                        setTimeout(() => setToast(null), 3000);
                     }
                 }}
                 onSaveComplete={async () => {
@@ -579,6 +596,27 @@ function LibraryContent() {
                     triggerMessage('supplementAdded', { supplement: 'Kombi-Präparat' });
                 }}
             />
+
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                        className={cn(
+                            "fixed bottom-24 left-1/2 -translate-x-1/2 z-50",
+                            "px-4 py-3 rounded-xl backdrop-blur-md shadow-lg",
+                            "border text-sm font-medium",
+                            toast.type === 'success' 
+                                ? "bg-primary/20 border-primary/30 text-primary"
+                                : "bg-red-500/20 border-red-500/30 text-red-400"
+                        )}
+                    >
+                        {toast.message}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <BottomNav />
         </div>

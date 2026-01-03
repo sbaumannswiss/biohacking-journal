@@ -533,20 +533,28 @@ export function FloatingChat() {
         onAddToStack={async (supplementId, dosage) => {
           if (!userId) return;
           try {
-            await addToStack(userId, supplementId, dosage);
-            // Add confirmation message to chat
-            setMessages(prev => [...prev, {
-              id: Date.now().toString(),
-              role: 'assistant',
-              content: `✅ **Supplement hinzugefügt!**\n\nIch habe das Supplement zu deinem Stack hinzugefügt. Check dein Dashboard! 🎯`,
-            }]);
-            if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+            const result = await addToStack(userId, supplementId, dosage);
+            if (result.success) {
+              const stackName = result.stackName || 'Stack';
+              setMessages(prev => [...prev, {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: `**Supplement hinzugefügt**\n\nDas Supplement wurde zum **${stackName}** hinzugefügt.`,
+              }]);
+              if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+            } else {
+              setMessages(prev => [...prev, {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: `Fehler: ${result.error || 'Konnte nicht hinzugefügt werden'}`,
+              }]);
+            }
           } catch (error) {
             console.error('Error adding from scan:', error);
             setMessages(prev => [...prev, {
               id: Date.now().toString(),
               role: 'assistant',
-              content: `Ups, da ist etwas schiefgelaufen beim Hinzufügen. Versuch es nochmal! 😅`,
+              content: `Fehler beim Hinzufügen. Bitte erneut versuchen.`,
             }]);
           }
         }}
