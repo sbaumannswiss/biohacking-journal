@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Loader2, Target, Check, FlaskConical, Camera, Sparkles } from 'lucide-react';
+import { X, Send, Loader2, Target, Check, Camera, Sparkles } from 'lucide-react';
 import { useAnonymousUser } from '@/hooks/useAnonymousUser';
 import { cn } from '@/lib/utils';
 import { parseQuestFromMessage, CreateQuestInput } from '@/lib/agent/questService';
-import { parseSupplementFromMessage, ParsedSupplementSuggestion } from '@/lib/agent/supplementService';
+// Supplement parsing removed - users use scan function instead
 import { ScanModal } from '@/components/ui/ScanModal';
 import { addToStack } from '@/lib/supabaseService';
 import { useHelix } from '@/components/coach';
@@ -17,8 +17,6 @@ interface Message {
   content: string;
   quest?: CreateQuestInput; // Parsed quest from message
   questActivated?: boolean; // Whether quest was activated
-  supplement?: ParsedSupplementSuggestion; // Parsed supplement suggestion
-  supplementSubmitted?: boolean; // Whether supplement was submitted
 }
 
 export function FloatingChat() {
@@ -105,8 +103,7 @@ export function FloatingChat() {
       // Parse quest from response if present
       const parsedQuest = parseQuestFromMessage(data.response);
       
-      // Parse supplement suggestion from response if present
-      const parsedSupplement = parseSupplementFromMessage(data.response);
+      // Supplement parsing disabled - users should use the scan function instead
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -114,8 +111,6 @@ export function FloatingChat() {
         content: data.response,
         quest: parsedQuest || undefined,
         questActivated: false,
-        supplement: parsedSupplement || undefined,
-        supplementSubmitted: false,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -172,45 +167,6 @@ export function FloatingChat() {
         id: Date.now().toString(),
         role: 'assistant',
         content: `Ups, die Quest konnte nicht aktiviert werden. ${error.message || 'Versuch es nochmal!'} 😅`,
-      }]);
-    }
-  };
-
-  const submitSupplementSuggestion = async (messageId: string, supplement: ParsedSupplementSuggestion) => {
-    if (!userId) return;
-
-    try {
-      const response = await fetch('/api/supplements/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, supplement }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Mark supplement as submitted in the message
-        setMessages(prev => prev.map(m => 
-          m.id === messageId ? { ...m, supplementSubmitted: true } : m
-        ));
-
-        // Add confirmation message
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: `**Supplement eingereicht!**\n\n"${supplement.name}" wurde erfolgreich vorgeschlagen.\n\nEs wird geprüft und dann zur Library hinzugefügt. Du bekommst eine Benachrichtigung, sobald es verfügbar ist.`,
-        }]);
-
-        // Haptic feedback
-        if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
-      } else {
-        throw new Error(data.error);
-      }
-    } catch (error: any) {
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: `Ups, das Supplement konnte nicht eingereicht werden. ${error.message || 'Versuch es nochmal!'} 😅`,
       }]);
     }
   };
@@ -430,31 +386,6 @@ export function FloatingChat() {
                     </motion.div>
                   )}
 
-                  {/* Supplement Einreichen Button */}
-                  {message.supplement && !message.supplementSubmitted && (
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3 }}
-                      onClick={() => submitSupplementSuggestion(message.id, message.supplement!)}
-                      className="mt-2 flex items-center gap-2 px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-xl text-cyan-400 text-sm font-medium transition-colors"
-                    >
-                      <FlaskConical size={16} />
-                      Zur Library hinzufügen
-                    </motion.button>
-                  )}
-
-                  {/* Supplement Eingereicht Badge */}
-                  {message.supplement && message.supplementSubmitted && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="mt-2 flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-xl text-green-400 text-sm font-medium"
-                    >
-                      <Check size={16} />
-                      Eingereicht!
-                    </motion.div>
-                  )}
                 </motion.div>
               ))}
 
