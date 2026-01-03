@@ -72,13 +72,12 @@ export function useRecommendations(userId: string | null): UseRecommendationsRes
         sleep: number;
         energy: number;
         focus: number;
-        mood: number;
       }) => ({
         date: m.date,
         sleep: m.sleep,
         energy: m.energy,
         focus: m.focus,
-        mood: m.mood,
+        mood: 5, // Default-Wert, da mood nicht in daily_metrics gespeichert wird
       }));
 
       // Erstelle Service
