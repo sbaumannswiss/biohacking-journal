@@ -42,18 +42,19 @@ export function XPDisplay({ xp }: XPDisplayProps) {
                 </div>
             </div>
 
-            {/* Progress Bar */}
-            <div className="mt-2">
-                <div className="h-1.5 w-full bg-background/50 rounded-full overflow-hidden relative">
+            {/* Progress Bar - More visible */}
+            <div className="mt-3">
+                <div className="h-2.5 w-full bg-white/10 rounded-full overflow-hidden relative border border-white/5">
                     <motion.div
-                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary/70 to-primary"
+                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary/80 via-primary to-primary/90 rounded-full"
+                        style={{ boxShadow: '0 0 10px rgba(79, 255, 176, 0.4)' }}
                         initial={{ width: 0 }}
                         animate={{ width: `${progress.progressPercent}%` }}
                         transition={{ duration: 1, ease: 'easeOut' }}
                     />
                 </div>
-                <span className="text-[9px] text-muted-foreground/60 font-mono mt-1 block">
-                    Total: {formatXP(xp)} XP
+                <span className="text-[9px] text-muted-foreground/70 font-mono mt-1.5 block">
+                    {formatXP(xp)} XP gesamt
                 </span>
             </div>
         </div>

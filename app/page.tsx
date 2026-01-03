@@ -491,7 +491,7 @@ export default function Home() {
           <h2 className="text-xs font-semibold uppercase tracking-wider">
             {TIME_LABELS[activeTime] || activeTime} Stack
             {activeTime === timeOfDay && (
-              <span className="ml-1.5 text-[10px] text-primary font-normal">(jetzt)</span>
+              <span className="ml-1.5 text-[10px] text-primary font-normal"> (jetzt)</span>
             )}
           </h2>
         </div>

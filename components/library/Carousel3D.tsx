@@ -118,46 +118,55 @@ export function Carousel3D({
         const offset = index - activeIndex;
         const absOffset = Math.abs(offset);
 
-        // Nur 1 Karte links, 1 rechts
-        if (absOffset > 1) {
+        // Zeige 2 Karten auf jeder Seite für mehr Tiefe
+        if (absOffset > 2) {
             return { display: 'none' };
         }
 
         const cardWidth = 280;
-        const peekAmount = 60; // Wie viel von seitlicher Karte sichtbar
+        const peekAmount = 120; // Mehr sichtbar von seitlichen Karten
 
         // ZENTRUM-KARTE (absOffset === 0)
         if (absOffset === 0) {
             return {
-                // translate3d für Hardware-Acceleration!
-                transform: `translate3d(0, 0, 50px) rotateY(0deg) scale(1.05)`,
+                transform: `translate3d(0, 0, 100px) rotateY(0deg) scale(1.08)`,
                 opacity: 1,
-                zIndex: 10,
-                transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s',
+                zIndex: 20,
+                transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s',
                 filter: 'none',
                 transformStyle: 'preserve-3d',
                 willChange: 'transform',
             };
         }
 
-        // SEITLICHE KARTEN (absOffset === 1)
-        const translateX = offset > 0 
-            ? (cardWidth / 2) - peekAmount  // Rechts
-            : -(cardWidth / 2) + peekAmount; // Links
-        
-        // WICHTIG: translateZ für 3D-Tiefe!
-        const translateZ = -120; // Karte geht NACH HINTEN
-        const rotateY = offset * -15; // Leichte Rotation
-        const scale = 0.85;
-        const opacity = 0.65;
+        // ERSTE SEITLICHE KARTEN (absOffset === 1)
+        if (absOffset === 1) {
+            const translateX = offset > 0 
+                ? cardWidth - peekAmount + 20  // Rechts
+                : -(cardWidth - peekAmount + 20); // Links
+            
+            return {
+                transform: `translate3d(${translateX}px, 0, -80px) rotateY(${offset * -25}deg) scale(0.88)`,
+                opacity: 0.75,
+                zIndex: 15,
+                transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s',
+                filter: 'brightness(0.85)',
+                transformStyle: 'preserve-3d',
+                willChange: 'transform',
+            };
+        }
 
+        // ZWEITE SEITLICHE KARTEN (absOffset === 2) - Peek-Effekt
+        const translateX = offset > 0 
+            ? cardWidth * 1.4  // Weiter rechts
+            : -(cardWidth * 1.4); // Weiter links
+        
         return {
-            // translate3d für Hardware-Acceleration!
-            transform: `translate3d(${translateX}px, 0, ${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-            opacity,
-            zIndex: 9 - absOffset,
-            transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s',
-            filter: 'blur(0.5px)',
+            transform: `translate3d(${translateX}px, 0, -200px) rotateY(${offset * -35}deg) scale(0.7)`,
+            opacity: 0.4,
+            zIndex: 10,
+            transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s',
+            filter: 'brightness(0.6) blur(1px)',
             transformStyle: 'preserve-3d',
             willChange: 'transform',
         };
@@ -174,15 +183,14 @@ export function Carousel3D({
     return (
         <div className="relative flex-1 flex flex-col items-center justify-center overflow-hidden">
 
-            {/* Carousel Container - PERSPECTIVE HIER! */}
+            {/* Carousel Container - Enhanced 3D Perspective */}
             <div
                 ref={containerRef}
-                className="relative w-full h-[450px] flex items-center justify-center overflow-hidden"
+                className="relative w-full h-[480px] flex items-center justify-center"
                 style={{
-                    // WICHTIG: Perspective auf Container!
-                    perspective: '1500px',
-                    WebkitPerspective: '1500px',
-                    perspectiveOrigin: '50% 50%',
+                    perspective: '1200px',
+                    WebkitPerspective: '1200px',
+                    perspectiveOrigin: '50% 45%',
                     transformStyle: 'preserve-3d',
                     WebkitTransformStyle: 'preserve-3d',
                 }}
@@ -322,10 +330,10 @@ export function Carousel3D({
                 >
                     <ChevronLeft size={20} />
                 </button>
-                <span className="text-sm text-white/70 font-mono min-w-[4rem] text-center">
+                <span className="text-sm text-white/70 min-w-[6rem] text-center">
                     <span className="text-primary font-bold">{activeIndex + 1}</span>
-                    <span className="text-white/30 mx-1">/</span>
-                    <span>{supplements.length}</span>
+                    <span className="text-white/40 mx-1">von</span>
+                    <span className="font-medium">{supplements.length}</span>
                 </span>
                 <button
                     onClick={goToNext}

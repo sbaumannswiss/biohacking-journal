@@ -488,7 +488,6 @@ export default function JournalPage() {
                     >
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                             Metriken
-                            <span className="text-xs font-normal text-primary">({sleep + energy + focus + mood}/40)</span>
                         </h3>
                         <ChevronDown size={16} className={cn("text-muted-foreground transition-transform", showSliders && "rotate-180")} />
                     </button>
@@ -662,8 +661,7 @@ export default function JournalPage() {
                             ) : (
                                 <motion.div key="save" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2">
                                     <Save size={20} aria-hidden="true" />
-                                    <span>{isEditMode ? 'Änderungen speichern' : 'Speichern'}</span>
-                                    {!isEditMode && <span className="text-xs opacity-70">+50 XP</span>}
+                                    <span>{isEditMode ? 'Änderungen speichern' : 'Eintrag speichern'}</span>
                                 </motion.div>
                             )}
                         </AnimatePresence>

@@ -340,9 +340,10 @@ function LibraryContent() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="mt-3 overflow-x-auto scrollbar-hide"
+                    className="mt-3 overflow-x-auto"
+                    style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(79, 255, 176, 0.3) transparent' }}
                 >
-                    <div className="flex gap-2 pb-2">
+                    <div className="flex gap-2 pb-3">
                         {/* "Alle" Button */}
                         <button
                             onClick={() => setActiveFilter(null)}
