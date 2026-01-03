@@ -1,0 +1,23 @@
+-- Top 20 Biohacking Supplements Seed
+INSERT INTO public.supplement_library (name, description, benefits, evidence_level, optimal_dosage, best_time, warnings, icon)
+VALUES 
+('Creatine Monohydrate', 'The gold standard for energy metabolism. Increases ATP availability, boosting power output and cognitive function.', ARRAY['Strength', 'Cognition', 'Energy'], 5, '5g daily', 'Any time (post-workout optimal)', 'Drink plenty of water.', 'Zap'),
+('Magnesium Glycinate', 'Highly bioavailable form of magnesium. Essential for 300+ enzymatic processes, relaxation, and sleep quality.', ARRAY['Sleep', 'Recovery', 'Nervous System'], 5, '200-400mg', 'Evening / Bedtime', 'Avoid Oxide form (laxative effect).', 'Moon'),
+('Omega-3 (EPA/DHA)', 'Essential fatty acids critical for brain health, inflammation reduction, and cell membrane fluidity.', ARRAY['Inflammation', 'Brain Health', 'Heart'], 5, '2g combined EPA/DHA', 'With a fatty meal', 'Check for rancidity (oxidized oil).', 'Droplet'),
+('Vitamin D3 + K2', 'Hormone precursor regulating immunity, mood, and bone density. K2 ensures calcium goes to bones, not arteries.', ARRAY['Immunity', 'Mood', 'Hormones'], 5, '2000-5000 IU', 'Morning (with fat)', 'Monitor blood levels regularly.', 'Sun'),
+('Ashwagandha (KSM-66)', 'Adaptogen that modulates cortisol response, reducing stress and anxiety while potentially boosting testosterone.', ARRAY['Stress', 'Testosterone', 'Sleep'], 4, '300-600mg', 'Evening', 'Cycle: 4 weeks on, 1 week off.', 'Anchor'),
+('L-Theanine', 'Amino acid found in tea. Promotes alpha-brainwaves (relaxed focus). Synergistic with Caffeine.', ARRAY['Focus', 'Calm', 'Anxiety'], 5, '100-200mg', 'Morning (with Caffeine)', 'Ratio 2:1 with Caffeine recommended.', 'Wind'),
+('N-Acetyl Cysteine (NAC)', 'Precursor to Glutathione (master antioxidant). Supports liver detox and respiratory health.', ARRAY['Detox', 'Immunity', 'Brain Health'], 4, '600-1200mg', 'Morning (Empty Stomach)', 'Can disturb mucus lining if taken chronically.', 'Shield'),
+('Glycine', 'Amino acid that lowers core body temperature and promotes deep sleep architecture.', ARRAY['Sleep', 'Detox', 'Joints'], 4, '3-5g', 'Bedtime', NULL, 'Feather'),
+('L-Tyrosine', 'Precursor to Dopamine and Noradrenaline. Restores cognitive resources during acute stress.', ARRAY['Focus', 'Stress', 'Mood'], 4, '500-1500mg', 'Morning / Pre-Task', 'Do not take with MAO inhibitors.', 'Brain'),
+('Curcumin (Meriva)', 'Potent anti-inflammatory compound from Turmeric. Needs piperine or lipids for absorption.', ARRAY['Inflammation', 'Joints', 'Brain Health'], 4, '500-1000mg', 'With Food', NULL, 'Flame'),
+('Rhodiola Rosea', 'Stimulating adaptogen to combat fatigue and burnout. Increases resilience to physical/mental stress.', ARRAY['Energy', 'Focus', 'Mood'], 4, '200-400mg', 'Morning', 'Can cause insomnia if taken late.', 'Sunrise'),
+('Collagen Peptides', 'Structural protein for skin, joints, and gut lining integrity.', ARRAY['Joints', 'Skin', 'Gut Health'], 3, '10-20g', 'Any time', NULL, 'Layers'),
+('Zinc Picolinate', 'Crucial for testosterone production, immune function, and DNA synthesis.', ARRAY['Immunity', 'Testosterone', 'Skin'], 5, '15-30mg', 'With Food', 'Do not exceed 50mg long-term.', 'Hexagon'),
+('Shilajit', 'Ancient biomass rich in Fulvic Acid and trace minerals. Boosts mitochondrial energy.', ARRAY['Energy', 'Minerals', 'Hormones'], 3, '250-500mg (Resin)', 'Morning', 'Ensure purified source (heavy metals).', 'Mountain'),
+('Apigenin', 'Bioflavonoid found in chamomile. Promotes sleep via GABA receptors and inhibits CD38 (NAD+ consumer).', ARRAY['Sleep', 'Anxiety', 'Longevity'], 3, '50mg', 'Bedtime', NULL, 'Flower'),
+('Taurine', 'Amino acid supporting heart health, hydration, and GABA activity.', ARRAY['Heart', 'Calm', 'Hydration'], 4, '1-3g', 'Evening', NULL, 'Bull'),
+('Inositol', 'Supports insulin sensitivity and neurotransmitter signaling (Serotonin/Dopamine).', ARRAY['Mood', 'Metabolism', 'Sleep'], 4, '2-4g', 'Bedtime', NULL, 'Circle'),
+('Lion’s Mane', 'Medicinal mushroom stimulating Nerve Growth Factor (NGF). Neurogenesis support.', ARRAY['Memory', 'Brain Health', 'Nerves'], 3, '500-1000mg (Extract)', 'Morning', 'Cycle to maintain sensitivity.', 'Mushroom'),
+('Nicotinamide Riboside (NR)', 'NAD+ precursor. Supports mitochondrial function and DNA repair (Longevity).', ARRAY['Longevity', 'Energy', 'Repair'], 4, '300mg', 'Morning', 'High cost per dose.', 'Infinity'),
+('Sulforaphane', 'Potent activator of Nrf2 pathway (cellular defense). Found in broccoli sprouts.', ARRAY['Detox', 'Cell Health', 'Longevity'], 3, '10-20mg (Active)', 'with Mustard Seed', 'Heat sensitive.', 'Sprout');

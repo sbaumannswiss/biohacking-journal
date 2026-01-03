@@ -1,0 +1,347 @@
+@import "tailwindcss";
+
+/* @plugin "tailwindcss-animate"; */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-success: var(--success);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-glow: glow 2s ease-in-out infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0
+    }
+
+    to {
+      height: var(--radix-accordion-content-height)
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height)
+    }
+
+    to {
+      height: 0
+    }
+  }
+
+  @keyframes glow {
+
+    0%,
+    100% {
+      box-shadow: 0 0 5px #A7F3D0, 0 0 10px #A7F3D0;
+    }
+
+    50% {
+      box-shadow: 0 0 20px #A7F3D0, 0 0 30px #A7F3D0;
+    }
+  }
+}
+
+/* 
+  Phantom x Brilliant Theme Variables 
+  Using HSL values for compatibility with shadcn conventions if needed, 
+  but Tailwind v4 vars usually expect direct color values if not using <alpha-value> placeholder.
+  For simplicity and safety with v4, we will use direct HSL strings but without `hsl()`.
+  Wait, typical Shadcn `globals.css` uses HSL numbers (e.g. 222.2 84% 4.9%).
+  Tailwind v4 `var(--param)` works best if the variable contains the Color.
+*/
+
+@layer base {
+  :root {
+    --radius: 2rem;
+    /* 32px - Phantom Style */
+
+    /* Phantom x Brilliant Palette (Light Mode - Fallback/Inverse) */
+    --background: hsl(240 20% 98%);
+    --foreground: hsl(240 20% 10%);
+
+    --card: hsl(240 20% 100%);
+    --card-foreground: hsl(240 20% 10%);
+
+    --popover: hsl(240 20% 100%);
+    --popover-foreground: hsl(240 20% 10%);
+
+    --primary: hsl(154 60% 40%);
+    --primary-foreground: hsl(240 20% 98%);
+
+    --secondary: hsl(250 80% 90%);
+    --secondary-foreground: hsl(240 20% 10%);
+
+    --muted: hsl(240 10% 90%);
+    --muted-foreground: hsl(240 10% 40%);
+
+    --accent: hsl(250 80% 90%);
+    --accent-foreground: hsl(240 20% 10%);
+
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: hsl(0 0% 98%);
+
+    --success: hsl(145 80% 40%);
+    /* Brilliant Green */
+
+    --border: hsl(240 20% 90%);
+    --input: hsl(240 20% 90%);
+    --ring: hsl(154 60% 40%);
+
+    --chart-1: hsl(154 60% 40%);
+    --chart-2: hsl(173 58% 39%);
+    --chart-3: hsl(197 37% 24%);
+    --chart-4: hsl(43 74% 66%);
+    --chart-5: hsl(27 87% 67%);
+  }
+
+  .dark {
+    /* Phantom x Brilliant Palette (Dark Mode - Primary) */
+    --background: hsl(240 20% 10%);
+    /* Deep Indigo (#14141F) */
+    --foreground: hsl(210 40% 98%);
+    /* Soft White */
+
+    --card: hsl(240 20% 15%);
+    /* Lighter Indigo */
+    --card-foreground: hsl(210 40% 98%);
+
+    --popover: hsl(240 20% 15%);
+    --popover-foreground: hsl(210 40% 98%);
+
+    --primary: hsl(154 60% 80%);
+    /* Electric Mint (#A7F3D0) */
+    --primary-foreground: hsl(240 20% 10%);
+
+    --volt: hsl(70 100% 50%);
+    /* Lando Volt (#D2FF00) */
+    --volt-foreground: hsl(240 20% 10%);
+
+    --secondary: hsl(250 80% 80%);
+    /* Phantom Lavender (#CABEFF) */
+    --secondary-foreground: hsl(240 20% 10%);
+
+    --muted: hsl(240 10% 25%);
+    --muted-foreground: hsl(240 10% 70%);
+
+    --accent: hsl(250 80% 80%);
+    --accent-foreground: hsl(240 20% 10%);
+
+    --destructive: hsl(0 62% 30%);
+    --destructive-foreground: hsl(0 0% 98%);
+
+    --success: hsl(145 70% 50%);
+    /* Brilliant Green */
+
+    --border: hsl(240 20% 20%);
+    --input: hsl(240 20% 20%);
+    --ring: hsl(154 60% 80%);
+
+    --chart-1: hsl(154 60% 80%);
+    --chart-2: hsl(173 58% 39%);
+    --chart-3: hsl(197 37% 24%);
+    --chart-4: hsl(43 74% 66%);
+    --chart-5: hsl(27 87% 67%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl;
+  }
+
+  /* Tactile Button (Brilliant Style) */
+  .btn-tactile {
+    @apply transition-all active:scale-95 active:shadow-none;
+    box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 15px rgba(167, 243, 208, 0.4);
+  }
+
+  .text-glow-purple {
+    text-shadow: 0 0 15px rgba(202, 190, 255, 0.5);
+  }
+
+  .box-glow {
+    box-shadow: 0 0 20px rgba(167, 243, 208, 0.15);
+  }
+
+  .box-glow-purple {
+    box-shadow: 0 0 20px rgba(202, 190, 255, 0.15);
+  }
+
+  .box-glow-orange {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);
+  }
+}
+
+/* iOS Safe Area Support */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 20px), 5rem);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 3D Carousel Utilities - POKEMON TCG STIL */
+.preserve-3d {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+  perspective-origin: 50% 50%;
+}
+
+.perspective-1500 {
+  perspective: 1500px;
+  -webkit-perspective: 1500px;
+  perspective-origin: 50% 50%;
+}
+
+.perspective-2000 {
+  perspective: 2000px;
+  -webkit-perspective: 2000px;
+  perspective-origin: 50% 50%;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Card Flip Container */
+.card-flip {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.card-flip.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+/* WICHTIG: Rückseite ist initial um 180° gedreht (unsichtbar) */
+.card-face-back {
+  transform: rotateY(180deg);
+}
+
+/* Hardware-Acceleration - NICHT auf card-flip (würde Flip überschreiben) */
+.card-face,
+.preserve-3d {
+  will-change: transform;
+}
+
+/* Holographic/Iridescent Effect */
+.holo-effect {
+  background: linear-gradient(
+    135deg,
+    rgba(167, 243, 208, 0.1) 0%,
+    rgba(202, 190, 255, 0.1) 25%,
+    rgba(167, 243, 208, 0.15) 50%,
+    rgba(202, 190, 255, 0.1) 75%,
+    rgba(167, 243, 208, 0.1) 100%
+  );
+  background-size: 400% 400%;
+  animation: holo-shift 8s ease infinite;
+}
+
+@keyframes holo-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Reflection Effect */
+.card-reflection {
+  position: absolute;
+  bottom: -100%;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, transparent 50%);
+  transform: scaleY(-1);
+  opacity: 0.3;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 40%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 40%);
+}
+
+/* Ambient Glow for Carousel */
+.carousel-glow {
+  position: absolute;
+  bottom: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 40%;
+  background: radial-gradient(ellipse at center, rgba(167, 243, 208, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  filter: blur(30px);
+}
