@@ -279,7 +279,7 @@ function LibraryContent() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen pb-24 relative overflow-hidden">
+        <div className="flex flex-col min-h-screen pb-28 relative overflow-hidden">
 
             {/* Header */}
             <div className="relative z-20 px-6 pt-8 pb-4">

@@ -91,7 +91,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen pb-24 relative">
+        <div className="flex flex-col min-h-screen pb-28 relative">
             {/* Toast Notification */}
             <AnimatePresence>
                 {toast && (

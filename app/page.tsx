@@ -372,7 +372,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-24">
+    <div className="flex flex-col min-h-screen pb-28">
       <SuccessOverlay
         isOpen={showSuccess}
         onClose={() => setShowSuccess(false)}

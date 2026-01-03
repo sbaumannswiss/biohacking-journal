@@ -247,7 +247,7 @@ export default function StatsPage() {
     }, [supplementStats]);
 
     return (
-        <div className="flex flex-col min-h-screen pb-24">
+        <div className="flex flex-col min-h-screen pb-28">
             {/* Header */}
             <header className="px-6 pt-8 pb-4">
                 <div className="flex items-center gap-3 mb-2">

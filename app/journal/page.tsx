@@ -267,7 +267,7 @@ export default function JournalPage() {
     // Loading State
     if (pageLoading || userLoading) {
         return (
-            <div className="flex flex-col min-h-screen pb-24">
+            <div className="flex flex-col min-h-screen pb-28">
                 <div className="flex-1 flex items-center justify-center">
                     <motion.div
                         animate={{ rotate: 360 }}
@@ -285,7 +285,7 @@ export default function JournalPage() {
     // ========================================
     if (hasLoggedToday && !isEditMode) {
         return (
-            <div className="flex flex-col min-h-screen pb-24">
+            <div className="flex flex-col min-h-screen pb-28">
                 <header className="px-6 pt-8 pb-4">
                     <h1 className="text-2xl font-bold text-foreground">Journal</h1>
                     <p className="text-sm text-muted-foreground">
@@ -445,7 +445,7 @@ export default function JournalPage() {
     // LOGGING / EDIT MODE - Normal Form
     // ========================================
     return (
-        <div className="flex flex-col min-h-screen pb-24">
+        <div className="flex flex-col min-h-screen pb-28">
             <header className="px-6 pt-8 pb-4">
                 <div className="flex items-center justify-between">
                     <div>

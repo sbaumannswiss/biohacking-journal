@@ -25,8 +25,8 @@ export function BottomNav() {
             aria-label="Hauptnavigation"
         >
             <div 
-                className="flex justify-around items-center px-4"
-                style={{ height: '72px', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+                className="flex justify-around items-center px-2"
+                style={{ height: '88px', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 {links.map((link) => {
                     const isActive = pathname === link.href;
@@ -36,18 +36,18 @@ export function BottomNav() {
                         <Link 
                             key={link.href} 
                             href={link.href} 
-                            className="flex flex-col items-center justify-center gap-1"
+                            className="flex flex-col items-center justify-center gap-1.5 min-w-[56px] py-2"
                             aria-label={link.label}
                             aria-current={isActive ? 'page' : undefined}
                         >
                             <div className={clsx(
-                                "p-1.5 rounded-xl transition-all duration-300",
+                                "p-2.5 rounded-xl transition-all duration-300",
                                 isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
                             )}>
-                                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
+                                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
                             </div>
                             <span className={clsx(
-                                "text-[9px] font-medium transition-colors leading-none",
+                                "text-[11px] font-medium transition-colors leading-none",
                                 isActive ? "text-primary" : "text-muted-foreground"
                             )}>
                                 {link.label}
