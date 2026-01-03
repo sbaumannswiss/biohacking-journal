@@ -199,14 +199,7 @@ export function StackItemCard({
 
                 {/* Content */}
                 <div className="flex-1 text-left">
-                    <div className="flex items-center gap-2">
-                        {(() => {
-                            const IconComponent = getSupplementIcon(icon);
-                            return <IconComponent size={18} className={clsx(
-                                "transition-colors duration-300",
-                                isChecked ? "text-primary" : "text-primary/60"
-                            )} strokeWidth={1.5} />;
-                        })()}
+                    <div className="flex items-center">
                         <span className={clsx(
                             "font-semibold transition-colors duration-300",
                             isChecked ? "text-primary" : "text-foreground"
