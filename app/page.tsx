@@ -618,7 +618,7 @@ export default function Home() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-[80px] left-0 right-0 px-4 z-40 sm:max-w-md sm:mx-auto"
+            className="fixed bottom-[100px] left-0 right-0 px-4 z-40 sm:max-w-md sm:mx-auto"
           >
             <button
               type="button"
@@ -659,7 +659,7 @@ export default function Home() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-[80px] left-0 right-0 px-4 z-40 sm:max-w-md sm:mx-auto"
+            className="fixed bottom-[100px] left-0 right-0 px-4 z-40 sm:max-w-md sm:mx-auto"
           >
             <div className="w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-3 bg-primary/20 text-primary border border-primary/30">
               <CheckCheck size={22} strokeWidth={2.5} />

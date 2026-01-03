@@ -17,6 +17,7 @@ export interface CustomSupplement {
   warnings?: string;
   image_base64?: string; // Optional: Produktbild
   created_at?: string;
+  evidence_level?: number; // 1-5 basierend auf wissenschaftlicher Evidenz
   
   // Für zentrales System
   submitted_to_central: boolean;
@@ -130,7 +131,7 @@ export async function submitToCentralSystem(
       name: supplement.name,
       description: supplement.description || `Kombi-Präparat mit ${supplement.ingredients.length} Wirkstoffen`,
       benefits: supplement.ingredients.map(i => i.name).slice(0, 5), // Top 5 Ingredients als Benefits
-      evidence_level: 3, // Standard für User-Submissions
+      evidence_level: supplement.evidence_level || 3, // AI-analysiertes Level oder Fallback
       optimal_dosage: supplement.serving_size || '1 Portion',
       best_time: supplement.best_time || 'With Meals',
       warnings: supplement.warnings,

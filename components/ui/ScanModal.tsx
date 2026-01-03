@@ -209,7 +209,7 @@ export function ScanModal({
             name: scanResult.detected.name,
             description: `Kombi-Präparat von ${scanResult.detected.brand || 'unbekannt'}`,
             benefits: comboIngredients.slice(0, 5).map(i => `${i.name} ${i.dosage}${i.unit}`),
-            evidence_level: 3,
+            evidence_level: scanResult.evidenceLevel || 3,
             isCombo: true,
             ingredients: comboIngredients,
           }),
@@ -235,6 +235,7 @@ export function ScanModal({
         ingredients: comboIngredients,
         best_time: 'With Meals',
         warnings: scanResult.detected.warnings,
+        evidence_level: scanResult.evidenceLevel,
       });
 
       if (!saveResult.success) {
@@ -305,7 +306,7 @@ export function ScanModal({
             name: scanResult.detected.name,
             description: `Supplement von ${scanResult.detected.brand || 'unbekannt'}`,
             benefits: [scanResult.detected.dosage || 'Dosierung unbekannt'],
-            evidence_level: 3,
+            evidence_level: scanResult.evidenceLevel || 3,
           }),
         });
         
@@ -329,6 +330,7 @@ export function ScanModal({
         ingredients: [], // Kein Kombi
         best_time: 'With Meals',
         warnings: scanResult.detected.warnings,
+        evidence_level: scanResult.evidenceLevel,
       });
 
       if (!saveResult.success) {

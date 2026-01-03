@@ -26,6 +26,9 @@ export interface ScanResult {
     warnings?: string;
   } | null;
   
+  // Evidenz-Level basierend auf wissenschaftlicher Forschung (1-5)
+  evidenceLevel?: number;
+  
   // Kombi-Präparat Erkennung
   isComboProduct: boolean;
   comboIngredients?: ComboIngredient[];
@@ -52,9 +55,16 @@ export interface ScanResult {
   helixComment: string;
 }
 
-const VISION_SYSTEM_PROMPT = `Du bist ein Supplement-Scanner. Analysiere das Bild eines Supplement-Produkts und extrahiere die Informationen.
+const VISION_SYSTEM_PROMPT = `Du bist ein Supplement-Scanner mit wissenschaftlicher Expertise. Analysiere das Bild eines Supplement-Produkts und extrahiere die Informationen.
 
 WICHTIG: Antworte NUR im folgenden JSON-Format, keine andere Ausgabe!
+
+## Evidenz-Level Bewertung (1-5):
+- 5 = Starke Evidenz (viele RCTs, Meta-Analysen) - z.B. Vitamin D, Omega-3, Magnesium, Kreatin
+- 4 = Gute Evidenz (mehrere Studien) - z.B. Ashwagandha, Zink, B-Vitamine
+- 3 = Moderate Evidenz (einige Studien) - z.B. L-Theanin, Rhodiola, CoQ10
+- 2 = Limitierte Evidenz (wenige Studien) - z.B. viele Pflanzenextrakte
+- 1 = Kaum Evidenz (hauptsächlich traditionell) - z.B. exotische Kräuter
 
 ## Für EINZEL-Supplements (1 Hauptwirkstoff):
 {
@@ -67,6 +77,7 @@ WICHTIG: Antworte NUR im folgenden JSON-Format, keine andere Ausgabe!
     "warnings": "Wichtige Warnhinweise falls sichtbar"
   },
   "isComboProduct": false,
+  "evidenceLevel": 4,
   "primarySupplement": "Der Hauptwirkstoff in einfacher Form (z.B. 'magnesium')",
   "confidence": "high/medium/low",
   "helixComment": "Kurzer Kommentar auf Deutsch"
@@ -83,6 +94,7 @@ WICHTIG: Antworte NUR im folgenden JSON-Format, keine andere Ausgabe!
     "warnings": "Warnhinweise"
   },
   "isComboProduct": true,
+  "evidenceLevel": 4,
   "comboIngredients": [
     {"name": "Vitamin D3", "dosage": "5000", "unit": "IU"},
     {"name": "Vitamin K2", "dosage": "100", "unit": "mcg"},
@@ -92,7 +104,7 @@ WICHTIG: Antworte NUR im folgenden JSON-Format, keine andere Ausgabe!
   "needsIngredientPhoto": false,
   "primarySupplement": null,
   "confidence": "high/medium/low",
-  "helixComment": "Das ist ein Kombi-Präparat mit X Wirkstoffen! 💊"
+  "helixComment": "Das ist ein Kombi-Präparat mit X Wirkstoffen!"
 }
 
 ## Wenn Mengenangaben NICHT lesbar sind:
@@ -241,8 +253,9 @@ export async function analyzeSupplementImage(base64Image: string): Promise<ScanR
       comboIngredients: parsed.comboIngredients || [],
       needsIngredientPhoto: parsed.needsIngredientPhoto || false,
       isNotSupplement: false,
+      evidenceLevel: parsed.evidenceLevel || undefined,
       match,
-      helixComment: parsed.helixComment || 'Supplement erkannt! ✨',
+      helixComment: parsed.helixComment || 'Supplement erkannt!',
     };
 
   } catch (error: any) {
