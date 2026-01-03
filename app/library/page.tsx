@@ -29,19 +29,55 @@ function LibraryContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [initialIndex, setInitialIndex] = useState<number | undefined>(undefined);
 
-    // Extrahiere alle einzigartigen Benefits für Filter-Tags
-    const allBenefits = useMemo(() => {
+    // Supplement-Typ Kategorien (basierend auf Namen/ID)
+    const CATEGORY_RULES: { name: string; match: (s: Supplement) => boolean }[] = [
+        { name: 'Vitamine', match: (s) => /vitamin|b12|b6|b1|b2|b3|b5|b7|b9|folat|biotin|niacin|pantothen|riboflavin|thiamin|cobalamin/i.test(s.name + s.id) },
+        { name: 'Aminosäuren', match: (s) => /glycine|theanine|taurine|tyrosine|carnitine|glutamine|bcaa|eaa|leucine|arginine|citrulline|ornithine|methionine|cysteine|tryptophan|gaba|nac|amino/i.test(s.name + s.id) },
+        { name: 'Mineralien', match: (s) => /magnesium|zinc|iron|calcium|potassium|selenium|iodine|copper|chromium|boron|electrolyte/i.test(s.name + s.id) },
+        { name: 'Adaptogene', match: (s) => /ashwagandha|rhodiola|ginseng|maca|cordyceps|reishi|lion|shilajit|schisandra|eleuthero|holy basil|tulsi/i.test(s.name + s.id) },
+        { name: 'Nootropika', match: (s) => /alpha.?gpc|cdp.?choline|citicoline|bacopa|ginkgo|phosphatidyl|lion|racetam|modafinil|noopept|huperzine/i.test(s.name + s.id) },
+        { name: 'Omega & Fette', match: (s) => /omega|fish.?oil|krill|dha|epa|mct|cla/i.test(s.name + s.id) },
+        { name: 'Proteine', match: (s) => /whey|casein|collagen|protein|peptide/i.test(s.name + s.id) },
+        { name: 'Antioxidantien', match: (s) => /coq10|glutathione|astaxanthin|resveratrol|quercetin|curcumin|turmeric|nac|alpha.?lipoic/i.test(s.name + s.id) },
+        { name: 'Schlaf', match: (s) => /melatonin|valerian|passionflower|chamomile|apigenin|gaba|glycine|magnesium.*glycinate/i.test(s.name + s.id) || s.benefits.includes('Sleep') },
+        { name: 'Performance', match: (s) => /creatine|beta.?alanine|caffeine|citrulline|nitrate|beetroot|pre.?workout/i.test(s.name + s.id) || s.benefits.includes('Performance') || s.benefits.includes('Endurance') },
+    ];
+
+    // Kategorien mit Counts berechnen
+    const categoryTags = useMemo(() => {
+        return CATEGORY_RULES.map(rule => ({
+            name: rule.name,
+            count: SUPPLEMENT_LIBRARY.filter(rule.match).length
+        })).filter(c => c.count > 0);
+    }, []);
+
+    // Benefit-Tags (die häufigsten, für nach den Kategorien)
+    const benefitTags = useMemo(() => {
         const benefitCounts = new Map<string, number>();
         SUPPLEMENT_LIBRARY.forEach(s => {
             s.benefits.forEach(b => {
                 benefitCounts.set(b, (benefitCounts.get(b) || 0) + 1);
             });
         });
-        // Sortiere nach Häufigkeit (beliebteste zuerst)
         return Array.from(benefitCounts.entries())
             .sort((a, b) => b[1] - a[1])
+            .slice(0, 15) // Top 15 Benefits
             .map(([benefit]) => benefit);
     }, []);
+
+    // Aktiver Filter kann Kategorie oder Benefit sein
+    const getFilteredByCategory = (supplements: Supplement[], filter: string | null) => {
+        if (!filter) return supplements;
+        
+        // Prüfe ob es eine Kategorie ist
+        const categoryRule = CATEGORY_RULES.find(r => r.name === filter);
+        if (categoryRule) {
+            return supplements.filter(categoryRule.match);
+        }
+        
+        // Sonst ist es ein Benefit
+        return supplements.filter(s => s.benefits.includes(filter));
+    };
     
     // Modal States
     const [showDosageModal, setShowDosageModal] = useState(false);
@@ -91,17 +127,15 @@ function LibraryContent() {
     }, [customSupplements]);
 
     // Erweiterte Suche + Filter: Name, Benefits, Description, ID, Emoji
-    const filteredSupplements = allSupplements.filter(s => {
-        // Zuerst: Kategorie-Filter prüfen
-        if (activeFilter && !s.benefits.includes(activeFilter)) {
-            return false;
-        }
+    const filteredSupplements = useMemo(() => {
+        // Zuerst: Kategorie/Benefit-Filter anwenden
+        let result = getFilteredByCategory(allSupplements, activeFilter);
         
         // Dann: Suchtext prüfen
         const searchLower = search.toLowerCase().trim();
-        if (!searchLower) return true; // Leer = alle anzeigen
+        if (!searchLower) return result;
         
-        return (
+        return result.filter(s => 
             s.name.toLowerCase().includes(searchLower) ||
             s.id.toLowerCase().includes(searchLower) ||
             s.description.toLowerCase().includes(searchLower) ||
@@ -114,7 +148,7 @@ function LibraryContent() {
             // Custom Supplements mit "custom" oder "kombi" finden
             ((s as any).isCustom && ('custom kombi eigene'.includes(searchLower)))
         );
-    });
+    }, [allSupplements, activeFilter, search]);
 
     // Wenn highlight Parameter vorhanden, finde den Index
     useEffect(() => {
@@ -321,8 +355,28 @@ function LibraryContent() {
                         >
                             Alle
                         </button>
-                        {/* Kategorie-Buttons */}
-                        {allBenefits.slice(0, 20).map(benefit => (
+                        
+                        {/* Typ-Kategorien (Vitamine, Aminosäuren, etc.) */}
+                        {categoryTags.map(cat => (
+                            <button
+                                key={cat.name}
+                                onClick={() => setActiveFilter(activeFilter === cat.name ? null : cat.name)}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                                    activeFilter === cat.name
+                                        ? "bg-primary text-black"
+                                        : "bg-white/10 text-white/80 hover:bg-white/15 hover:text-white border border-white/10"
+                                )}
+                            >
+                                {cat.name}
+                            </button>
+                        ))}
+                        
+                        {/* Trenner */}
+                        <div className="w-px bg-white/20 mx-1" />
+                        
+                        {/* Benefit-Tags (Sleep, Energy, etc.) */}
+                        {benefitTags.map(benefit => (
                             <button
                                 key={benefit}
                                 onClick={() => setActiveFilter(activeFilter === benefit ? null : benefit)}
