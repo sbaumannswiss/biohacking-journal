@@ -31,6 +31,9 @@ export interface ScanResult {
   comboIngredients?: ComboIngredient[];
   needsIngredientPhoto?: boolean; // Wenn Mengenangaben nicht lesbar
   
+  // Kein Supplement erkannt
+  isNotSupplement?: boolean;
+  
   // Match mit Library
   match: {
     found: boolean;
@@ -107,9 +110,20 @@ WICHTIG: Antworte NUR im folgenden JSON-Format, keine andere Ausgabe!
 {
   "detected": null,
   "isComboProduct": false,
+  "isNotSupplement": false,
   "primarySupplement": null,
   "confidence": "low",
   "helixComment": "Hmm, ich kann das leider nicht erkennen. Kannst du ein klareres Foto machen? 📸"
+}
+
+## Falls KEIN Supplement (z.B. Essen, Tiere, Menschen, Gegenstände):
+{
+  "detected": null,
+  "isComboProduct": false,
+  "isNotSupplement": true,
+  "primarySupplement": null,
+  "confidence": "high",
+  "helixComment": "Hey, das sieht nicht nach einem Supplement aus! 😄 Ich kann nur Nahrungsergänzungsmittel scannen. Probiere es mit einer Supplement-Dose oder -Verpackung! 💊"
 }
 
 Erkenne als KOMBI-Präparat wenn:
@@ -203,6 +217,18 @@ export async function analyzeSupplementImage(base64Image: string): Promise<ScanR
       };
     }
 
+    // Check if it's not a supplement at all
+    if (parsed.isNotSupplement) {
+      return {
+        success: true,
+        detected: null,
+        isComboProduct: false,
+        isNotSupplement: true,
+        match: { found: false, confidence: 'high' as const },
+        helixComment: parsed.helixComment || 'Das sieht nicht nach einem Supplement aus! 😄 Probiere es mit einer Supplement-Verpackung! 💊',
+      };
+    }
+
     // Match against library (only for single supplements)
     const match = parsed.isComboProduct 
       ? { found: false, confidence: 'low' as const }
@@ -214,6 +240,7 @@ export async function analyzeSupplementImage(base64Image: string): Promise<ScanR
       isComboProduct: parsed.isComboProduct || false,
       comboIngredients: parsed.comboIngredients || [],
       needsIngredientPhoto: parsed.needsIngredientPhoto || false,
+      isNotSupplement: false,
       match,
       helixComment: parsed.helixComment || 'Supplement erkannt! ✨',
     };
