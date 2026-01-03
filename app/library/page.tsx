@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Search, Loader2, AlertTriangle, Trash2, Sparkles, Camera, Package } from 'lucide-react';
 import { SUPPLEMENT_LIBRARY, Supplement } from '@/data/supplements';
 import { cn } from '@/lib/utils';
@@ -15,11 +16,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DosageModal } from '@/components/ui/DosageModal';
 import { ScanModal } from '@/components/ui/ScanModal';
 
-export default function LibraryPage() {
+function LibraryContent() {
     const { userId } = useAnonymousUser();
     const { triggerMessage } = useHelix();
     const searchParams = useSearchParams();
-    const highlightId = searchParams.get('highlight');
+    const highlightId = searchParams?.get('highlight') || null;
     
     const [search, setSearch] = useState('');
     const [userStackIds, setUserStackIds] = useState<Set<string>>(new Set());
@@ -467,5 +468,18 @@ export default function LibraryPage() {
 
             <BottomNav />
         </div>
+    );
+}
+
+// Wrapper mit Suspense für useSearchParams
+export default function LibraryPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex flex-col min-h-screen items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        }>
+            <LibraryContent />
+        </Suspense>
     );
 }
