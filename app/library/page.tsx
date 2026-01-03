@@ -23,10 +23,25 @@ function LibraryContent() {
     const highlightId = searchParams?.get('highlight') || null;
     
     const [search, setSearch] = useState('');
+    const [activeFilter, setActiveFilter] = useState<string | null>(null);
     const [userStackIds, setUserStackIds] = useState<Set<string>>(new Set());
     const [customSupplements, setCustomSupplements] = useState<CustomSupplement[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [initialIndex, setInitialIndex] = useState<number | undefined>(undefined);
+
+    // Extrahiere alle einzigartigen Benefits für Filter-Tags
+    const allBenefits = useMemo(() => {
+        const benefitCounts = new Map<string, number>();
+        SUPPLEMENT_LIBRARY.forEach(s => {
+            s.benefits.forEach(b => {
+                benefitCounts.set(b, (benefitCounts.get(b) || 0) + 1);
+            });
+        });
+        // Sortiere nach Häufigkeit (beliebteste zuerst)
+        return Array.from(benefitCounts.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([benefit]) => benefit);
+    }, []);
     
     // Modal States
     const [showDosageModal, setShowDosageModal] = useState(false);
@@ -75,8 +90,14 @@ function LibraryContent() {
         return [...customAsSupplements, ...SUPPLEMENT_LIBRARY];
     }, [customSupplements]);
 
-    // Erweiterte Suche: Name, Benefits, Description, ID, Emoji
+    // Erweiterte Suche + Filter: Name, Benefits, Description, ID, Emoji
     const filteredSupplements = allSupplements.filter(s => {
+        // Zuerst: Kategorie-Filter prüfen
+        if (activeFilter && !s.benefits.includes(activeFilter)) {
+            return false;
+        }
+        
+        // Dann: Suchtext prüfen
         const searchLower = search.toLowerCase().trim();
         if (!searchLower) return true; // Leer = alle anzeigen
         
@@ -278,6 +299,44 @@ function LibraryContent() {
                             ✕
                         </button>
                     )}
+                </motion.div>
+
+                {/* Filter Tags */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="mt-3 overflow-x-auto scrollbar-hide"
+                >
+                    <div className="flex gap-2 pb-2">
+                        {/* "Alle" Button */}
+                        <button
+                            onClick={() => setActiveFilter(null)}
+                            className={cn(
+                                "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                                activeFilter === null
+                                    ? "bg-primary text-black"
+                                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                            )}
+                        >
+                            Alle
+                        </button>
+                        {/* Kategorie-Buttons */}
+                        {allBenefits.slice(0, 20).map(benefit => (
+                            <button
+                                key={benefit}
+                                onClick={() => setActiveFilter(activeFilter === benefit ? null : benefit)}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                                    activeFilter === benefit
+                                        ? "bg-primary text-black"
+                                        : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                                )}
+                            >
+                                {benefit}
+                            </button>
+                        ))}
+                    </div>
                 </motion.div>
             </div>
 
