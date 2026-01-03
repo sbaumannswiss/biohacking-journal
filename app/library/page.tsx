@@ -427,7 +427,7 @@ function LibraryContent() {
                     }}
                     onSave={handleConfirmAdd}
                     supplementName={selectedForAdd.name}
-                    supplementEmoji={selectedForAdd.emoji}
+                    supplementIcon={selectedForAdd.icon}
                     defaultDosage={selectedForAdd.optimal_dosage}
                     defaultTime={undefined}
                     mode="add"
