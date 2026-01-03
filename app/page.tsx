@@ -390,25 +390,23 @@ export default function Home() {
           </div>
         </div>
 
-        {/* XP Display + Buttons Side by Side */}
-        <div className="flex gap-3">
+        {/* XP Display + Buttons - Grid Layout für gleiche Höhe */}
+        <div className="grid grid-cols-[1fr_auto] gap-2">
           {/* XP Display - links */}
-          <div className="flex-1">
-            <XPDisplay xp={userXP} />
-          </div>
+          <XPDisplay xp={userXP} />
 
-          {/* Buttons - rechts, untereinander, gleich groß */}
-          <div className="flex flex-col gap-1.5 w-24">
+          {/* Buttons - rechts, 3er Grid */}
+          <div className="grid grid-rows-3 gap-1.5">
             <button
               type="button"
               onClick={() => setShowQuests(true)}
               aria-label={`Aktive Quests anzeigen${helixQuests.length > 0 ? `, ${helixQuests.length} aktiv` : ''}`}
-              className="flex items-center justify-center gap-1.5 bg-purple-500/10 border border-purple-500/20 px-2 py-2 rounded-xl text-purple-400 hover:bg-purple-500/20 transition-colors"
+              className="flex items-center justify-center gap-1 bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-xl text-purple-400 hover:bg-purple-500/20 active:scale-95 transition-all min-w-[90px]"
             >
-              <Zap size={14} fill="currentColor" />
-              <span className="text-xs font-bold">Aktiv</span>
+              <Zap size={12} fill="currentColor" />
+              <span className="text-[11px] font-bold">Aktiv</span>
               {helixQuests.length > 0 && (
-                <span className="min-w-[16px] h-[16px] flex items-center justify-center bg-purple-500 text-white text-[9px] font-bold rounded-full" aria-hidden="true">
+                <span className="min-w-[14px] h-[14px] flex items-center justify-center bg-purple-500 text-white text-[8px] font-bold rounded-full" aria-hidden="true">
                   {helixQuests.length}
                 </span>
               )}
@@ -418,20 +416,20 @@ export default function Home() {
               type="button"
               onClick={() => setShowQuestCatalog(true)}
               aria-label="Quest-Katalog öffnen"
-              className="flex items-center justify-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-2 py-2 rounded-xl text-amber-400 hover:bg-amber-500/20 transition-colors"
+              className="flex items-center justify-center gap-1 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl text-amber-400 hover:bg-amber-500/20 active:scale-95 transition-all"
             >
-              <Trophy size={14} />
-              <span className="text-xs font-bold">Katalog</span>
+              <Trophy size={12} />
+              <span className="text-[11px] font-bold">Katalog</span>
             </button>
             
             <button
               type="button"
               onClick={() => setShowStreakModal(true)}
               aria-label={`${streak} Tage Streak – Tippen für Details`}
-              className="flex items-center justify-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-2 py-2 rounded-xl text-orange-400 hover:bg-orange-500/20 transition-colors"
+              className="flex items-center justify-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-xl text-orange-400 hover:bg-orange-500/20 active:scale-95 transition-all"
             >
-              <Flame size={14} fill="currentColor" className="animate-pulse-slow" aria-hidden="true" />
-              <span className="font-mono font-bold text-xs">{streak}</span>
+              <Flame size={12} fill="currentColor" className="animate-pulse-slow" aria-hidden="true" />
+              <span className="font-mono font-bold text-[11px]">{streak}</span>
             </button>
           </div>
         </div>
