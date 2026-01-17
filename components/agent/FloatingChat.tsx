@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, Target, Check, FlaskConical, Camera, Sparkles } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useAnonymousUser } from '@/hooks/useAnonymousUser';
 import { cn } from '@/lib/utils';
 import { parseQuestFromMessage, CreateQuestInput } from '@/lib/agent/questService';
@@ -22,6 +23,7 @@ interface Message {
 }
 
 export function FloatingChat() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -32,6 +34,13 @@ export function FloatingChat() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { userId } = useAnonymousUser();
   const { helixMood } = useHelix();
+
+  // Hide on onboarding page
+  const isOnboarding = pathname === '/onboarding';
+  
+  if (isOnboarding) {
+    return null;
+  }
 
   // DNA Helix animation speed based on mood
   const helixSpeed = helixMood === 'excited' ? 1.5 : 
