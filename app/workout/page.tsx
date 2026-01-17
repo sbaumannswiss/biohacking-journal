@@ -372,7 +372,7 @@ export default function WorkoutPage() {
         <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
       </header>
 
-      <main className="flex-1 px-6 space-y-6 overflow-y-auto">
+      <main data-tour-id="workout-main" className="flex-1 px-6 space-y-6 overflow-y-auto">
         <AnimatePresence mode="wait">
           {!activeWorkout ? (
             // ========================================

@@ -965,6 +965,106 @@ export interface QuestStatsResult {
     completedQuestIds: string[];
 }
 
+// ============================================
+// USER PROFILE OPERATIONS
+// ============================================
+
+export interface OnboardingProfile {
+    name: string;
+    ageGroup?: string;
+    gender?: string;
+    weight?: string;
+    chronotype?: string;
+    activityLevel?: string;
+    caffeineLevel?: string;
+    dietType?: string;
+    allergies?: string[];
+    medications?: string[];
+    goals?: string[];
+    wearables?: string[];
+}
+
+/**
+ * Aktualisiert das User-Profil mit Onboarding-Daten
+ * Wird nach erfolgreicher Registrierung aufgerufen
+ */
+export async function updateUserProfile(
+    userId: string,
+    profile: OnboardingProfile
+): Promise<{ success: boolean; error?: string }> {
+    if (!supabase) {
+        return { success: false, error: 'Supabase nicht konfiguriert' };
+    }
+    
+    try {
+        // Onboarding-Daten als JSON speichern für flexible Erweiterung
+        const onboardingData = {
+            age_group: profile.ageGroup,
+            gender: profile.gender,
+            weight: profile.weight,
+            chronotype: profile.chronotype,
+            activity_level: profile.activityLevel,
+            caffeine_level: profile.caffeineLevel,
+            diet_type: profile.dietType,
+            allergies: profile.allergies,
+            medications: profile.medications,
+            goals: profile.goals,
+            wearables: profile.wearables,
+        };
+
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                display_name: profile.name,
+                // DSGVO-Einwilligungen bei Signup bereits erteilt
+                privacy_accepted_at: new Date().toISOString(),
+                health_data_consent_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', userId);
+
+        if (error) throw error;
+
+        return { success: true };
+    } catch (error: any) {
+        console.error('updateUserProfile error:', error);
+        return { success: false, error: error.message || 'Profil-Update fehlgeschlagen' };
+    }
+}
+
+/**
+ * Holt das User-Profil
+ */
+export async function getUserProfile(userId: string): Promise<{
+    displayName?: string;
+    email?: string;
+    privacyAccepted?: boolean;
+    healthDataConsent?: boolean;
+    emailConfirmed?: boolean;
+} | null> {
+    if (!supabase) return null;
+    
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('display_name, email, privacy_accepted_at, health_data_consent_at')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+
+        return {
+            displayName: data.display_name,
+            email: data.email,
+            privacyAccepted: !!data.privacy_accepted_at,
+            healthDataConsent: !!data.health_data_consent_at,
+        };
+    } catch (error) {
+        console.error('getUserProfile error:', error);
+        return null;
+    }
+}
+
 /**
  * Quest-Statistiken für Badges laden
  */

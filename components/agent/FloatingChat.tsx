@@ -219,6 +219,7 @@ export function FloatingChat() {
     <>
       {/* Floating Helix Button - Top Right */}
       <motion.button
+        data-tour-id="helix-chat"
         onClick={() => setIsOpen(!isOpen)}
         className="fixed z-50 w-12 h-12 rounded-full cursor-pointer"
         style={{ 

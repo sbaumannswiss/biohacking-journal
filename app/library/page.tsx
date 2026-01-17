@@ -422,14 +422,16 @@ function LibraryContent() {
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     </div>
                 ) : (
-                    <Carousel3D
-                        supplements={filteredSupplements}
-                        userStackIds={userStackIds}
-                        onAddToStack={handleAddToStack}
-                        onRemoveFromStack={handleRemoveFromStack}
-                        onDeleteFromLibrary={handleDeleteFromLibrary}
-                        initialIndex={initialIndex}
-                    />
+                    <div data-tour-id="library-carousel" className="flex-1">
+                        <Carousel3D
+                            supplements={filteredSupplements}
+                            userStackIds={userStackIds}
+                            onAddToStack={handleAddToStack}
+                            onRemoveFromStack={handleRemoveFromStack}
+                            onDeleteFromLibrary={handleDeleteFromLibrary}
+                            initialIndex={initialIndex}
+                        />
+                    </div>
                 )}
             </motion.div>
 

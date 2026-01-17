@@ -286,7 +286,7 @@ export default function StatsPage() {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
             ) : (
-                <main className="flex-1 px-6 space-y-6">
+                <main data-tour-id="stats-graph" className="flex-1 px-6 space-y-6">
                     {/* Overview Stats */}
                     <div className="grid grid-cols-3 gap-3">
                         <div className="glass-panel p-4 rounded-2xl text-center">

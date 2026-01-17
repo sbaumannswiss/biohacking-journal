@@ -8,6 +8,7 @@ import { FloatingChat } from '@/components/agent/FloatingChat';
 import { I18nProvider } from '@/components/i18n';
 import { AuthProvider } from '@/components/auth';
 import { CookieBanner } from '@/components/consent';
+import { AppTourProvider, TourOverlay } from '@/components/tour';
 
 // Plus Jakarta Sans - Premium, modern, cleaner Look
 const plusJakarta = Plus_Jakarta_Sans({ 
@@ -42,18 +43,21 @@ export default function RootLayout({
         <AuthProvider>
           <I18nProvider>
             <HelixProvider>
-              <DisclaimerOverlay />
-              <div className="relative flex min-h-screen flex-col overflow-hidden sm:mx-auto sm:max-w-md sm:border-x sm:border-border">
-                {/* Background Ambient Glows */}
-                <div className="fixed top-[-10%] left-[-10%] h-[50vh] w-[50vh] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-                <div className="fixed bottom-[-10%] right-[-10%] h-[50vh] w-[50vh] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+              <AppTourProvider>
+                <DisclaimerOverlay />
+                <div className="relative flex min-h-screen flex-col overflow-hidden sm:mx-auto sm:max-w-md sm:border-x sm:border-border">
+                  {/* Background Ambient Glows */}
+                  <div className="fixed top-[-10%] left-[-10%] h-[50vh] w-[50vh] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+                  <div className="fixed bottom-[-10%] right-[-10%] h-[50vh] w-[50vh] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
-                <main className="flex-1 flex flex-col relative z-10 pb-safe">
-                  {children}
-                </main>
-              </div>
-              <FloatingChat />
-              <CookieBanner />
+                  <main className="flex-1 flex flex-col relative z-10 pb-safe">
+                    {children}
+                  </main>
+                </div>
+                <FloatingChat />
+                <CookieBanner />
+                <TourOverlay />
+              </AppTourProvider>
             </HelixProvider>
           </I18nProvider>
         </AuthProvider>

@@ -28,11 +28,18 @@ import {
   Watch,
   X,
   Search,
-  Plus
+  Plus,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SUPPLEMENT_LIBRARY } from '@/data/supplements';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+import { updateUserProfile } from '@/lib/supabaseService';
 
 // ============================================
 // TYPES & INTERFACES
@@ -70,7 +77,7 @@ interface OnboardingData {
 // CONSTANTS
 // ============================================
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const AGE_GROUPS = ['18-25', '26-35', '36-45', '46-55', '56+'];
 
@@ -1183,7 +1190,243 @@ function Step5Goals({
   );
 }
 
-function Step6Paywall({ 
+// ============================================
+// STEP 6: SIGNUP (NEU)
+// ============================================
+
+interface SignupData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  acceptedPrivacy: boolean;
+  acceptedHealthData: boolean;
+}
+
+function Step6Signup({ 
+  data,
+  signupData,
+  onSignupChange,
+  onSignup,
+  isLoading,
+  error,
+  isAuthenticated
+}: { 
+  data: OnboardingData;
+  signupData: SignupData;
+  onSignupChange: (updates: Partial<SignupData>) => void;
+  onSignup: () => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
+  isAuthenticated: boolean;
+}) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const canSubmit = 
+    signupData.email.trim() !== '' &&
+    signupData.password.length >= 8 &&
+    signupData.password === signupData.confirmPassword &&
+    signupData.acceptedPrivacy &&
+    signupData.acceptedHealthData;
+
+  // Wenn bereits eingeloggt, zeige Erfolgsanzeige
+  if (isAuthenticated) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="space-y-6"
+      >
+        <div className="flex flex-col items-center text-center py-8">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+            className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-4"
+          >
+            <Check size={40} className="text-primary" />
+          </motion.div>
+          <h2 className="text-xl font-bold mb-2">Konto erstellt!</h2>
+          <p className="text-muted-foreground text-sm">
+            Wir haben dir eine Bestätigungs-E-Mail gesendet.
+            Du kannst die App sofort nutzen.
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="space-y-6"
+    >
+      {/* Helix asks */}
+      <div className="flex items-start gap-3">
+        <HelixMascot mood="happy" size="sm" />
+        <SpeechBubble className="flex-1">
+          <p className="text-sm">
+            Super, {data.name || 'Biohacker'}! Erstelle jetzt dein Konto, 
+            um deine Daten zu sichern und auf allen Geräten zu synchronisieren.
+          </p>
+        </SpeechBubble>
+      </div>
+      
+      {/* Error Message */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm"
+        >
+          {error}
+        </motion.div>
+      )}
+      
+      {/* Email Input */}
+      <div className="space-y-2">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Mail size={16} />
+          E-Mail
+        </label>
+        <input
+          type="email"
+          value={signupData.email}
+          onChange={(e) => onSignupChange({ email: e.target.value })}
+          placeholder="deine@email.de"
+          className="w-full bg-card/50 border border-white/10 rounded-xl p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          autoComplete="email"
+        />
+      </div>
+      
+      {/* Password Input */}
+      <div className="space-y-2">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Lock size={16} />
+          Passwort
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={signupData.password}
+            onChange={(e) => onSignupChange({ password: e.target.value })}
+            placeholder="Mindestens 8 Zeichen"
+            className="w-full bg-card/50 border border-white/10 rounded-xl p-4 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            autoComplete="new-password"
+            minLength={8}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        {signupData.password.length > 0 && signupData.password.length < 8 && (
+          <p className="text-xs text-amber-400">Mindestens 8 Zeichen erforderlich</p>
+        )}
+      </div>
+      
+      {/* Confirm Password */}
+      <div className="space-y-2">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Lock size={16} />
+          Passwort bestätigen
+        </label>
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={signupData.confirmPassword}
+            onChange={(e) => onSignupChange({ confirmPassword: e.target.value })}
+            placeholder="Passwort wiederholen"
+            className="w-full bg-card/50 border border-white/10 rounded-xl p-4 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            autoComplete="new-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        {signupData.confirmPassword.length > 0 && signupData.password !== signupData.confirmPassword && (
+          <p className="text-xs text-red-400">Passwörter stimmen nicht überein</p>
+        )}
+      </div>
+      
+      {/* DSGVO Checkboxes */}
+      <div className="space-y-3 pt-2">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={signupData.acceptedPrivacy}
+            onChange={(e) => onSignupChange({ acceptedPrivacy: e.target.checked })}
+            className="mt-1 w-4 h-4 rounded border-white/20 bg-card/50 accent-primary"
+          />
+          <span className="text-sm text-muted-foreground">
+            Ich akzeptiere die{' '}
+            <Link href="/privacy" className="text-primary underline" target="_blank">
+              Datenschutzerklärung
+            </Link>
+          </span>
+        </label>
+
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={signupData.acceptedHealthData}
+            onChange={(e) => onSignupChange({ acceptedHealthData: e.target.checked })}
+            className="mt-1 w-4 h-4 rounded border-white/20 bg-card/50 accent-primary"
+          />
+          <span className="text-sm text-muted-foreground">
+            Ich stimme der Verarbeitung meiner Gesundheitsdaten gemäß Art. 9 DSGVO zu
+          </span>
+        </label>
+      </div>
+      
+      {/* Submit Button */}
+      <button
+        type="button"
+        onClick={onSignup}
+        disabled={!canSubmit || isLoading}
+        className={cn(
+          "w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all",
+          canSubmit && !isLoading
+            ? "bg-gradient-to-r from-primary to-cyan-400 text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95"
+            : "bg-white/10 text-muted-foreground cursor-not-allowed"
+        )}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="animate-spin" size={20} />
+            <span>Konto wird erstellt...</span>
+          </>
+        ) : (
+          <>
+            <User size={20} />
+            <span>Konto erstellen</span>
+          </>
+        )}
+      </button>
+      
+      {/* Info Text */}
+      <p className="text-xs text-center text-muted-foreground">
+        Du erhältst eine Bestätigungs-E-Mail. Du kannst die App trotzdem sofort nutzen.
+      </p>
+    </motion.div>
+  );
+}
+
+// ============================================
+// STEP 7: PAYWALL
+// ============================================
+
+function Step7Paywall({ 
   data, 
   onComplete,
   isLoading 
@@ -1414,10 +1657,13 @@ function LoadingScreen({ name }: { name: string }) {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { signUp, isAuthenticated, user } = useAuth();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
+  const [signupError, setSignupError] = useState<string | null>(null);
   
+  // Onboarding Data
   const [data, setData] = useState<OnboardingData>({
     name: '',
     ageGroup: '',
@@ -1439,9 +1685,24 @@ export default function OnboardingPage() {
     wearables: [],
   });
   
+  // Signup Data
+  const [signupData, setSignupData] = useState<SignupData>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    acceptedPrivacy: false,
+    acceptedHealthData: false,
+  });
+  
   const updateData = useCallback((updates: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...updates }));
   }, []);
+  
+  const updateSignupData = useCallback((updates: Partial<SignupData>) => {
+    setSignupData(prev => ({ ...prev, ...updates }));
+    // Fehler zurücksetzen wenn User tippt
+    if (signupError) setSignupError(null);
+  }, [signupError]);
   
   const canProceed = useCallback(() => {
     switch (step) {
@@ -1450,10 +1711,11 @@ export default function OnboardingPage() {
       case 3: return data.chronotype !== '' && data.activityLevel !== '' && data.caffeineLevel !== '';
       case 4: return data.dietType !== '';
       case 5: return data.goals.length > 0;
-      case 6: return true;
+      case 6: return isAuthenticated; // Nur weiter wenn eingeloggt
+      case 7: return true;
       default: return true;
     }
-  }, [step, data]);
+  }, [step, data, isAuthenticated]);
   
   const handleNext = () => {
     if (step < TOTAL_STEPS) {
@@ -1467,22 +1729,108 @@ export default function OnboardingPage() {
     }
   };
   
+  // Signup Handler
+  const handleSignup = async () => {
+    setIsLoading(true);
+    setSignupError(null);
+    
+    try {
+      // Validierung
+      if (signupData.password !== signupData.confirmPassword) {
+        setSignupError('Passwörter stimmen nicht überein');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (signupData.password.length < 8) {
+        setSignupError('Passwort muss mindestens 8 Zeichen haben');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!signupData.acceptedPrivacy) {
+        setSignupError('Bitte akzeptiere die Datenschutzerklärung');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!signupData.acceptedHealthData) {
+        setSignupError('Bitte stimme der Verarbeitung deiner Gesundheitsdaten zu');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Supabase SignUp
+      const { error } = await signUp(signupData.email, signupData.password);
+      
+      if (error) {
+        // Fehler übersetzen
+        const errorMap: Record<string, string> = {
+          'User already registered': 'Diese E-Mail ist bereits registriert',
+          'Invalid email': 'Ungültige E-Mail-Adresse',
+          'Password should be at least 6 characters': 'Passwort zu kurz',
+          'Email rate limit exceeded': 'Zu viele Anfragen, bitte warte kurz',
+        };
+        setSignupError(errorMap[error.message] || error.message);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Erfolg - automatisch weiter nach kurzer Verzögerung
+      setTimeout(() => {
+        handleNext();
+      }, 1500);
+      
+    } catch (err) {
+      setSignupError('Ein unerwarteter Fehler ist aufgetreten');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   const handleComplete = async (plan: 'yearly' | 'monthly' | 'skip') => {
     setIsLoading(true);
     setShowLoading(true);
     
-    // Simulate processing
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    // Save onboarding data
-    localStorage.setItem('stax_onboarding_completed', 'true');
-    localStorage.setItem('stax_disclaimer_accepted', 'true');
-    localStorage.setItem('stax_user_profile', JSON.stringify(data));
-    localStorage.setItem('stax_goals', JSON.stringify(data.goals));
-    localStorage.setItem('stax_subscription_plan', plan);
-    
-    // Navigate to home
-    router.push('/');
+    try {
+      // Profil in Supabase speichern wenn User authentifiziert ist
+      if (user?.id) {
+        await updateUserProfile(user.id, {
+          name: data.name,
+          ageGroup: data.ageGroup,
+          gender: data.gender,
+          weight: data.weight,
+          chronotype: data.chronotype,
+          activityLevel: data.activityLevel,
+          caffeineLevel: data.caffeineLevel,
+          dietType: data.dietType || data.customDiet,
+          allergies: [...data.allergies, ...data.customAllergies],
+          medications: [...data.medications, ...data.customMedications],
+          goals: data.goals,
+          wearables: data.wearables,
+        });
+      }
+      
+      // Simulate additional processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Save onboarding data to localStorage (backup/offline)
+      localStorage.setItem('stax_onboarding_completed', 'true');
+      localStorage.setItem('stax_disclaimer_accepted', 'true');
+      localStorage.setItem('stax_user_profile', JSON.stringify(data));
+      localStorage.setItem('stax_goals', JSON.stringify(data.goals));
+      localStorage.setItem('stax_subscription_plan', plan);
+      
+      // Trigger app tour after onboarding
+      localStorage.setItem('stax_start_tour', 'true');
+      
+      // Navigate to home
+      router.push('/');
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      // Trotzdem weitermachen - localStorage hat Daten
+      router.push('/');
+    }
   };
   
   // Show loading screen
@@ -1534,7 +1882,19 @@ export default function OnboardingPage() {
           {step === 3 && <Step3Lifestyle key="step3" data={data} onChange={updateData} />}
           {step === 4 && <Step4Nutrition key="step4" data={data} onChange={updateData} />}
           {step === 5 && <Step5Goals key="step5" data={data} onChange={updateData} />}
-          {step === 6 && <Step6Paywall key="step6" data={data} onComplete={handleComplete} isLoading={isLoading} />}
+          {step === 6 && (
+            <Step6Signup 
+              key="step6" 
+              data={data}
+              signupData={signupData}
+              onSignupChange={updateSignupData}
+              onSignup={handleSignup}
+              isLoading={isLoading}
+              error={signupError}
+              isAuthenticated={isAuthenticated}
+            />
+          )}
+          {step === 7 && <Step7Paywall key="step7" data={data} onComplete={handleComplete} isLoading={isLoading} />}
         </AnimatePresence>
       </main>
       
@@ -1557,6 +1917,24 @@ export default function OnboardingPage() {
             )}
           >
             <span>Weiter</span>
+            <ArrowRight size={20} />
+          </button>
+        </motion.footer>
+      )}
+      
+      {/* Footer for Step 6 (after signup success) */}
+      {step === 6 && isAuthenticated && (
+        <motion.footer
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="sticky bottom-0 z-50 bg-background/80 backdrop-blur-xl border-t border-white/5 px-4 py-4"
+        >
+          <button
+            type="button"
+            onClick={handleNext}
+            className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-primary to-cyan-400 text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95"
+          >
+            <span>Weiter zur App</span>
             <ArrowRight size={20} />
           </button>
         </motion.footer>

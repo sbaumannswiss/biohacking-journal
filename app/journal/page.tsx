@@ -501,6 +501,7 @@ export default function JournalPage() {
                     <AnimatePresence>
                         {showSliders && (
                             <motion.div
+                                data-tour-id="journal-sliders"
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
-import { useAnonymousUser } from '@/hooks/useAnonymousUser';
+import { useAuth } from '@/hooks/useAuth';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { XPDisplay } from '@/components/dashboard/XPDisplay';
 import { StackItemCard } from '@/components/dashboard/StackItemCard';
@@ -13,7 +13,6 @@ import { SuccessOverlay } from '@/components/ui/SuccessOverlay';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { getUserStack, getUserXP, getUserStreak, logCheckIn, getTodayCheckIns, StackItem } from '@/lib/supabaseService';
-import { getAnonymousUserId } from '@/hooks/useAnonymousUser';
 import { useHelix, getTimeBasedGreeting } from '@/components/coach';
 import { calculateLevel, getLevelProgress, XP_VALUES } from '@/lib/xpSystem';
 import { SUPPLEMENT_LIBRARY } from '@/data/supplements';
@@ -25,6 +24,7 @@ import { ScanModal } from '@/components/ui/ScanModal';
 import { StreakModal } from '@/components/dashboard/StreakModal';
 import { addToStack } from '@/lib/supabaseService';
 import { useTranslations } from 'next-intl';
+import { EmailConfirmBanner } from '@/components/auth';
 
 // Zeit-Mapping für Supplement-Filterung
 // Matches against best_time values from supplements.ts
@@ -79,7 +79,8 @@ const COMPLETE_BUTTON_STYLE = {
 
 export default function Home() {
   const router = useRouter();
-  const { userId, isLoading: userLoading } = useAnonymousUser();
+  const { user, isLoading: userLoading, isAuthenticated } = useAuth();
+  const userId = user?.id || null;
   const timeOfDay = useTimeOfDay();
   const { triggerMessage } = useHelix();
   const t = useTranslations('home');
@@ -179,15 +180,27 @@ export default function Home() {
     }
   }, [userId]);
 
-  // Onboarding-Check
+  // Onboarding & Auth Check
   useEffect(() => {
+    // Warte bis Auth-Loading abgeschlossen ist
+    if (userLoading) return;
+    
     const hasOnboarded = localStorage.getItem('stax_onboarding_completed');
+    
+    // Wenn nicht onboarded, zum Onboarding
     if (!hasOnboarded) {
       router.push('/onboarding');
-    } else {
-      setLoading(false);
+      return;
     }
-  }, [router]);
+    
+    // Wenn onboarded aber nicht eingeloggt, zum Login
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/');
+      return;
+    }
+    
+    setLoading(false);
+  }, [router, userLoading, isAuthenticated]);
 
   // Daten laden wenn User-ID verfügbar
   useEffect(() => {
@@ -353,9 +366,10 @@ export default function Home() {
     triggerMessage('allDone');
     
     // Supabase Logging nur für neue Check-Ins
-    const odieUserId = getAnonymousUserId();
-    for (const item of uncompletedSupplements) {
-      logCheckIn(odieUserId, item.supplement_id).catch(console.error);
+    if (userId) {
+      for (const item of uncompletedSupplements) {
+        logCheckIn(userId, item.supplement_id).catch(console.error);
+      }
     }
     
     // Reload data to sync und isCompleting zurücksetzen
@@ -384,6 +398,9 @@ export default function Home() {
 
       {/* Header Section */}
       <header className="px-4 pt-8 pb-4 relative">
+        {/* E-Mail Bestätigungs-Banner */}
+        <EmailConfirmBanner className="mb-4" />
+        
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-3">
             {/* Profile Avatar */}
@@ -407,7 +424,9 @@ export default function Home() {
         {/* XP Display + Buttons - Grid Layout für gleiche Höhe */}
         <div className="grid grid-cols-[1fr_auto] gap-2">
           {/* XP Display - links */}
-          <XPDisplay xp={userXP} />
+          <div data-tour-id="home-xp">
+            <XPDisplay xp={userXP} />
+          </div>
 
           {/* Buttons - rechts, 3er Grid */}
           <div className="grid grid-rows-3 gap-1.5">
