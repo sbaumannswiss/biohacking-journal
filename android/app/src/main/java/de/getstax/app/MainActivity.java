@@ -1,4 +1,4 @@
-package com.biohacking.journal;
+package de.getstax.app;
 
 import com.getcapacitor.BridgeActivity;
 

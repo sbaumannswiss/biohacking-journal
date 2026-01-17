@@ -1,22 +1,30 @@
 'use client';
 
 import { BottomNav } from '@/components/layout/BottomNav';
-import { User, Settings, Shield, Award, Flame, Zap, Calendar, Loader2, TrendingUp, Watch, Scale, BarChart3 } from 'lucide-react';
+import { User, Settings, Shield, Award, Flame, Zap, Calendar, Loader2, TrendingUp, Watch, Scale, BarChart3, Download, Trash2, LogOut } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAnonymousUser } from '@/hooks/useAnonymousUser';
+import { useAuth } from '@/hooks/useAuth';
 import { getUserStreak, getUserXP, getUserStack, getCheckInHistory } from '@/lib/supabaseService';
 import { calculateLevel, getLevelProgress, getLevelTitle } from '@/lib/xpSystem';
 import { WearableConnectCard } from '@/components/wearables';
 import { getConnectedProviders, WearableProvider } from '@/lib/wearables';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
     const t = useTranslations('profile');
     const tCommon = useTranslations('common');
-    const { userId, isLoading: userLoading } = useAnonymousUser();
+    const { user, isLoading: userLoading, signOut } = useAuth();
+    const userId = user?.id || null;
+    const router = useRouter();
     const [toast, setToast] = useState<string | null>(null);
+    
+    // DSGVO Actions
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     
     // Echte Daten aus Supabase
     const [streak, setStreak] = useState(0);
@@ -116,6 +124,66 @@ export default function ProfilePage() {
     const handleInteraction = (feature: string) => {
         setToast(tCommon('comingSoon', { feature }));
         setTimeout(() => setToast(null), 2000);
+    };
+
+    // DSGVO: Datenexport
+    const handleExportData = async () => {
+        setIsExporting(true);
+        try {
+            const response = await fetch('/api/user/export');
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `stax-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                setToast('Daten wurden exportiert');
+            } else {
+                setToast('Export fehlgeschlagen');
+            }
+        } catch (error) {
+            setToast('Export fehlgeschlagen');
+        } finally {
+            setIsExporting(false);
+            setTimeout(() => setToast(null), 2000);
+        }
+    };
+
+    // DSGVO: Konto löschen
+    const handleDeleteAccount = async () => {
+        setIsDeleting(true);
+        try {
+            const response = await fetch('/api/user/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ confirmation: 'DELETE_MY_ACCOUNT' }),
+            });
+            
+            if (response.ok) {
+                setToast('Konto wurde gelöscht');
+                setTimeout(() => {
+                    router.push('/login');
+                }, 1500);
+            } else {
+                setToast('Löschen fehlgeschlagen');
+            }
+        } catch (error) {
+            setToast('Löschen fehlgeschlagen');
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+            setTimeout(() => setToast(null), 2000);
+        }
+    };
+
+    // Logout
+    const handleLogout = async () => {
+        await signOut();
+        router.push('/login');
     };
 
     return (
@@ -345,35 +413,144 @@ export default function ProfilePage() {
 
                 {/* Menu */}
                 <div className="space-y-2">
-                    {[
-                        { label: t('accountSettings'), icon: Settings },
-                        { label: t('privacyData'), icon: Shield },
-                        { label: t('achievements'), icon: Award },
-                    ].map((item) => (
-                        <button
-                            key={item.label}
-                            onClick={() => handleInteraction(item.label)}
-                            className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
-                        >
-                            <div className="p-2 bg-white/5 rounded-lg group-hover:text-primary transition-colors">
-                                <item.icon size={20} />
-                            </div>
-                            <span className="font-medium">{item.label}</span>
-                        </button>
-                    ))}
+                    <button
+                        onClick={() => handleInteraction(t('accountSettings'))}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
+                    >
+                        <div className="p-2 bg-white/5 rounded-lg group-hover:text-primary transition-colors">
+                            <Settings size={20} />
+                        </div>
+                        <span className="font-medium">{t('accountSettings')}</span>
+                    </button>
+                    
+                    <button
+                        onClick={() => handleInteraction(t('achievements'))}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
+                    >
+                        <div className="p-2 bg-white/5 rounded-lg group-hover:text-primary transition-colors">
+                            <Award size={20} />
+                        </div>
+                        <span className="font-medium">{t('achievements')}</span>
+                    </button>
                 </div>
 
-                <div className="pt-8 text-center">
+                {/* DSGVO Section */}
+                <div className="space-y-2 pt-4">
+                    <h3 className="text-xs uppercase tracking-wider text-muted-foreground px-1 mb-3">
+                        Datenschutz & Daten
+                    </h3>
+                    
+                    {/* Datenexport */}
                     <button
-                        onClick={() => handleInteraction(t('logOut'))}
-                        className="text-xs text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest font-bold"
+                        onClick={handleExportData}
+                        disabled={isExporting}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
                     >
-                        {t('logOut')}
+                        <div className="p-2 bg-emerald-500/20 rounded-lg">
+                            {isExporting ? (
+                                <Loader2 size={20} className="text-emerald-400 animate-spin" />
+                            ) : (
+                                <Download size={20} className="text-emerald-400" />
+                            )}
+                        </div>
+                        <div>
+                            <span className="font-medium block">Meine Daten exportieren</span>
+                            <span className="text-xs text-muted-foreground">DSGVO Art. 20 - Datenportabilität</span>
+                        </div>
                     </button>
-                    <p className="text-[10px] text-muted-foreground/50 mt-4 font-mono">
-                        {t('userId')}: {userId?.slice(0, 8)}...
-                    </p>
+
+                    {/* Datenschutzerklärung */}
+                    <a
+                        href="/privacy"
+                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
+                    >
+                        <div className="p-2 bg-white/5 rounded-lg group-hover:text-primary transition-colors">
+                            <Shield size={20} />
+                        </div>
+                        <span className="font-medium">Datenschutzerklärung</span>
+                    </a>
+
+                    {/* Konto löschen */}
+                    <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-red-500/10 transition-colors text-left group"
+                    >
+                        <div className="p-2 bg-red-500/20 rounded-lg">
+                            <Trash2 size={20} className="text-red-400" />
+                        </div>
+                        <div>
+                            <span className="font-medium text-red-400 block">Konto löschen</span>
+                            <span className="text-xs text-muted-foreground">DSGVO Art. 17 - Recht auf Löschung</span>
+                        </div>
+                    </button>
                 </div>
+
+                {/* Logout & User Info */}
+                <div className="pt-8 text-center space-y-4">
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center justify-center gap-2 mx-auto text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <LogOut size={16} />
+                        <span>{t('logOut')}</span>
+                    </button>
+                    <div className="text-[10px] text-muted-foreground/50 font-mono space-y-1">
+                        <p>{user?.email}</p>
+                        <p>{t('userId')}: {userId?.slice(0, 8)}...</p>
+                    </div>
+                </div>
+
+                {/* Delete Confirmation Modal */}
+                <AnimatePresence>
+                    {showDeleteConfirm && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full"
+                            >
+                                <div className="text-center mb-6">
+                                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
+                                        <Trash2 size={32} className="text-red-400" />
+                                    </div>
+                                    <h3 className="text-lg font-bold mb-2">Konto wirklich löschen?</h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        Alle deine Daten werden unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.
+                                    </p>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    <button
+                                        onClick={handleDeleteAccount}
+                                        disabled={isDeleting}
+                                        className="w-full py-3 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-colors disabled:opacity-50"
+                                    >
+                                        {isDeleting ? (
+                                            <span className="flex items-center justify-center gap-2">
+                                                <Loader2 size={18} className="animate-spin" />
+                                                Wird gelöscht...
+                                            </span>
+                                        ) : (
+                                            'Ja, Konto löschen'
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDeleteConfirm(false)}
+                                        className="w-full py-3 bg-white/10 rounded-xl font-semibold hover:bg-white/20 transition-colors"
+                                    >
+                                        Abbrechen
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </main>
 
             <BottomNav />

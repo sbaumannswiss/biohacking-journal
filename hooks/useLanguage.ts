@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 export type SupportedLocale = 'en' | 'de' | 'es' | 'it';
 
-const STORAGE_KEY = 'bioboost_language';
+const STORAGE_KEY = 'stax_language';
 const SUPPORTED_LOCALES: SupportedLocale[] = ['en', 'de', 'es', 'it'];
 
 // Language display names and flags

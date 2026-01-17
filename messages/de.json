@@ -33,7 +33,7 @@
       "evening": "Guten Abend",
       "bedtime": "Gute Nacht"
     },
-    "biohacker": "Biohacker",
+    "biohacker": "User",
     "timeSlots": {
       "morning": "Morgen",
       "noon": "Mittag",
@@ -148,7 +148,7 @@
     "addedToStack": "{name} zum {stackName} hinzugefügt"
   },
   "profile": {
-    "title": "Biohacker",
+    "title": "Profil",
     "level": "Level {level}",
     "dayStreak": "Tage Streak",
     "adherence": "Adherence",
@@ -340,7 +340,7 @@
   "helix": {
     "welcome": [
       "Hey! Ich bin Helix, dein Bio-Coach. Zusammen optimieren wir deine Zellgesundheit.",
-      "Willkommen zurück, Biohacker! Bereit für die heutige Dosis Optimierung?"
+      "Willkommen zurück! Bereit für die heutige Dosis Optimierung?"
     ],
     "morningGreeting": [
       "Guten Morgen! Cortisol-Peak erkannt. Perfekter Zeitpunkt für Sonnenlicht und Protein.",
@@ -356,7 +356,7 @@
       "Der Abend naht. Dein Körper beginnt, Melatonin-Vorläufer zu produzieren. Unterstütze ihn!"
     ],
     "bedtimeGreeting": [
-      "Schlafenszeit naht! Die nächsten 8 Stunden sind dein größtes Biohack-Tool. Nutze sie weise.",
+      "Schlafenszeit naht! Die nächsten 8 Stunden sind dein größtes Performance-Tool. Nutze sie weise.",
       "Glymphatic System incoming! Im Schlaf reinigt dein Gehirn 60% mehr Toxine. Gönn dir das!"
     ],
     "checkIn": [
@@ -377,7 +377,7 @@
     "streakMilestone": [
       "{streak} Tage Streak! Deine Mitochondrien feiern gerade eine kleine ATP-Party.",
       "Wahnsinn! {streak} Tage in Folge. Deine Genexpression optimiert sich messbar.",
-      "{streak}-Tage-Streak! Das ist kein Zufall mehr, das ist Identität. Du BIST ein Biohacker."
+      "{streak}-Tage-Streak! Das ist kein Zufall mehr, das ist Identität. Du BIST ein STAX-Pro."
     ],
     "levelUp": [
       "LEVEL UP! Du bist jetzt Level {level}! Neue Quests freigeschaltet.",

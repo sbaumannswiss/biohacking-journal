@@ -98,7 +98,7 @@ const getStreakMessage = (streak: number): { title: string; message: string; emo
   if (streak >= 180 && streak < 365) {
     return {
       title: 'Halbjahres-Held!',
-      message: 'Über ein halbes Jahr täglich am optimieren. Du gehörst zur Elite der Biohacker!',
+      message: 'Über ein halbes Jahr täglich am optimieren. Du gehörst zur Elite!',
       emoji: '🔮',
     };
   }

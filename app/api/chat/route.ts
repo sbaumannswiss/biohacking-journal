@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { chat } from '@/lib/agent/openaiService';
-import { buildUserContext, formatContextForPrompt } from '@/lib/agent/contextBuilder';
+import { buildUserContext } from '@/lib/agent/contextBuilder';
+import { anonymizeContext, formatAnonymizedContextForPrompt } from '@/lib/agent/anonymizedContext';
 
+/**
+ * DSGVO-konformer Chat-Endpoint
+ * 
+ * Nur anonymisierte/kategorische Daten werden an OpenAI gesendet.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -23,17 +29,21 @@ export async function POST(request: NextRequest) {
     
     // Build user context
     const userContext = await buildUserContext(userId);
-    const contextString = formatContextForPrompt(userContext);
     
-    // Get response from OpenAI
-    const response = await chat(message, contextString, conversationHistory);
+    // DSGVO: Anonymisiere Kontext bevor er an OpenAI gesendet wird
+    const anonymizedUserContext = anonymizeContext(userContext);
+    const anonymizedContextString = formatAnonymizedContextForPrompt(anonymizedUserContext);
     
+    // Get response from OpenAI with anonymized context
+    const response = await chat(message, anonymizedContextString, conversationHistory);
+    
+    // Nur nicht-personenbezogene Metadaten zurückgeben
     return NextResponse.json({ 
       response,
       context: {
-        streak: userContext.user.streak,
-        level: userContext.user.level,
-        stackSize: userContext.stack.length,
+        streakCategory: anonymizedUserContext.streakCategory,
+        levelCategory: anonymizedUserContext.levelCategory,
+        stackSize: anonymizedUserContext.stackSize,
       }
     });
     

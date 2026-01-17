@@ -200,7 +200,7 @@ function HelixMascot({ mood = 'happy', size = 'md' }: { mood?: 'happy' | 'thinki
     >
       <Image
         src="/helix-mascot.svg"
-        alt="Helix - Dein Biohacking Coach"
+        alt="Helix - Dein STAX Coach"
         fill
         className="object-contain drop-shadow-[0_0_15px_rgba(167,243,208,0.3)]"
         priority
@@ -1211,7 +1211,7 @@ function Step6Paywall({
           className="mt-4"
         >
           <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-primary">
-            Perfekt, {data.name || 'Biohacker'}!
+            Perfekt, {data.name || 'User'}!
           </h2>
           <p className="text-muted-foreground mt-2">
             Dein personalisierter Plan ist bereit.
@@ -1389,7 +1389,7 @@ function LoadingScreen({ name }: { name: string }) {
         className="mt-8 w-full max-w-xs"
       >
         <h2 className="text-lg font-bold mb-2">
-          Einen Moment, {name || 'Biohacker'}...
+          Einen Moment, {name || 'User'}...
         </h2>
         <p className="text-sm text-muted-foreground mb-6">{status}</p>
         
@@ -1475,11 +1475,11 @@ export default function OnboardingPage() {
     await new Promise(resolve => setTimeout(resolve, 2500));
     
     // Save onboarding data
-    localStorage.setItem('bioboost_onboarding_completed', 'true');
-    localStorage.setItem('bioboost_disclaimer_accepted', 'true');
-    localStorage.setItem('bioboost_user_profile', JSON.stringify(data));
-    localStorage.setItem('bioboost_goals', JSON.stringify(data.goals));
-    localStorage.setItem('bioboost_subscription_plan', plan);
+    localStorage.setItem('stax_onboarding_completed', 'true');
+    localStorage.setItem('stax_disclaimer_accepted', 'true');
+    localStorage.setItem('stax_user_profile', JSON.stringify(data));
+    localStorage.setItem('stax_goals', JSON.stringify(data.goals));
+    localStorage.setItem('stax_subscription_plan', plan);
     
     // Navigate to home
     router.push('/');

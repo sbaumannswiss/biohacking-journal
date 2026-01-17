@@ -1,4 +1,4 @@
-# 🐛 UMFASSENDER BUG REPORT - Biohacking App
+# 🐛 UMFASSENDER BUG REPORT - STAX App
 
 **Datum:** Heute  
 **Status:** Alle Bugs gefunden, noch nicht behoben

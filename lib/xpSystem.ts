@@ -187,13 +187,13 @@ export function formatXP(xp: number): string {
  * Gibt eine Beschreibung für das Level zurück
  */
 export function getLevelTitle(level: number): string {
-  if (level <= 5) return 'Biohacker Novize';
-  if (level <= 10) return 'Biohacker Apprentice';
-  if (level <= 20) return 'Biohacker Adept';
-  if (level <= 35) return 'Biohacker Expert';
-  if (level <= 50) return 'Biohacker Master';
-  if (level <= 75) return 'Biohacker Guru';
-  return 'Biohacker Legend';
+  if (level <= 5) return 'STAX Novize';
+  if (level <= 10) return 'STAX Apprentice';
+  if (level <= 20) return 'STAX Adept';
+  if (level <= 35) return 'STAX Expert';
+  if (level <= 50) return 'STAX Master';
+  if (level <= 75) return 'STAX Guru';
+  return 'STAX Legend';
 }
 
 // Level-Vorschau für UI

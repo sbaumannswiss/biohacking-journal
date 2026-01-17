@@ -65,7 +65,7 @@ export default function WaitlistPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center">
               <Zap size={22} className="text-black" />
             </div>
-            <span className="font-bold text-xl tracking-tight">BioBoost</span>
+            <span className="font-bold text-xl tracking-tight">STAX</span>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
             <Users size={16} />
@@ -106,16 +106,16 @@ export default function WaitlistPage() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                 <span className="text-white">Dein </span>
                 <span className="bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent">
-                  Biohacking
+                  Performance
                 </span>
                 <br />
-                <span className="text-white">Journal</span>
+                <span className="text-white">Tracker</span>
               </h1>
 
               {/* Description */}
               <p className="text-lg text-gray-400 mb-8 max-w-lg">
                 Tracke deine Supplements, optimiere dein Timing und erreiche neue Levels. 
-                Die intelligente App für moderne Biohacker.
+                Die intelligente App für deine Performance.
               </p>
 
               {/* Features */}
@@ -175,7 +175,7 @@ export default function WaitlistPage() {
                     <span className="font-bold text-lg">Du bist dabei!</span>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    Wir benachrichtigen dich, sobald BioBoost startet. 
+                    Wir benachrichtigen dich, sobald STAX startet. 
                     Check deine Inbox für Updates!
                   </p>
                 </motion.div>
@@ -194,7 +194,7 @@ export default function WaitlistPage() {
                   ))}
                 </div>
                 <p className="text-sm text-gray-400">
-                  <span className="text-white font-semibold">{signupCount.toLocaleString()}+</span> Biohacker warten bereits
+                  <span className="text-white font-semibold">{signupCount.toLocaleString()}+</span> User warten bereits
                 </p>
               </div>
             </motion.div>
@@ -205,7 +205,7 @@ export default function WaitlistPage() {
       {/* Footer */}
       <footer className="relative z-10 px-6 lg:px-12 py-8 border-t border-white/5 mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-          <p>© 2026 BioBoost. Alle Rechte vorbehalten.</p>
+          <p>© 2026 STAX. Alle Rechte vorbehalten.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-white transition-colors">Datenschutz</a>
             <a href="#" className="hover:text-white transition-colors">Impressum</a>
@@ -243,7 +243,7 @@ function PhoneMockup() {
             <div className="flex justify-between items-start mb-3">
               <div>
                 <h2 className="text-base font-bold text-white">Good Morning,</h2>
-                <span className="text-primary font-bold text-sm">Biohacker</span>
+                <span className="text-primary font-bold text-sm">User</span>
               </div>
               <div className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded-lg">
                 <Flame size={12} className="text-orange-400" fill="currentColor" />
@@ -259,7 +259,7 @@ function PhoneMockup() {
                     <Trophy size={12} className="text-primary" />
                   </div>
                   <div>
-                    <span className="text-[8px] text-gray-400 uppercase font-bold block leading-tight">Biohacker Novize</span>
+                    <span className="text-[8px] text-gray-400 uppercase font-bold block leading-tight">STAX Novize</span>
                     <span className="text-sm font-bold text-white leading-tight">Level 5</span>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
-# 🔧 BIOHACKING APP - UMFASSENDER BUGFIX & OPTIMIERUNG PROMPT
+# 🔧 STAX APP - UMFASSENDER BUGFIX & OPTIMIERUNG PROMPT
 
 ## 📋 ÜBERSICHT
-Diese App ist eine Biohacking-Tracking-App mit Next.js, Supabase, und einem Premium 3D-Karussell für Supplements. Die Library ist bereits mit `Carousel3D` und `SupplementCard3D` implementiert, aber es gibt **kritische Bugs** die behoben werden müssen.
+Diese App ist eine STAX-Tracking-App mit Next.js, Supabase, und einem Premium 3D-Karussell für Supplements. Die Library ist bereits mit `Carousel3D` und `SupplementCard3D` implementiert, aber es gibt **kritische Bugs** die behoben werden müssen.
 
 ---
 

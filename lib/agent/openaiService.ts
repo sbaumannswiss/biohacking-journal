@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { buildSystemPrompt } from './systemPrompt';
+import { buildSystemPrompt, buildAnonymizedSystemPrompt } from './systemPrompt';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -10,7 +10,41 @@ export interface ChatMessage {
   content: string;
 }
 
+/**
+ * DSGVO-konformer Chat - verwendet nur anonymisierten Kontext
+ */
 export async function chat(
+  userMessage: string,
+  userContext: string,
+  conversationHistory: ChatMessage[] = []
+): Promise<string> {
+  // Verwende anonymisierten System-Prompt
+  const systemPrompt = buildAnonymizedSystemPrompt(userContext);
+  
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    { role: 'system', content: systemPrompt },
+    ...conversationHistory.map(msg => ({
+      role: msg.role as 'user' | 'assistant',
+      content: msg.content,
+    })),
+    { role: 'user', content: userMessage },
+  ];
+  
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages,
+    temperature: 0.7,
+    max_tokens: 500,
+  });
+  
+  return response.choices[0]?.message?.content || 'Hmm, da ist etwas schiefgelaufen. Versuch es nochmal!';
+}
+
+/**
+ * Legacy-Funktion mit vollem Kontext (nur für lokale Verarbeitung)
+ * NICHT für externe APIs verwenden!
+ */
+export async function chatWithFullContext(
   userMessage: string,
   userContext: string,
   conversationHistory: ChatMessage[] = []
@@ -33,15 +67,19 @@ export async function chat(
     max_tokens: 500,
   });
   
-  return response.choices[0]?.message?.content || 'Hmm, da ist etwas schiefgelaufen. Versuch es nochmal! 💙';
+  return response.choices[0]?.message?.content || 'Hmm, da ist etwas schiefgelaufen. Versuch es nochmal!';
 }
 
+/**
+ * DSGVO-konformer Streaming Chat - verwendet nur anonymisierten Kontext
+ */
 export async function* chatStream(
   userMessage: string,
   userContext: string,
   conversationHistory: ChatMessage[] = []
 ): AsyncGenerator<string> {
-  const systemPrompt = buildSystemPrompt(userContext);
+  // Verwende anonymisierten System-Prompt
+  const systemPrompt = buildAnonymizedSystemPrompt(userContext);
   
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: 'system', content: systemPrompt },

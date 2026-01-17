@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Genug Daten vorhanden: AI-Analyse mit Fokus auf statistische Signifikanz
-        const prompt = `Du bist Helix, ein freundlicher Biohacking-Coach. Analysiere diese User-Stats und gib eine kurze, wissenschaftlich fundierte Zusammenfassung (5-8 Sätze auf Deutsch).
+        const prompt = `Du bist Helix, ein freundlicher STAX-Coach. Analysiere diese User-Stats und gib eine kurze, wissenschaftlich fundierte Zusammenfassung (5-8 Sätze auf Deutsch).
 
 STATS (basierend auf ${journalDays} Tagen Tracking):
 - Aktueller Streak: ${stats.currentStreak} Tage
@@ -83,7 +83,7 @@ BEISPIEL für ehrliche Analyse:
         const completion = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
             messages: [
-                { role: 'system', content: 'Du bist Helix, ein DNA-Maskottchen und wissenschaftlich fundierter Biohacking-Coach. Du machst NUR Aussagen, die durch ausreichend Daten gestützt sind. Du bist ehrlich über die Grenzen der verfügbaren Daten.' },
+                { role: 'system', content: 'Du bist Helix, ein DNA-Maskottchen und wissenschaftlich fundierter STAX-Coach. Du machst NUR Aussagen, die durch ausreichend Daten gestützt sind. Du bist ehrlich über die Grenzen der verfügbaren Daten.' },
                 { role: 'user', content: prompt }
             ],
             max_tokens: 500,

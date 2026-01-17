@@ -1,5 +1,5 @@
 # 🐛 LIVE APP BUG REPORT
-**URL:** https://biohacking-journal.vercel.app?v=4  
+**URL:** https://stax.vercel.app  
 **Datum:** Heute  
 **Getestet:** Homepage, Library, Journal, Navigation
 

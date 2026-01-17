@@ -9,8 +9,8 @@ export function DisclaimerOverlay() {
 
     useEffect(() => {
         // Prüfe ob Onboarding abgeschlossen wurde
-        const hasOnboarded = localStorage.getItem('bioboost_onboarding_completed');
-        const hasAccepted = localStorage.getItem('bioboost_disclaimer_accepted');
+        const hasOnboarded = localStorage.getItem('stax_onboarding_completed');
+        const hasAccepted = localStorage.getItem('stax_disclaimer_accepted');
         
         // Nur für Legacy-User zeigen: Onboarding bereits gemacht, aber kein Disclaimer-Flag
         // Neue User gehen durch das Onboarding, das den Disclaimer einschließt
@@ -20,7 +20,7 @@ export function DisclaimerOverlay() {
     }, []);
 
     const handleAccept = () => {
-        localStorage.setItem('bioboost_disclaimer_accepted', 'true');
+        localStorage.setItem('stax_disclaimer_accepted', 'true');
         setIsOpen(false);
     };
 
@@ -45,7 +45,7 @@ export function DisclaimerOverlay() {
                             </div>
                             <h2 className="text-xl font-bold text-foreground mb-2">Legal Disclaimer</h2>
                             <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                                BioBoost Pro is for informational and tracking purposes only.
+                                STAX is for informational and tracking purposes only.
                                 Use of this app does not constitute medical advice.
                                 Always consult with your Swiss qualified healthcare professional before starting any new supplement regimen.
                             </p>

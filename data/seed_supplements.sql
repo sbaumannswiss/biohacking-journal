@@ -1,4 +1,4 @@
--- Top 20 Biohacking Supplements Seed
+-- Top 20 STAX Supplements Seed
 INSERT INTO public.supplement_library (name, description, benefits, evidence_level, optimal_dosage, best_time, warnings, icon)
 VALUES 
 ('Creatine Monohydrate', 'The gold standard for energy metabolism. Increases ATP availability, boosting power output and cognitive function.', ARRAY['Strength', 'Cognition', 'Energy'], 5, '5g daily', 'Any time (post-workout optimal)', 'Drink plenty of water.', 'Zap'),

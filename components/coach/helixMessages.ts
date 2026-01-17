@@ -45,7 +45,7 @@ export interface HelixMessageData {
 const MESSAGES: Record<HelixTrigger, string[]> = {
     welcome: [
         "Hey! Ich bin Helix, dein Bio-Coach. Zusammen optimieren wir deine Zellgesundheit.",
-        "Willkommen zurück, Biohacker! Bereit für die heutige Dosis Optimierung?",
+        "Willkommen zurück! Bereit für die heutige Dosis Optimierung?",
     ],
     
     morningGreeting: [
@@ -65,7 +65,7 @@ const MESSAGES: Record<HelixTrigger, string[]> = {
     ],
     
     bedtimeGreeting: [
-        "Schlafenszeit naht! Die nächsten 8 Stunden sind dein größtes Biohack-Tool. Nutze sie weise.",
+        "Schlafenszeit naht! Die nächsten 8 Stunden sind dein größtes Performance-Tool. Nutze sie weise.",
         "Glymphatic System incoming! Im Schlaf reinigt dein Gehirn 60% mehr Toxine. Gönn dir das!",
     ],
     
@@ -90,7 +90,7 @@ const MESSAGES: Record<HelixTrigger, string[]> = {
     streakMilestone: [
         "{streak} Tage Streak! Deine Mitochondrien feiern gerade eine kleine ATP-Party.",
         "Wahnsinn! {streak} Tage in Folge. Deine Genexpression optimiert sich messbar.",
-        "{streak}-Tage-Streak! Das ist kein Zufall mehr, das ist Identität. Du BIST ein Biohacker.",
+        "{streak}-Tage-Streak! Das ist kein Zufall mehr, das ist Identität. Du BIST ein STAX-Pro.",
     ],
     
     levelUp: [

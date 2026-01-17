@@ -1,14 +1,22 @@
 apply plugin: 'com.android.application'
 
+// Keystore Properties laden (falls vorhanden)
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
-    namespace = "com.biohacking.journal"
+    namespace = "de.getstax.app"
     compileSdk = rootProject.ext.compileSdkVersion
+    
     defaultConfig {
-        applicationId "com.biohacking.journal"
+        applicationId "de.getstax.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.0-alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,11 +24,40 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
-    buildTypes {
+    
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Keystore aus keystore.properties laden
+            if (keystorePropertiesFile.exists()) {
+                storeFile file(keystoreProperties['STAX_RELEASE_STORE_FILE'])
+                storePassword keystoreProperties['STAX_RELEASE_STORE_PASSWORD']
+                keyAlias keystoreProperties['STAX_RELEASE_KEY_ALIAS']
+                keyPassword keystoreProperties['STAX_RELEASE_KEY_PASSWORD']
+            }
         }
+    }
+    
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            debuggable true
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Signierung nur wenn keystore.properties existiert
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+    
+    // Lint-Optionen für Release-Build
+    lintOptions {
+        checkReleaseBuilds true
+        abortOnError false
     }
 }
 

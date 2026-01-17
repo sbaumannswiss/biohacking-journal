@@ -7,7 +7,7 @@
 
 import { NormalizedHealthData } from '@/lib/garmin/types';
 
-// Realistische Baseline-Werte für einen typischen Biohacker
+// Realistische Baseline-Werte für einen typischen User
 const BASELINE = {
   sleepScore: 7.2,
   sleepDuration: 7.5,
@@ -127,7 +127,7 @@ export function calculateMockSleepSchedule(): {
   avgWakeTime: string;
   lastCaffeineTime: string;
 } {
-  // Simuliere typische Biohacker-Zeiten
+  // Simuliere typische User-Zeiten
   const sleepHour = 22 + Math.random() * 2; // 22:00 - 00:00
   const wakeHour = 6 + Math.random() * 1.5; // 06:00 - 07:30
   

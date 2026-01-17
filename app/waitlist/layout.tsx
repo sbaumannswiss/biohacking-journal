@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "BioBoost - Waitlist",
-  description: "Werde Teil der Biohacking-Revolution. Trage dich in die Warteliste ein!",
+  title: "STAX - Waitlist",
+  description: "Werde Teil der STAX-Revolution. Trage dich in die Warteliste ein!",
 };
 
 export default function WaitlistLayout({

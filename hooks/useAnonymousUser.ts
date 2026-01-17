@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-const USER_ID_KEY = 'bioboost_user_id';
+const USER_ID_KEY = 'stax_user_id';
 
 /**
  * Hook für anonyme User-Identifikation.

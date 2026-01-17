@@ -21,6 +21,7 @@
   "nav": {
     "home": "Home",
     "journal": "Diario",
+    "workout": "Allenamento",
     "library": "Libreria",
     "stats": "Stats",
     "profile": "Profilo"
@@ -32,7 +33,7 @@
       "evening": "Buonasera",
       "bedtime": "Buonanotte"
     },
-    "biohacker": "Biohacker",
+    "biohacker": "User",
     "timeSlots": {
       "morning": "Mattina",
       "noon": "Mezzogiorno",
@@ -147,7 +148,7 @@
     "addedToStack": "{name} aggiunto al {stackName}"
   },
   "profile": {
-    "title": "Biohacker",
+    "title": "Profilo",
     "level": "Livello {level}",
     "dayStreak": "Giorni di Serie",
     "adherence": "Aderenza",
@@ -225,6 +226,64 @@
       }
     }
   },
+  "workout": {
+    "title": "Allenamento",
+    "subtitle": "Il tuo allenamento di oggi",
+    "noActiveWorkout": "Nessun allenamento attivo",
+    "startWorkout": "Inizia allenamento",
+    "endWorkout": "Termina allenamento",
+    "workoutActive": "Allenamento in corso",
+    "workoutTypes": {
+      "strength": "Forza",
+      "cardio": "Cardio",
+      "hiit": "HIIT",
+      "yoga": "Yoga",
+      "running": "Corsa",
+      "cycling": "Ciclismo",
+      "swimming": "Nuoto",
+      "other": "Altro"
+    },
+    "timing": {
+      "now": "Ora",
+      "in30min": "Tra 30 min",
+      "in1h": "Tra 1 ora",
+      "custom": "Orario personalizzato"
+    },
+    "duration": {
+      "title": "Durata stimata",
+      "30min": "30 min",
+      "45min": "45 min",
+      "60min": "60 min",
+      "90min": "90 min"
+    },
+    "phases": {
+      "rest": "Riposo",
+      "pre": "Pre-allenamento",
+      "intra": "Allenamento",
+      "post": "Post-allenamento"
+    },
+    "supplements": {
+      "preWorkout": "Integratori Pre-Allenamento",
+      "intraWorkout": "Integratori Intra-Allenamento",
+      "postWorkout": "Integratori Post-Allenamento",
+      "noSupplements": "Nessun integratore per questa fase",
+      "minutesBefore": "{minutes} min prima",
+      "minutesAfter": "{minutes} min dopo",
+      "during": "Durante l'allenamento"
+    },
+    "hydration": {
+      "title": "Idratazione",
+      "goal": "Obiettivo",
+      "add250ml": "+250ml",
+      "add500ml": "+500ml",
+      "reset": "Reset"
+    },
+    "timer": {
+      "elapsed": "Trascorso",
+      "remaining": "Rimanente",
+      "startsIn": "Inizia tra"
+    }
+  },
   "dosageModal": {
     "addToStack": "Aggiungi allo Stack",
     "editDosage": "Modifica Dosaggio",
@@ -281,7 +340,7 @@
   "helix": {
     "welcome": [
       "Ciao! Sono Helix, il tuo bio-coach. Insieme ottimizzeremo la tua salute cellulare.",
-      "Bentornato, Biohacker! Pronto per la dose di ottimizzazione di oggi?"
+      "Bentornato! Pronto per la dose di ottimizzazione di oggi?"
     ],
     "morningGreeting": [
       "Buongiorno! Picco di cortisolo rilevato. Momento perfetto per luce solare e proteine.",
@@ -297,7 +356,7 @@
       "La sera si avvicina. Il tuo corpo inizia a produrre precursori della melatonina. Supportalo!"
     ],
     "bedtimeGreeting": [
-      "Si avvicina l'ora di dormire! Le prossime 8 ore sono il tuo più grande strumento di biohacking. Usale saggiamente.",
+      "Si avvicina l'ora di dormire! Le prossime 8 ore sono il tuo più grande strumento di performance. Usale saggiamente.",
       "Sistema glinfatico in arrivo! Durante il sonno, il tuo cervello elimina il 60% in più di tossine. Concediti questo!"
     ],
     "checkIn": [

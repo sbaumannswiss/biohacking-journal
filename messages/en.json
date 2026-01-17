@@ -33,7 +33,7 @@
       "evening": "Good Evening",
       "bedtime": "Good Night"
     },
-    "biohacker": "Biohacker",
+    "biohacker": "User",
     "timeSlots": {
       "morning": "Morning",
       "noon": "Noon",
@@ -148,7 +148,7 @@
     "addedToStack": "{name} added to {stackName}"
   },
   "profile": {
-    "title": "Biohacker",
+    "title": "Profile",
     "level": "Level {level}",
     "dayStreak": "Day Streak",
     "adherence": "Adherence",
@@ -340,7 +340,7 @@
   "helix": {
     "welcome": [
       "Hey! I'm Helix, your bio-coach. Together we'll optimize your cellular health.",
-      "Welcome back, Biohacker! Ready for today's dose of optimization?"
+      "Welcome back! Ready for today's dose of optimization?"
     ],
     "morningGreeting": [
       "Good morning! Cortisol peak detected. Perfect time for sunlight and protein.",

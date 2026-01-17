@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ============================================================
+# Android Release Signing - NIEMALS EINCHECKEN!
+# ============================================================
+android/keystore.properties
+android/*.jks
+android/*.keystore
+*.jks
+*.keystore
+
+# Android Build Outputs
+android/app/build/
+android/.gradle/
+android/build/
+android/capacitor-cordova-android-plugins/build/
+
+# iOS Build Outputs
+ios/App/build/
+ios/App/Pods/
+ios/.xcode.env.local
