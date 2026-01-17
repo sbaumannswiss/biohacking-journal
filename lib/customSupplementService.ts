@@ -36,11 +36,14 @@ export async function saveCustomSupplement(
   }
 
   try {
+    // Destructure to exclude evidence_level (not in DB schema)
+    const { evidence_level, ...supplementData } = supplement;
+    
     const { data, error } = await supabase
       .from('custom_supplements')
       .insert({
         user_id: userId,
-        ...supplement,
+        ...supplementData,
         submitted_to_central: false,
       })
       .select('id')
