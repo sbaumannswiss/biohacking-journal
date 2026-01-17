@@ -1,7 +1,7 @@
 'use client';
 
 import { BottomNav } from '@/components/layout/BottomNav';
-import { User, Settings, Shield, Award, Flame, Zap, Calendar, Loader2, TrendingUp, Watch } from 'lucide-react';
+import { User, Settings, Shield, Award, Flame, Zap, Calendar, Loader2, TrendingUp, Watch, Scale, BarChart3 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnonymousUser } from '@/hooks/useAnonymousUser';
@@ -9,8 +9,12 @@ import { getUserStreak, getUserXP, getUserStack, getCheckInHistory } from '@/lib
 import { calculateLevel, getLevelProgress, getLevelTitle } from '@/lib/xpSystem';
 import { WearableConnectCard } from '@/components/wearables';
 import { getConnectedProviders, WearableProvider } from '@/lib/wearables';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { useTranslations } from 'next-intl';
 
 export default function ProfilePage() {
+    const t = useTranslations('profile');
+    const tCommon = useTranslations('common');
     const { userId, isLoading: userLoading } = useAnonymousUser();
     const [toast, setToast] = useState<string | null>(null);
     
@@ -28,6 +32,10 @@ export default function ProfilePage() {
         lastSyncAt: string | null;
     }[]>([]);
     const [showWearables, setShowWearables] = useState(false);
+    
+    // Body metrics
+    const [bodyWeight, setBodyWeight] = useState<number>(70);
+    const [editingWeight, setEditingWeight] = useState(false);
 
     // Level Berechnung aus neuem XP-System
     const levelProgress = getLevelProgress(totalXP);
@@ -44,6 +52,26 @@ export default function ProfilePage() {
     useEffect(() => {
         loadWearables();
     }, [loadWearables]);
+    
+    // Load body weight from localStorage
+    useEffect(() => {
+        const savedWeight = localStorage.getItem('user_body_weight');
+        if (savedWeight) {
+            const weight = parseFloat(savedWeight);
+            if (weight > 0 && weight < 300) {
+                setBodyWeight(weight);
+            }
+        }
+    }, []);
+    
+    // Save body weight to localStorage
+    const saveBodyWeight = useCallback((weight: number) => {
+        if (weight > 20 && weight < 300) {
+            setBodyWeight(weight);
+            localStorage.setItem('user_body_weight', weight.toString());
+            setEditingWeight(false);
+        }
+    }, []);
 
     useEffect(() => {
         if (userId) {
@@ -86,7 +114,7 @@ export default function ProfilePage() {
     }, [userId]);
 
     const handleInteraction = (feature: string) => {
-        setToast(`${feature} coming soon!`);
+        setToast(tCommon('comingSoon', { feature }));
         setTimeout(() => setToast(null), 2000);
     };
 
@@ -116,12 +144,12 @@ export default function ProfilePage() {
                         <User size={40} className="text-muted-foreground" />
                     </div>
                 </motion.div>
-                <h1 className="text-2xl font-bold text-foreground">Biohacker</h1>
+                <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
                 <p className="text-sm text-primary font-mono">
                     {dataLoading ? (
-                        <span className="animate-pulse">Loading...</span>
+                        <span className="animate-pulse">{tCommon('loading')}</span>
                     ) : (
-                        <>Level {level} • {totalXP} XP</>
+                        <>{t('level', { level })} • {totalXP} XP</>
                     )}
                 </p>
             </header>
@@ -143,21 +171,21 @@ export default function ProfilePage() {
                                 <Flame size={18} className="text-orange-400" />
                                 <span className="text-2xl font-bold text-foreground">{streak}</span>
                             </div>
-                            <div className="text-xs text-muted-foreground uppercase tracking-wider">Day Streak</div>
+                            <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('dayStreak')}</div>
                         </div>
                         <div className="glass-panel p-4 rounded-xl text-center">
                             <div className="flex items-center justify-center gap-2 mb-1">
                                 <TrendingUp size={18} className="text-emerald-400" />
                                 <span className="text-2xl font-bold text-foreground">{adherence}%</span>
                             </div>
-                            <div className="text-xs text-muted-foreground uppercase tracking-wider">Adherence</div>
+                            <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('adherence')}</div>
                         </div>
                         <div className="glass-panel p-4 rounded-xl text-center">
                             <div className="flex items-center justify-center gap-2 mb-1">
                                 <Zap size={18} className="text-primary" />
                                 <span className="text-2xl font-bold text-foreground">{totalXP}</span>
                             </div>
-                            <div className="text-xs text-muted-foreground uppercase tracking-wider">Total XP</div>
+                            <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('totalXP')}</div>
                         </div>
                         <div className="glass-panel p-4 rounded-xl text-center">
                             <div className="flex items-center justify-center gap-2 mb-1">
@@ -211,11 +239,11 @@ export default function ProfilePage() {
                                 <Watch size={20} className="text-primary" />
                             </div>
                             <div className="text-left">
-                                <h3 className="font-medium text-foreground">Wearables</h3>
+                                <h3 className="font-medium text-foreground">{t('wearables')}</h3>
                                 <p className="text-xs text-muted-foreground">
                                     {connectedWearables.length > 0 
-                                        ? `${connectedWearables.length} verbunden`
-                                        : 'Keine verbunden'}
+                                        ? t('connected', { count: connectedWearables.length })
+                                        : t('noWearablesConnected')}
                                 </p>
                             </div>
                         </div>
@@ -253,7 +281,7 @@ export default function ProfilePage() {
                                 {/* Hinweis: Daten sind bei Stats */}
                                 {connectedWearables.length > 0 && (
                                     <p className="text-xs text-muted-foreground text-center py-2">
-                                        📊 Deine Wearable-Daten findest du unter <span className="text-primary font-medium">Stats</span>
+                                        <BarChart3 size={12} className="inline mr-1" /> {t('wearableDataHint')} <span className="text-primary font-medium">Stats</span>
                                     </p>
                                 )}
                             </motion.div>
@@ -261,12 +289,66 @@ export default function ProfilePage() {
                     </AnimatePresence>
                 </motion.div>
 
+                {/* Language Switcher */}
+                <div className="space-y-2">
+                    <LanguageSwitcher />
+                </div>
+                
+                {/* Body Weight */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="glass-panel p-4 rounded-xl"
+                >
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-cyan-500/20 rounded-lg">
+                                <Scale size={20} className="text-cyan-400" />
+                            </div>
+                            <div>
+                                <h3 className="font-medium text-foreground text-sm">Körpergewicht</h3>
+                                <p className="text-xs text-muted-foreground">Für Hydration & Dosierungen</p>
+                            </div>
+                        </div>
+                        
+                        {editingWeight ? (
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    value={bodyWeight}
+                                    onChange={(e) => setBodyWeight(Number(e.target.value))}
+                                    className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-center text-foreground font-mono"
+                                    min={20}
+                                    max={300}
+                                    autoFocus
+                                />
+                                <span className="text-sm text-muted-foreground">kg</span>
+                                <button
+                                    onClick={() => saveBodyWeight(bodyWeight)}
+                                    className="px-3 py-1 bg-primary text-primary-foreground rounded-lg text-xs font-medium"
+                                >
+                                    OK
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setEditingWeight(true)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                            >
+                                <span className="text-lg font-bold text-foreground">{bodyWeight}</span>
+                                <span className="text-sm text-muted-foreground">kg</span>
+                            </button>
+                        )}
+                    </div>
+                </motion.div>
+
                 {/* Menu */}
                 <div className="space-y-2">
                     {[
-                        { label: 'Account Settings', icon: Settings },
-                        { label: 'Privacy & Data', icon: Shield },
-                        { label: 'Achievements', icon: Award },
+                        { label: t('accountSettings'), icon: Settings },
+                        { label: t('privacyData'), icon: Shield },
+                        { label: t('achievements'), icon: Award },
                     ].map((item) => (
                         <button
                             key={item.label}
@@ -283,13 +365,13 @@ export default function ProfilePage() {
 
                 <div className="pt-8 text-center">
                     <button
-                        onClick={() => handleInteraction('Log Out')}
+                        onClick={() => handleInteraction(t('logOut'))}
                         className="text-xs text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest font-bold"
                     >
-                        Log Out
+                        {t('logOut')}
                     </button>
                     <p className="text-[10px] text-muted-foreground/50 mt-4 font-mono">
-                        User ID: {userId?.slice(0, 8)}...
+                        {t('userId')}: {userId?.slice(0, 8)}...
                     </p>
                 </div>
             </main>

@@ -23,6 +23,7 @@ import { QUESTS, Quest } from '@/data/quests';
 import { ScanModal } from '@/components/ui/ScanModal';
 import { StreakModal } from '@/components/dashboard/StreakModal';
 import { addToStack } from '@/lib/supabaseService';
+import { useTranslations } from 'next-intl';
 
 // Zeit-Mapping für Supplement-Filterung
 // Matches against best_time values from supplements.ts
@@ -63,13 +64,9 @@ const matchesTimeOfDay = (bestTime: string, timeOfDay: string): boolean => {
   return validPatterns.some(pattern => lowerBestTime.includes(pattern));
 };
 
-// Labels für die Tageszeiten
-const TIME_LABELS: Record<string, string> = {
-  morning: 'Morning',
-  noon: 'Noon', 
-  evening: 'Evening',
-  bedtime: 'Bedtime',
-};
+// Time keys for translation lookup
+const TIME_KEYS = ['morning', 'noon', 'evening', 'bedtime'] as const;
+type TimeKey = typeof TIME_KEYS[number];
 
 // Button-Style für Complete Stack (einheitlich)
 const COMPLETE_BUTTON_STYLE = {
@@ -84,6 +81,11 @@ export default function Home() {
   const { userId, isLoading: userLoading } = useAnonymousUser();
   const timeOfDay = useTimeOfDay();
   const { triggerMessage } = useHelix();
+  const t = useTranslations('home');
+  const tCommon = useTranslations('common');
+  
+  // Helper function to get translated time label
+  const getTimeLabel = (time: string) => t(`timeSlots.${time as TimeKey}`);
   
   // User Data State
   const [userXP, setUserXP] = useState(0);
@@ -124,10 +126,10 @@ export default function Home() {
 
   // Tageszeit-Tabs Konfiguration
   const TIME_SLOTS = [
-    { id: 'morning', label: 'Morning', icon: Sun, emoji: '☀️' },
-    { id: 'noon', label: 'Noon', icon: Coffee, emoji: '🌤️' },
-    { id: 'evening', label: 'Evening', icon: Sunset, emoji: '🌅' },
-    { id: 'bedtime', label: 'Bedtime', icon: Moon, emoji: '🌙' },
+    { id: 'morning' as const, icon: Sun, emoji: '☀️' },
+    { id: 'noon' as const, icon: Coffee, emoji: '🌤️' },
+    { id: 'evening' as const, icon: Sunset, emoji: '🌅' },
+    { id: 'bedtime' as const, icon: Moon, emoji: '🌙' },
   ];
 
   // Level-Berechnung jetzt aus @/lib/xpSystem importiert
@@ -382,11 +384,22 @@ export default function Home() {
       {/* Header Section */}
       <header className="px-4 pt-8 pb-4 relative">
         <div className="flex justify-between items-start mb-4">
-          <div>
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-primary/80">
-              Good {timeOfDay.charAt(0).toUpperCase() + timeOfDay.slice(1)},
-            </h1>
-            <span className="text-primary font-bold text-xl">Biohacker</span>
+          <div className="flex items-center gap-3">
+            {/* Profile Avatar */}
+            <button
+              type="button"
+              onClick={() => router.push('/profile')}
+              aria-label="Profil öffnen"
+              className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold text-lg hover:scale-105 active:scale-95 transition-transform"
+            >
+              B
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-primary/80">
+                {t(`greeting.${timeOfDay as TimeKey}`)},
+              </h1>
+              <span className="text-primary font-bold text-xl">{t('biohacker')}</span>
+            </div>
           </div>
         </div>
 
@@ -400,11 +413,11 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setShowQuests(true)}
-              aria-label={`Aktive Quests anzeigen${helixQuests.length > 0 ? `, ${helixQuests.length} aktiv` : ''}`}
+              aria-label={t('quests.active')}
               className="flex items-center justify-center gap-1 bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-xl text-purple-400 hover:bg-purple-500/20 active:scale-95 transition-all min-w-[90px]"
             >
               <Zap size={12} fill="currentColor" />
-              <span className="text-[11px] font-bold">Aktiv</span>
+              <span className="text-[11px] font-bold">{t('quests.active')}</span>
               {helixQuests.length > 0 && (
                 <span className="min-w-[14px] h-[14px] flex items-center justify-center bg-purple-500 text-white text-[8px] font-bold rounded-full" aria-hidden="true">
                   {helixQuests.length}
@@ -415,17 +428,17 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setShowQuestCatalog(true)}
-              aria-label="Quest-Katalog öffnen"
+              aria-label={t('quests.catalog')}
               className="flex items-center justify-center gap-1 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl text-amber-400 hover:bg-amber-500/20 active:scale-95 transition-all"
             >
               <Trophy size={12} />
-              <span className="text-[11px] font-bold">Katalog</span>
+              <span className="text-[11px] font-bold">{t('quests.catalog')}</span>
             </button>
             
             <button
               type="button"
               onClick={() => setShowStreakModal(true)}
-              aria-label={`${streak} Tage Streak – Tippen für Details`}
+              aria-label={t('streak.daysStreak', { count: streak })}
               className="flex items-center justify-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-xl text-orange-400 hover:bg-orange-500/20 active:scale-95 transition-all"
             >
               <Flame size={12} fill="currentColor" className="animate-pulse-slow" aria-hidden="true" />
@@ -463,7 +476,7 @@ export default function Home() {
               >
                 <div className="flex items-center gap-1">
                   <Icon size={14} className={isActive ? "text-primary-foreground" : ""} />
-                  <span>{slot.label}</span>
+                  <span>{getTimeLabel(slot.id)}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {count > 0 && (
@@ -489,9 +502,9 @@ export default function Home() {
         <div className="flex items-center gap-2 text-muted-foreground">
           <Clock size={14} />
           <h2 className="text-xs font-semibold uppercase tracking-wider">
-            {TIME_LABELS[activeTime] || activeTime} Stack
+            {t('stack', { time: getTimeLabel(activeTime) })}
             {activeTime === timeOfDay && (
-              <span className="ml-1.5 text-[10px] text-primary font-normal"> (jetzt)</span>
+              <span className="ml-1.5 text-[10px] text-primary font-normal"> {t('stackNow')}</span>
             )}
           </h2>
         </div>
@@ -499,15 +512,15 @@ export default function Home() {
           <button
             onClick={() => setShowScanModal(true)}
             className="p-3 min-w-11 min-h-11 bg-cyan-500/10 text-cyan-400 rounded-xl hover:bg-cyan-500/20 active:scale-95 transition-all flex items-center justify-center"
-            title="Supplement scannen"
-            aria-label="Supplement mit Kamera scannen"
+            title={t('scanSupplement')}
+            aria-label={t('scanSupplement')}
           >
             <Camera size={22} aria-hidden="true" />
           </button>
           <Link 
             href="/library" 
             className="p-3 min-w-11 min-h-11 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 active:scale-95 transition-all flex items-center justify-center"
-            aria-label="Supplement zur Library hinzufügen"
+            aria-label={t('addSupplement')}
           >
             <Plus size={22} aria-hidden="true" />
           </Link>
@@ -580,10 +593,10 @@ export default function Home() {
                     <Droplets size={24} />
                   </div>
                   <p className="text-muted-foreground text-sm font-medium">
-                    Keine Supplements für {TIME_LABELS[activeTime] || activeTime}.
+                    {t('noSupplementsForTime', { time: getTimeLabel(activeTime) })}
                   </p>
                   <p className="text-xs text-muted-foreground/60 mt-1">
-                    {activeTime === timeOfDay ? 'Hydrate and breathe.' : 'Wechsle die Tageszeit oben.'}
+                    {activeTime === timeOfDay ? t('hydrateAndBreathe') : t('switchTime')}
                   </p>
                 </div>
               ) : (
@@ -595,11 +608,11 @@ export default function Home() {
                   <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4 text-primary group-hover:scale-110 transition-transform">
                     <FlaskConical size={32} />
                   </div>
-                  <p className="text-foreground font-semibold mb-1">Dein Stack ist leer</p>
-                  <p className="text-sm text-muted-foreground mb-4">Füge Supplements aus dem Bio-Lab hinzu</p>
+                  <p className="text-foreground font-semibold mb-1">{t('emptyStackTitle')}</p>
+                  <p className="text-sm text-muted-foreground mb-4">{t('emptyStackSubtitle')}</p>
                   <span className="text-primary font-bold text-sm uppercase tracking-wider flex items-center gap-2">
                     <Plus size={16} />
-                    Bio-Lab öffnen
+                    {t('openBioLab')}
                   </span>
                 </Link>
               )}
@@ -644,7 +657,7 @@ export default function Home() {
                 <CheckCheck size={22} strokeWidth={2.5} />
               )}
               <span>
-                Complete Stack
+                {t('completeStack')}
                 <span className="ml-2 opacity-80">({completedCount}/{relevantSupplements.length})</span>
               </span>
             </button>
@@ -663,7 +676,7 @@ export default function Home() {
           >
             <div className="w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-3 bg-primary/20 text-primary border border-primary/30">
               <CheckCheck size={22} strokeWidth={2.5} />
-              <span>Stack Complete!</span>
+              <span>{t('stackComplete')}</span>
             </div>
           </motion.div>
         )}
@@ -693,8 +706,8 @@ export default function Home() {
                     <Zap size={24} fill="currentColor" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-foreground">Quests</h2>
-                    <p className="text-sm text-muted-foreground">Tägliche Herausforderungen</p>
+                    <h2 className="text-lg font-bold text-foreground">{t('quests.title')}</h2>
+                    <p className="text-sm text-muted-foreground">{t('quests.subtitle')}</p>
                   </div>
                 </div>
                 <button
@@ -711,8 +724,8 @@ export default function Home() {
                 {/* Morning Routine - Fortschrittsanzeige ohne separates XP */}
                 {getRelevantSupplements('morning').length > 0 && (
                   <QuestItem 
-                    title="Morning Routine"
-                    description="Nimm alle Morning-Supplements"
+                    title={t('quests.morningRoutine')}
+                    description={t('quests.morningRoutineDesc')}
                     xp={0}
                     progress={getRelevantSupplements('morning').filter(s => completedSupplements.has(s.supplement_id)).length}
                     total={getRelevantSupplements('morning').length}
@@ -722,8 +735,8 @@ export default function Home() {
                 
                 {/* Journal Entry - 50 XP im neuen System */}
                 <QuestItem 
-                  title="Journal Entry"
-                  description="Logge deine täglichen Metriken"
+                  title={t('quests.journalEntry')}
+                  description={t('quests.journalEntryDesc')}
                   xp={XP_VALUES.JOURNAL_LOGGED}
                   progress={0}
                   total={1}
@@ -733,8 +746,8 @@ export default function Home() {
                 {/* Full Stack Day - 25 XP im neuen System */}
                 {userStack.length > 0 && (
                   <QuestItem 
-                    title="Full Stack Day"
-                    description="Check alle Supplements für heute"
+                    title={t('quests.fullStackDay')}
+                    description={t('quests.fullStackDayDesc')}
                     xp={XP_VALUES.STACK_COMPLETE}
                     progress={completedSupplements.size}
                     total={userStack.length}
@@ -745,8 +758,8 @@ export default function Home() {
                 {/* Streak Quest - Bonus bei Meilensteinen */}
                 {streak > 0 && (
                   <QuestItem 
-                    title="Streak Keeper"
-                    description={`Halte deinen ${streak}-Tage Streak aufrecht`}
+                    title={t('quests.streakKeeper')}
+                    description={t('quests.streakKeeperDesc', { streak })}
                     xp={streak % 7 === 0 ? XP_VALUES.STREAK_7_DAYS : 0}
                     progress={completedSupplements.size > 0 ? 1 : 0}
                     total={1}
@@ -789,7 +802,7 @@ export default function Home() {
               {/* Footer */}
               <div className="mt-6 pt-4 border-t border-white/5 text-center">
                 <p className="text-xs text-muted-foreground">
-                  Quests werden täglich um Mitternacht zurückgesetzt
+                  {t('quests.resetInfo')}
                 </p>
               </div>
             </motion.div>

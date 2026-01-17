@@ -7,6 +7,7 @@ import { Camera, X, Loader2, Check, RefreshCw, Plus, AlertCircle, Sparkles, File
 import { cn } from '@/lib/utils';
 import { ScanResult, ComboIngredient } from '@/lib/agent/visionService';
 import { saveCustomSupplement, submitToCentralSystem, addCustomToStack } from '@/lib/customSupplementService';
+import { useTranslations } from 'next-intl';
 
 interface ScanModalProps {
   isOpen: boolean;
@@ -38,6 +39,8 @@ export function ScanModal({
   onSaveComplete,
   userId 
 }: ScanModalProps) {
+  const t = useTranslations('scanModal');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [state, setState] = useState<ScanState>('idle');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -410,8 +413,8 @@ export function ScanModal({
                   <Camera className="text-primary" size={20} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-foreground">Supplement Scanner</h3>
-                  <p className="text-xs text-muted-foreground">Powered by Helix AI</p>
+                  <h3 className="font-bold text-foreground">{t('title')}</h3>
+                  <p className="text-xs text-muted-foreground">{t('poweredBy')}</p>
                 </div>
               </div>
               <button
@@ -450,10 +453,10 @@ export function ScanModal({
                     <Camera size={48} className="text-primary" />
                   </motion.button>
                   <p className="text-muted-foreground text-sm text-center">
-                    Fotografiere das Etikett deines Supplements
+                    {t('takePhoto')}
                   </p>
                   <p className="text-muted-foreground/60 text-xs mt-2 text-center">
-                    Auch Kombi-Präparate werden erkannt.
+                    {t('comboRecognized')}
                   </p>
                 </motion.div>
               )}
@@ -474,14 +477,14 @@ export function ScanModal({
                       className="flex-1 py-3 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
                     >
                       <RefreshCw size={18} />
-                      Neu
+                      {t('new')}
                     </button>
                     <button
                       onClick={state === 'ingredient-photo' ? handleIngredientPhotoScan : handleScan}
                       className="flex-1 py-3 px-4 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                     >
                       <Sparkles size={18} />
-                      Analysieren
+                      {t('analyze')}
                     </button>
                   </div>
                 </motion.div>
@@ -505,10 +508,10 @@ export function ScanModal({
                     />
                   </div>
                   <p className="text-foreground font-medium mt-4">
-                    {state === 'saving' ? 'Speichere...' : 'Helix analysiert...'}
+                    {state === 'saving' ? t('saving') : t('analyzing')}
                   </p>
                   <p className="text-muted-foreground text-sm mt-1">
-                    {state === 'saving' ? 'Einen Moment...' : 'Einen Moment Geduld...'}
+                    {t('patience')}
                   </p>
                 </motion.div>
               )}
@@ -526,15 +529,14 @@ export function ScanModal({
                   {scanResult.detected && (
                     <div className="bg-white/5 rounded-xl p-4 mb-4 space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Erkannt</span>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">{t('detected')}</span>
                         <span className={cn(
                           "text-xs px-2 py-0.5 rounded-full",
                           scanResult.match.confidence === 'high' ? "bg-green-500/20 text-green-400" :
                           scanResult.match.confidence === 'medium' ? "bg-yellow-500/20 text-yellow-400" :
                           "bg-red-500/20 text-red-400"
                         )}>
-                          {scanResult.match.confidence === 'high' ? 'Sicher' : 
-                           scanResult.match.confidence === 'medium' ? 'Wahrscheinlich' : 'Unsicher'}
+                          {t(`confidence.${scanResult.match.confidence}`)}
                         </span>
                       </div>
                       <p className="text-lg font-bold text-foreground">{scanResult.detected.name}</p>
@@ -553,7 +555,7 @@ export function ScanModal({
                         <span className="text-3xl">{scanResult.match.supplement.emoji}</span>
                         <div>
                           <p className="font-bold text-foreground">{scanResult.match.supplement.name}</p>
-                          <p className="text-xs text-green-400">✓ Bereits in deiner Library!</p>
+                          <p className="text-xs text-green-400">✓ {t('inLibrary')}</p>
                         </div>
                         <Check className="ml-auto text-green-400" size={24} />
                       </div>
@@ -563,8 +565,8 @@ export function ScanModal({
                       <div className="flex items-center gap-3">
                         <AlertCircle className="text-yellow-400" size={24} />
                         <div>
-                          <p className="font-medium text-foreground">Nicht in Library</p>
-                          <p className="text-xs text-muted-foreground">Du kannst es vorschlagen!</p>
+                          <p className="font-medium text-foreground">{t('notInLibrary')}</p>
+                          <p className="text-xs text-muted-foreground">{t('canSuggest')}</p>
                         </div>
                       </div>
                     </div>
@@ -573,7 +575,7 @@ export function ScanModal({
                   <div className="flex gap-3">
                     <button onClick={reset} className="flex-1 py-3 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
                       <RefreshCw size={18} />
-                      Nochmal
+                      {tCommon('retry')}
                     </button>
                     {scanResult.match.found && scanResult.match.supplement ? (
                       <button 
@@ -584,12 +586,12 @@ export function ScanModal({
                         className="flex-1 py-3 px-4 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                       >
                         <ExternalLink size={18} />
-                        In Library
+                        {t('inLibraryBtn')}
                       </button>
                     ) : (
                       <button onClick={handleSuggestNew} className="flex-1 py-3 px-4 bg-cyan-500 text-white rounded-xl font-bold hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2">
                         <Sparkles size={18} />
-                        Vorschlagen
+                        {t('suggest')}
                       </button>
                     )}
                   </div>
@@ -603,7 +605,7 @@ export function ScanModal({
                     <div className="flex items-start gap-3">
                       <Package className="text-purple-400 mt-0.5" size={24} />
                       <div>
-                        <p className="font-bold text-foreground mb-1">Kombi-Präparat erkannt</p>
+                        <p className="font-bold text-foreground mb-1">{t('comboDetected')}</p>
                         <p className="text-sm text-muted-foreground">{scanResult.helixComment}</p>
                       </div>
                     </div>
@@ -619,7 +621,7 @@ export function ScanModal({
                   )}
 
                   <p className="text-sm text-muted-foreground text-center mb-4">
-                    Um die Inhaltsstoffe zu erfassen, mach ein Foto der Nährwerttabelle oder gib sie manuell ein.
+                    {t('ingredientPhotoHint')}
                   </p>
 
                   <div className="flex flex-col gap-3">
@@ -628,14 +630,14 @@ export function ScanModal({
                       className="py-3 px-4 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                     >
                       <Camera size={18} />
-                      Mengenangaben fotografieren
+                      {t('photoIngredients')}
                     </button>
                     <button
                       onClick={() => setState('ingredient-manual')}
                       className="py-3 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
                     >
                       <Edit3 size={18} />
-                      Manuell eingeben
+                      {t('enterManually')}
                     </button>
                   </div>
                 </motion.div>

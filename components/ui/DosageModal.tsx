@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 // Icon mapping for supplements
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -41,14 +42,17 @@ interface DosageModalProps {
     mode: 'add' | 'edit';
 }
 
-const TIME_OPTIONS = [
-    { value: 'morning', label: 'Morning', emoji: '☀️' },
-    { value: 'noon', label: 'Noon', emoji: '🌤️' },
-    { value: 'evening', label: 'Evening', emoji: '🌅' },
-    { value: 'bedtime', label: 'Bedtime', emoji: '🌙' },
-];
+const TIME_OPTION_KEYS = [
+    { value: 'morning', emoji: '☀️' },
+    { value: 'noon', emoji: '🌤️' },
+    { value: 'evening', emoji: '🌅' },
+    { value: 'bedtime', emoji: '🌙' },
+] as const;
 
-const ALL_UNITS = ['mg', 'g', 'ml', 'IU', 'mcg', 'Kapseln', 'Tabletten', 'Tropfen'];
+const ALL_UNIT_KEYS = ['mg', 'g', 'ml', 'iu', 'mcg', 'capsules', 'tablets', 'drops'] as const;
+
+// Static unit values for parsing (language-independent)
+const PARSE_UNITS = ['mg', 'g', 'ml', 'IU', 'mcg', 'Kapseln', 'Tabletten', 'Tropfen', 'capsules', 'tablets', 'drops'];
 
 // Parse dosage into amount and unit
 function parseDosage(dosageStr: string): { amount: string; unit: string } {
@@ -58,8 +62,8 @@ function parseDosage(dosageStr: string): { amount: string; unit: string } {
         const amount = match[1] || '';
         const unitRaw = match[2]?.toLowerCase() || '';
         // Find matching unit from our list
-        const unit = ALL_UNITS.find(u => u.toLowerCase() === unitRaw) || 
-                     ALL_UNITS.find(u => unitRaw.startsWith(u.toLowerCase())) || 
+        const unit = PARSE_UNITS.find(u => u.toLowerCase() === unitRaw) || 
+                     PARSE_UNITS.find(u => unitRaw.startsWith(u.toLowerCase())) || 
                      'mg';
         return { amount, unit };
     }
@@ -76,6 +80,9 @@ export function DosageModal({
     defaultTime,
     mode,
 }: DosageModalProps) {
+    const t = useTranslations('dosageModal');
+    const tHome = useTranslations('home');
+    const tCommon = useTranslations('common');
     const parsed = parseDosage(defaultDosage);
     const [amount, setAmount] = useState(parsed.amount);
     const [unit, setUnit] = useState(parsed.unit);
@@ -140,7 +147,7 @@ export function DosageModal({
                                 })()}
                                 <div>
                                     <h2 className="text-lg font-bold text-foreground">
-                                        {mode === 'add' ? 'Zum Stack hinzufügen' : 'Dosierung bearbeiten'}
+                                        {mode === 'add' ? t('addToStack') : t('editDosage')}
                                     </h2>
                                     <p className="text-sm text-muted-foreground">{supplementName}</p>
                                 </div>
@@ -158,7 +165,7 @@ export function DosageModal({
                         <div className="mb-6">
                             <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                                 <Pill size={16} />
-                                Dosierung
+                                {t('dosage')}
                             </label>
                             <div className="flex gap-2">
                                 {/* Amount Input */}
@@ -168,7 +175,7 @@ export function DosageModal({
                                     inputMode="decimal"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
-                                    placeholder="Menge"
+                                    placeholder={t('amount')}
                                     className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground text-lg font-mono text-center placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
                                 />
                                 
@@ -178,15 +185,15 @@ export function DosageModal({
                                     onChange={(e) => setUnit(e.target.value)}
                                     className="w-28 px-2 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground font-medium focus:outline-none focus:border-primary/50 transition-all cursor-pointer text-center"
                                 >
-                                    {ALL_UNITS.map((u) => (
-                                        <option key={u} value={u} className="bg-background text-foreground">
-                                            {u}
+                                    {ALL_UNIT_KEYS.map((u) => (
+                                        <option key={u} value={t(`units.${u}`)} className="bg-background text-foreground">
+                                            {t(`units.${u}`)}
                                         </option>
                                     ))}
                                 </select>
                             </div>
                             <p className="text-xs text-muted-foreground/60 mt-2 text-center">
-                                Standard: {defaultDosage}
+                                {t('default')}: {defaultDosage}
                             </p>
                         </div>
 
@@ -194,10 +201,10 @@ export function DosageModal({
                         <div className="mb-6">
                             <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                                 <Clock size={16} />
-                                Einnahmezeit (optional)
+                                {t('intakeTime')}
                             </label>
                             <div className="flex gap-2">
-                                {TIME_OPTIONS.map((option) => (
+                                {TIME_OPTION_KEYS.map((option) => (
                                     <button
                                         key={option.value}
                                         type="button"
@@ -212,7 +219,7 @@ export function DosageModal({
                                         )}
                                     >
                                         <span>{option.emoji}</span>
-                                        <span>{option.label}</span>
+                                        <span>{tHome(`timeSlots.${option.value}`)}</span>
                                     </button>
                                 ))}
                             </div>
@@ -225,7 +232,7 @@ export function DosageModal({
                                 onClick={onClose}
                                 className="flex-1 py-3.5 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors"
                             >
-                                Abbrechen
+                                {tCommon('cancel')}
                             </button>
                             <button
                                 type="button"
@@ -233,7 +240,7 @@ export function DosageModal({
                                 className="flex-1 py-3.5 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"
                             >
                                 <Check size={18} strokeWidth={2.5} />
-                                {mode === 'add' ? 'Hinzufügen' : 'Speichern'}
+                                {mode === 'add' ? tCommon('add') : tCommon('save')}
                             </button>
                         </div>
                     </motion.div>

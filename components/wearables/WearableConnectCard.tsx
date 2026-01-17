@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Watch, 
@@ -9,15 +9,20 @@ import {
   Loader2, 
   CheckCircle2,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Smartphone,
+  Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   WearableProvider, 
   mockConnectProvider, 
   mockDisconnectProvider,
-  USE_MOCK_DATA 
+  USE_MOCK_DATA,
+  checkNativeHealthAvailable,
+  connectNativeHealth,
 } from '@/lib/wearables';
+import { isNativePlatform, openHealthConnectStore, getPlatform } from '@/lib/health';
 
 interface WearableConnectCardProps {
   provider: WearableProvider;
@@ -36,6 +41,20 @@ const PROVIDER_INFO: Record<WearableProvider, {
   bgColor: string;
   description: string;
 }> = {
+  healthconnect: {
+    name: 'Health Connect',
+    icon: '💚',
+    color: 'text-green-400',
+    bgColor: 'bg-green-500/10 border-green-500/30',
+    description: 'Garmin, Samsung, Fitbit, Whoop, Oura & mehr',
+  },
+  apple_health: {
+    name: 'Apple Health',
+    icon: '❤️',
+    color: 'text-red-400',
+    bgColor: 'bg-red-500/10 border-red-500/30',
+    description: 'Apple Watch, alle HealthKit-Apps',
+  },
   garmin: {
     name: 'Garmin',
     icon: '⌚',
@@ -84,11 +103,37 @@ export function WearableConnectCard({
 }: WearableConnectCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmDisconnect, setShowConfirmDisconnect] = useState(false);
+  const [healthConnectAvailable, setHealthConnectAvailable] = useState<boolean | null>(null);
+  const [needsInstall, setNeedsInstall] = useState(false);
   
   const info = PROVIDER_INFO[provider];
 
+  // Prüfe Health Connect Verfügbarkeit bei Native-Providern
+  useEffect(() => {
+    if (provider === 'healthconnect' || provider === 'apple_health') {
+      checkNativeHealthAvailable().then(result => {
+        setHealthConnectAvailable(result.available);
+        if (!result.available && getPlatform() === 'android') {
+          setNeedsInstall(true);
+        }
+      });
+    }
+  }, [provider]);
+
   const handleConnect = async () => {
     setIsLoading(true);
+    
+    // Native Health APIs (Health Connect / HealthKit)
+    if (provider === 'healthconnect' || provider === 'apple_health') {
+      const result = await connectNativeHealth();
+      if (result.success) {
+        onConnect();
+      } else if (result.error?.includes('nicht verfügbar') && getPlatform() === 'android') {
+        setNeedsInstall(true);
+      }
+      setIsLoading(false);
+      return;
+    }
     
     if (USE_MOCK_DATA) {
       // Mock-Verbindung simulieren
@@ -101,6 +146,10 @@ export function WearableConnectCard({
     }
     
     setIsLoading(false);
+  };
+
+  const handleInstallHealthConnect = () => {
+    openHealthConnectStore();
   };
 
   const handleDisconnect = async () => {
@@ -202,6 +251,17 @@ export function WearableConnectCard({
                 <Unlink size={16} className="text-red-400" />
               </button>
             </>
+          ) : needsInstall ? (
+            <button
+              onClick={handleInstallHealthConnect}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all",
+                "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30"
+              )}
+            >
+              <Download size={16} />
+              Installieren
+            </button>
           ) : (
             <button
               onClick={handleConnect}

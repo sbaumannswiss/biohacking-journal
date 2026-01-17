@@ -2,21 +2,86 @@
  * Wearable Service
  * 
  * Zentrale Schnittstelle für alle Wearable-Operationen.
- * Unterstützt sowohl echte APIs als auch Mock-Daten.
+ * Unterstützt native Health APIs (Health Connect/HealthKit) und Mock-Daten.
  */
 
 import { supabase } from '@/lib/supabase';
 import { NormalizedHealthData, WearableConnection } from '@/lib/garmin/types';
 import { generateMockHealthHistory, calculateMockSleepSchedule } from './mockData';
+import {
+  checkHealthAvailability,
+  requestHealthPermissions,
+  syncAllHealthData,
+  isNativePlatform,
+  getPlatform,
+} from '@/lib/health';
 
-// Feature Flag für Mock-Modus
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_WEARABLES === 'true' || true; // Default: Mock
+// Feature Flag für Mock-Modus (nur im Web)
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_WEARABLES === 'true' || !isNativePlatform();
 
-export type WearableProvider = 'garmin' | 'whoop' | 'oura' | 'apple' | 'samsung';
+// Provider-Typ erweitert um Health Connect
+export type WearableProvider = 'healthconnect' | 'apple_health' | 'garmin' | 'whoop' | 'oura' | 'apple' | 'samsung';
 
 // ============================================
 // CONNECTION MANAGEMENT
 // ============================================
+
+/**
+ * Prüft ob native Health APIs verfügbar sind
+ */
+export async function checkNativeHealthAvailable(): Promise<{
+  available: boolean;
+  provider: 'healthconnect' | 'apple_health' | null;
+  reason?: string;
+}> {
+  const result = await checkHealthAvailability();
+  
+  if (!result.available) {
+    return { available: false, provider: null, reason: result.reason };
+  }
+  
+  const provider = result.platform === 'android' ? 'healthconnect' : 'apple_health';
+  return { available: true, provider };
+}
+
+/**
+ * Verbindet native Health APIs (fordert Berechtigungen an)
+ */
+export async function connectNativeHealth(): Promise<{
+  success: boolean;
+  provider: WearableProvider | null;
+  error?: string;
+}> {
+  const availability = await checkNativeHealthAvailable();
+  
+  if (!availability.available || !availability.provider) {
+    return { 
+      success: false, 
+      provider: null, 
+      error: availability.reason || 'Health APIs nicht verfügbar' 
+    };
+  }
+  
+  const permissions = await requestHealthPermissions();
+  
+  if (!permissions.granted) {
+    return { 
+      success: false, 
+      provider: null, 
+      error: 'Berechtigungen abgelehnt' 
+    };
+  }
+  
+  // Speichere Verbindung in localStorage
+  if (typeof window !== 'undefined') {
+    const connections = JSON.parse(localStorage.getItem('native_health_connections') || '{}');
+    connections[availability.provider] = true;
+    connections.connectedAt = new Date().toISOString();
+    localStorage.setItem('native_health_connections', JSON.stringify(connections));
+  }
+  
+  return { success: true, provider: availability.provider };
+}
 
 /**
  * Prüft ob ein Provider verbunden ist
@@ -25,6 +90,18 @@ export async function isProviderConnected(
   userId: string,
   provider: WearableProvider
 ): Promise<boolean> {
+  // Native Health Check
+  if (provider === 'healthconnect' || provider === 'apple_health') {
+    if (typeof window !== 'undefined') {
+      const connections = localStorage.getItem('native_health_connections');
+      if (connections) {
+        const parsed = JSON.parse(connections);
+        return parsed[provider] === true;
+      }
+    }
+    return false;
+  }
+  
   if (USE_MOCK_DATA) {
     // Im Mock-Modus: Prüfe localStorage
     if (typeof window !== 'undefined') {
@@ -151,6 +228,19 @@ export async function getHealthData(
   days: number = 14,
   provider?: WearableProvider
 ): Promise<NormalizedHealthData[]> {
+  // Native Health APIs (Health Connect / HealthKit)
+  if (isNativePlatform()) {
+    const nativeConnected = await isNativeHealthConnected();
+    if (nativeConnected) {
+      try {
+        return await syncAllHealthData(days);
+      } catch (e) {
+        console.error('Native Health Sync fehlgeschlagen:', e);
+        // Fallback auf gespeicherte Daten
+      }
+    }
+  }
+  
   if (USE_MOCK_DATA) {
     // Hole Supplements aus localStorage für realistische Korrelationen
     const supplements: string[] = [];
@@ -193,6 +283,19 @@ export async function getHealthData(
     activeMinutes: d.active_minutes,
     spo2Average: d.spo2_average,
   }));
+}
+
+/**
+ * Prüft ob native Health APIs verbunden sind
+ */
+async function isNativeHealthConnected(): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  
+  const connections = localStorage.getItem('native_health_connections');
+  if (!connections) return false;
+  
+  const parsed = JSON.parse(connections);
+  return parsed.healthconnect === true || parsed.apple_health === true;
 }
 
 /**

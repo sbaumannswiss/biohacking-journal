@@ -126,7 +126,7 @@ export interface GarminStressData {
 // Normalisierte Daten für unsere App
 export interface NormalizedHealthData {
   date: string;
-  source: 'garmin';
+  source: 'garmin' | 'healthconnect' | 'apple_health';
   
   // Schlaf
   sleepScore: number | null; // 0-10 (normalisiert von 0-100)
@@ -161,7 +161,7 @@ export interface NormalizedHealthData {
 export interface WearableConnection {
   id: string;
   user_id: string;
-  provider: 'garmin' | 'whoop' | 'oura' | 'apple' | 'samsung';
+  provider: 'garmin' | 'whoop' | 'oura' | 'apple' | 'samsung' | 'healthconnect' | 'apple_health';
   access_token: string;
   access_token_secret?: string; // Für OAuth 1.0a (Garmin)
   refresh_token?: string;

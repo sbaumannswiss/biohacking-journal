@@ -10,40 +10,46 @@ import { useAnonymousUser } from '@/hooks/useAnonymousUser';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useHelix } from '@/components/coach';
+import { useTranslations } from 'next-intl';
 
-// Whoop-Style Fragen nach Kategorien
-const JOURNAL_QUESTIONS = {
-    'SCHLAF & RECOVERY': [
-        { id: 'slept_well', question: 'Gut geschlafen?', positive: true },
-        { id: 'slept_through', question: 'Durchgeschlafen?', positive: true },
-        { id: 'woke_rested', question: 'Ausgeruht aufgewacht?', positive: true },
+// Question IDs and categories - questions are translated via i18n
+const JOURNAL_QUESTION_STRUCTURE = {
+    'sleepRecovery': [
+        { id: 'slept_well', positive: true },
+        { id: 'slept_through', positive: true },
+        { id: 'woke_rested', positive: true },
     ],
-    'LIFESTYLE': [
-        { id: 'training', question: 'Training absolviert?', positive: true },
-        { id: 'alcohol', question: 'Alkohol konsumiert?', positive: false },
-        { id: 'caffeine_late', question: 'Koffein nach 14 Uhr?', positive: false },
-        { id: 'morning_sun', question: 'Morgensonne bekommen?', positive: true },
-        { id: 'screen_before_bed', question: 'Bildschirm vor dem Schlafen?', positive: false },
+    'lifestyle': [
+        { id: 'training', positive: true },
+        { id: 'alcohol', positive: false },
+        { id: 'caffeine_late', positive: false },
+        { id: 'morning_sun', positive: true },
+        { id: 'screen_before_bed', positive: false },
     ],
-    'MENTAL': [
-        { id: 'stressed', question: 'Gestresst gefühlt?', positive: false },
-        { id: 'focused', question: 'Fokussiert gearbeitet?', positive: true },
-        { id: 'good_mood', question: 'Gute Stimmung?', positive: true },
-        { id: 'anxious', question: 'Ängstlich/unruhig?', positive: false },
+    'mental': [
+        { id: 'stressed', positive: false },
+        { id: 'focused', positive: true },
+        { id: 'good_mood', positive: true },
+        { id: 'anxious', positive: false },
     ],
-    'KÖRPER': [
-        { id: 'digestion_ok', question: 'Verdauung okay?', positive: true },
-        { id: 'hydrated', question: 'Genug getrunken?', positive: true },
-        { id: 'sick', question: 'Krank/unwohl?', positive: false },
+    'body': [
+        { id: 'digestion_ok', positive: true },
+        { id: 'hydrated', positive: true },
+        { id: 'sick', positive: false },
     ],
-};
+} as const;
 
-const ALL_QUESTIONS = Object.values(JOURNAL_QUESTIONS).flat();
+type QuestionId = typeof JOURNAL_QUESTION_STRUCTURE[keyof typeof JOURNAL_QUESTION_STRUCTURE][number]['id'];
+type CategoryKey = keyof typeof JOURNAL_QUESTION_STRUCTURE;
+
+const ALL_QUESTION_IDS = Object.values(JOURNAL_QUESTION_STRUCTURE).flat();
 
 
 export default function JournalPage() {
     const { userId, isLoading: userLoading } = useAnonymousUser();
     const { triggerMessage } = useHelix();
+    const t = useTranslations('journal');
+    const tCommon = useTranslations('common');
     
     // State für bereits geloggt
     const [hasLoggedToday, setHasLoggedToday] = useState(false);
@@ -97,7 +103,7 @@ export default function JournalPage() {
         let positive = 0;
         let negative = 0;
         
-        ALL_QUESTIONS.forEach(q => {
+        ALL_QUESTION_IDS.forEach(q => {
             const answer = answers[q.id];
             if (answer === null || answer === undefined) return;
             
@@ -287,9 +293,9 @@ export default function JournalPage() {
         return (
             <div className="flex flex-col min-h-screen pb-28">
                 <header className="px-6 pt-8 pb-4">
-                    <h1 className="text-2xl font-bold text-foreground">Journal</h1>
+                    <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
                     <p className="text-sm text-muted-foreground">
-                        Gestern & letzte Nacht
+                        {t('subtitle')}
                     </p>
                 </header>
 
@@ -319,7 +325,7 @@ export default function JournalPage() {
                             </div>
                             
                             <h2 className="text-xl font-bold text-foreground mb-1">
-                                Bereits geloggt
+                                {t('alreadyLogged')}
                             </h2>
                         </motion.div>
                     </motion.section>
@@ -333,7 +339,7 @@ export default function JournalPage() {
                     >
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                                Dein Score Heute
+                                {t('yourScoreToday')}
                             </h3>
                             {trend && (
                                 <div className={cn(
@@ -345,7 +351,7 @@ export default function JournalPage() {
                                     {trend.direction === 'up' && <TrendingUp size={12} />}
                                     {trend.direction === 'down' && <TrendingDown size={12} />}
                                     {trend.direction === 'stable' && <Minus size={12} />}
-                                    {trend.diff > 0 ? '+' : ''}{trend.diff} vs gestern
+                                    {trend.diff > 0 ? '+' : ''}{trend.diff} {t('vsYesterday')}
                                 </div>
                             )}
                         </div>
@@ -360,7 +366,7 @@ export default function JournalPage() {
                             >
                                 {totalScore}%
                             </motion.div>
-                            <div className="text-xs text-muted-foreground mt-1">Bio-Performance</div>
+                            <div className="text-xs text-muted-foreground mt-1">{t('bioPerformance')}</div>
                         </div>
 
                         {/* Metrics Grid */}
@@ -408,8 +414,8 @@ export default function JournalPage() {
                                     <Clock size={18} className="text-primary" />
                                 </div>
                                 <div>
-                                    <div className="text-sm font-medium text-foreground">Nächster Log</div>
-                                    <div className="text-xs text-muted-foreground">in {timeUntilMidnight}</div>
+                                    <div className="text-sm font-medium text-foreground">{t('nextLog')}</div>
+                                    <div className="text-xs text-muted-foreground">{t('inTime', { time: timeUntilMidnight })}</div>
                                 </div>
                             </div>
                             
@@ -418,7 +424,7 @@ export default function JournalPage() {
                                 className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-foreground hover:bg-white/10 transition-colors"
                             >
                                 <Pencil size={14} />
-                                Bearbeiten
+                                {tCommon('edit')}
                             </button>
                         </div>
                     </motion.section>
@@ -431,7 +437,7 @@ export default function JournalPage() {
                         className="text-center py-4"
                     >
                         <p className="text-sm text-muted-foreground">
-                            Bis morgen
+                            {t('untilTomorrow')}
                         </p>
                     </motion.div>
                 </main>
@@ -450,10 +456,10 @@ export default function JournalPage() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-foreground">
-                            {isEditMode ? 'Journal bearbeiten' : 'Journal'}
+                            {isEditMode ? t('editTitle') : t('title')}
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Gestern & letzte Nacht auf heute
+                            {isEditMode ? t('subtitleEdit') : t('subtitle')}
                         </p>
                     </div>
                     {isEditMode && (
@@ -487,7 +493,7 @@ export default function JournalPage() {
                         aria-label="Metriken anzeigen/verbergen"
                     >
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                            Metriken
+                            {t('metrics')}
                         </h3>
                         <ChevronDown size={16} className={cn("text-muted-foreground transition-transform", showSliders && "rotate-180")} />
                     </button>
@@ -500,20 +506,20 @@ export default function JournalPage() {
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                             >
-                                <MetricSlider label="Schlafqualität" value={sleep} onChange={setSleep} icon={<Moon size={18} />} />
-                                <MetricSlider label="Energie" value={energy} onChange={setEnergy} icon={<Zap size={18} />} />
-                                <MetricSlider label="Fokus" value={focus} onChange={setFocus} icon={<Target size={18} />} />
-                                <MetricSlider label="Stimmung" value={mood} onChange={setMood} icon={<Sparkles size={18} />} />
+                                <MetricSlider label={t('sleepQuality')} value={sleep} onChange={setSleep} icon={<Moon size={18} />} />
+                                <MetricSlider label={t('energy')} value={energy} onChange={setEnergy} icon={<Zap size={18} />} />
+                                <MetricSlider label={t('focus')} value={focus} onChange={setFocus} icon={<Target size={18} />} />
+                                <MetricSlider label={t('mood')} value={mood} onChange={setMood} icon={<Sparkles size={18} />} />
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </section>
 
                 {/* Whoop-Style Questions */}
-                {Object.entries(JOURNAL_QUESTIONS).map(([category, questions]) => (
-                    <section key={category} className="glass-panel rounded-2xl p-5 border border-white/5">
+                {(Object.entries(JOURNAL_QUESTION_STRUCTURE) as [CategoryKey, typeof JOURNAL_QUESTION_STRUCTURE[CategoryKey]][]).map(([categoryKey, questions]) => (
+                    <section key={categoryKey} className="glass-panel rounded-2xl p-5 border border-white/5">
                         <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
-                            {category}
+                            {t(`categories.${categoryKey}`)}
                         </h3>
                         <div className="space-y-3">
                             {questions.map((q) => (
@@ -524,7 +530,7 @@ export default function JournalPage() {
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.05 }}
                                 >
-                                    <span className="text-sm text-foreground">{q.question}</span>
+                                    <span className="text-sm text-foreground">{t(`questions.${q.id}`)}</span>
                                     <div className="flex gap-2">
                                         <motion.button
                                             type="button"
@@ -532,7 +538,7 @@ export default function JournalPage() {
                                                 setAnswer(q.id, false);
                                                 if (navigator.vibrate) navigator.vibrate(15);
                                             }}
-                                            aria-label={`${q.question} - Nein`}
+                                            aria-label={`${t(`questions.${q.id}`)} - No`}
                                             aria-pressed={answers[q.id] === false}
                                             className={cn(
                                                 "w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative overflow-hidden",
@@ -554,7 +560,7 @@ export default function JournalPage() {
                                                 setAnswer(q.id, true);
                                                 if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
                                             }}
-                                            aria-label={`${q.question} - Ja`}
+                                            aria-label={`${t(`questions.${q.id}`)} - Yes`}
                                             aria-pressed={answers[q.id] === true}
                                             className={cn(
                                                 "w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative overflow-hidden",
@@ -590,17 +596,17 @@ export default function JournalPage() {
                 {/* Notes Section */}
                 <section className="glass-panel rounded-2xl p-5 border border-white/5">
                     <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">
-                        Notizen (optional)
+                        {t('notes')}
                     </h3>
                     <textarea
                         value={notes}
                         onChange={(e) => setNotes(e.target.value.slice(0, 280))}
-                        placeholder="Besondere Vorkommnisse..."
-                        aria-label="Notizen"
+                        placeholder={t('notesPlaceholder')}
+                        aria-label={t('notes')}
                         className="w-full h-20 p-3 bg-white/5 border border-white/10 rounded-xl text-foreground text-sm placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/50 transition-all"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                        <span>{answeredCount}/{ALL_QUESTIONS.length} beantwortet</span>
+                        <span>{answeredCount}/{ALL_QUESTION_IDS.length} {t('answered')}</span>
                         <span>{notes.length}/280</span>
                     </div>
                 </section>
@@ -617,11 +623,11 @@ export default function JournalPage() {
                             >
                                 <motion.span className="flex items-center gap-1.5 text-primary" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 0.3 }} key={`pos-${positive}`}>
                                     <Check size={16} strokeWidth={3} aria-hidden="true" />
-                                    {positive} positiv
+                                    {positive} {t('positive')}
                                 </motion.span>
                                 <motion.span className="flex items-center gap-1.5 text-muted-foreground" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 0.3 }} key={`neg-${negative}`}>
                                     <X size={16} strokeWidth={3} aria-hidden="true" />
-                                    {negative} negativ
+                                    {negative} {t('negative')}
                                 </motion.span>
                             </motion.div>
                         )}
@@ -649,19 +655,19 @@ export default function JournalPage() {
                                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
                                         <Save size={20} aria-hidden="true" />
                                     </motion.div>
-                                    <span>Speichern...</span>
+                                    <span>{t('saving')}</span>
                                 </motion.div>
                             ) : saved ? (
                                 <motion.div key="saved" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} className="flex items-center gap-2">
                                     <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ duration: 0.4 }}>
                                         <Check size={24} strokeWidth={3} aria-hidden="true" />
                                     </motion.div>
-                                    <span>Gespeichert!</span>
+                                    <span>{t('saved')}</span>
                                 </motion.div>
                             ) : (
                                 <motion.div key="save" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2">
                                     <Save size={20} aria-hidden="true" />
-                                    <span>{isEditMode ? 'Änderungen speichern' : 'Eintrag speichern'}</span>
+                                    <span>{isEditMode ? t('saveChanges') : t('saveEntry')}</span>
                                 </motion.div>
                             )}
                         </AnimatePresence>

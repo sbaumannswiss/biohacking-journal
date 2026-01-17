@@ -15,12 +15,15 @@ import { useHelix } from '@/components/coach';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DosageModal } from '@/components/ui/DosageModal';
 import { ScanModal } from '@/components/ui/ScanModal';
+import { useTranslations } from 'next-intl';
 
 function LibraryContent() {
     const { userId } = useAnonymousUser();
     const { triggerMessage } = useHelix();
     const searchParams = useSearchParams();
     const highlightId = searchParams?.get('highlight') || null;
+    const t = useTranslations('library');
+    const tCommon = useTranslations('common');
     
     const [search, setSearch] = useState('');
     const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -301,7 +304,7 @@ function LibraryContent() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-3xl font-black tracking-tighter text-white"
                     >
-                        BIO<span className="text-primary">LAB</span>
+                        {t('title').split('LAB')[0]}<span className="text-primary">LAB</span>
                     </motion.h1>
                     <motion.p 
                         initial={{ opacity: 0 }}
@@ -310,7 +313,7 @@ function LibraryContent() {
                         className="text-primary/60 font-mono text-[10px] uppercase tracking-[0.2em] mt-1 flex items-center gap-1.5"
                     >
                         <Sparkles size={10} />
-                        {filteredSupplements.length} Supplements
+                        {t('subtitle', { count: filteredSupplements.length })}
                     </motion.p>
                 </div>
 
@@ -324,7 +327,7 @@ function LibraryContent() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors" size={16} />
                     <input
                         type="text"
-                        placeholder="Search supplements..."
+                        placeholder={t('searchPlaceholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-14 py-3.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all"
@@ -333,7 +336,7 @@ function LibraryContent() {
                     <button
                         onClick={() => setShowScanModal(true)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-colors"
-                        title="Supplement scannen"
+                        title={t('scanSupplement')}
                     >
                         <Camera size={16} />
                     </button>
@@ -366,7 +369,7 @@ function LibraryContent() {
                                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                             )}
                         >
-                            Alle
+                            {t('all')}
                         </button>
                         
                         {/* Typ-Kategorien (Vitamine, Aminosäuren, etc.) */}
@@ -470,11 +473,11 @@ function LibraryContent() {
                                     <AlertTriangle size={32} />
                                 </div>
                                 <h3 className="text-xl font-bold text-foreground mb-2">
-                                    Aus Stack entfernen?
+                                    {t('removeFromStack')}
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
                                     <span className="text-2xl mr-2">{selectedForRemove.emoji}</span>
-                                    {selectedForRemove.name} wird aus deinem Stack entfernt.
+                                    {t('removeConfirmText', { name: selectedForRemove.name })}
                                 </p>
                             </div>
 
@@ -483,7 +486,7 @@ function LibraryContent() {
                                     onClick={() => setShowConfirmRemove(false)}
                                     className="flex-1 py-3 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors"
                                 >
-                                    Abbrechen
+                                    {tCommon('cancel')}
                                 </button>
                                 <button
                                     onClick={handleConfirmRemove}
@@ -495,7 +498,7 @@ function LibraryContent() {
                                     ) : (
                                         <Trash2 size={18} />
                                     )}
-                                    Entfernen
+                                    {tCommon('remove')}
                                 </button>
                             </div>
                         </motion.div>
@@ -526,14 +529,14 @@ function LibraryContent() {
                                     <Trash2 size={32} />
                                 </div>
                                 <h3 className="text-xl font-bold text-foreground mb-2">
-                                    Aus Library löschen?
+                                    {t('deleteFromLibrary')}
                                 </h3>
                                 <p className="text-sm text-muted-foreground mb-2">
                                     <span className="text-2xl mr-2">{selectedForDelete.emoji}</span>
                                     {selectedForDelete.name}
                                 </p>
                                 <p className="text-xs text-red-400/80">
-                                    Dieses Produkt wird permanent gelöscht und kann nicht wiederhergestellt werden.
+                                    {t('deleteConfirmText')}
                                 </p>
                             </div>
 
@@ -542,7 +545,7 @@ function LibraryContent() {
                                     onClick={() => setShowConfirmDelete(false)}
                                     className="flex-1 py-3 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors"
                                 >
-                                    Abbrechen
+                                    {tCommon('cancel')}
                                 </button>
                                 <button
                                     onClick={handleConfirmDelete}
@@ -554,7 +557,7 @@ function LibraryContent() {
                                     ) : (
                                         <Trash2 size={18} />
                                     )}
-                                    Löschen
+                                    {tCommon('delete')}
                                 </button>
                             </div>
                         </motion.div>

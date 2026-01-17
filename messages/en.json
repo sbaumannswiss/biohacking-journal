@@ -1,0 +1,478 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "remove": "Remove",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "done": "Done",
+    "back": "Back",
+    "retry": "Try Again",
+    "confirm": "Confirm",
+    "error": "Error",
+    "success": "Success",
+    "comingSoon": "{feature} coming soon!",
+    "days": "days",
+    "day": "day"
+  },
+  "nav": {
+    "home": "Home",
+    "journal": "Journal",
+    "workout": "Workout",
+    "library": "Library",
+    "stats": "Stats",
+    "profile": "Profile"
+  },
+  "home": {
+    "greeting": {
+      "morning": "Good Morning",
+      "noon": "Good Afternoon",
+      "evening": "Good Evening",
+      "bedtime": "Good Night"
+    },
+    "biohacker": "Biohacker",
+    "timeSlots": {
+      "morning": "Morning",
+      "noon": "Noon",
+      "evening": "Evening",
+      "bedtime": "Bedtime"
+    },
+    "stack": "{time} Stack",
+    "stackNow": "(now)",
+    "completeStack": "Complete Stack",
+    "stackComplete": "Stack Complete!",
+    "emptyStackTitle": "Your stack is empty",
+    "emptyStackSubtitle": "Add supplements from the Bio-Lab",
+    "openBioLab": "Open Bio-Lab",
+    "noSupplementsForTime": "No supplements for {time}.",
+    "hydrateAndBreathe": "Hydrate and breathe.",
+    "switchTime": "Switch time above.",
+    "scanSupplement": "Scan supplement",
+    "addSupplement": "Add supplement to Library",
+    "quests": {
+      "title": "Quests",
+      "subtitle": "Daily challenges",
+      "active": "Active",
+      "catalog": "Catalog",
+      "resetInfo": "Quests reset daily at midnight",
+      "morningRoutine": "Morning Routine",
+      "morningRoutineDesc": "Take all morning supplements",
+      "journalEntry": "Journal Entry",
+      "journalEntryDesc": "Log your daily metrics",
+      "fullStackDay": "Full Stack Day",
+      "fullStackDayDesc": "Check all supplements for today",
+      "streakKeeper": "Streak Keeper",
+      "streakKeeperDesc": "Keep your {streak}-day streak going"
+    },
+    "streak": {
+      "title": "Streak",
+      "daysStreak": "{count} Day Streak"
+    }
+  },
+  "journal": {
+    "title": "Journal",
+    "editTitle": "Edit Journal",
+    "subtitle": "Yesterday & last night",
+    "subtitleEdit": "Yesterday & last night until today",
+    "reflectionHint": "Reflect: How was your <strong>yesterday</strong> and your <strong>night until today</strong>?",
+    "alreadyLogged": "Already logged",
+    "yourScoreToday": "Your Score Today",
+    "bioPerformance": "Bio-Performance",
+    "nextLog": "Next Log",
+    "inTime": "in {time}",
+    "metrics": "Metrics",
+    "sleepQuality": "Sleep Quality",
+    "energy": "Energy",
+    "focus": "Focus",
+    "mood": "Mood",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Special occurrences...",
+    "answered": "answered",
+    "positive": "positive",
+    "negative": "negative",
+    "saveEntry": "Save Entry",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "vsYesterday": "vs yesterday",
+    "untilTomorrow": "Until tomorrow",
+    "categories": {
+      "sleepRecovery": "SLEEP & RECOVERY",
+      "lifestyle": "LIFESTYLE",
+      "mental": "MENTAL",
+      "body": "BODY"
+    },
+    "questions": {
+      "slept_well": "Slept well?",
+      "slept_through": "Slept through?",
+      "woke_rested": "Woke up rested?",
+      "training": "Completed training?",
+      "alcohol": "Consumed alcohol?",
+      "caffeine_late": "Caffeine after 2 PM?",
+      "morning_sun": "Got morning sun?",
+      "screen_before_bed": "Screen before bed?",
+      "stressed": "Felt stressed?",
+      "focused": "Worked focused?",
+      "good_mood": "Good mood?",
+      "anxious": "Felt anxious?",
+      "digestion_ok": "Digestion okay?",
+      "hydrated": "Drank enough?",
+      "sick": "Sick/unwell?"
+    }
+  },
+  "library": {
+    "title": "BIOLAB",
+    "subtitle": "{count} Supplements",
+    "searchPlaceholder": "Search supplements...",
+    "scanSupplement": "Scan supplement",
+    "all": "All",
+    "categories": {
+      "vitamins": "Vitamins",
+      "aminoAcids": "Amino Acids",
+      "minerals": "Minerals",
+      "adaptogens": "Adaptogens",
+      "nootropics": "Nootropics",
+      "omegaFats": "Omega & Fats",
+      "proteins": "Proteins",
+      "antioxidants": "Antioxidants",
+      "sleep": "Sleep",
+      "performance": "Performance"
+    },
+    "removeFromStack": "Remove from Stack?",
+    "removeConfirmText": "{name} will be removed from your stack.",
+    "deleteFromLibrary": "Delete from Library?",
+    "deleteConfirmText": "This product will be permanently deleted and cannot be restored.",
+    "addedToStack": "{name} added to {stackName}"
+  },
+  "profile": {
+    "title": "Biohacker",
+    "level": "Level {level}",
+    "dayStreak": "Day Streak",
+    "adherence": "Adherence",
+    "totalXP": "Total XP",
+    "wearables": "Wearables",
+    "noWearablesConnected": "None connected",
+    "connected": "{count} connected",
+    "wearableDataHint": "Find your wearable data under",
+    "accountSettings": "Account Settings",
+    "privacyData": "Privacy & Data",
+    "achievements": "Achievements",
+    "logOut": "Log Out",
+    "userId": "User ID",
+    "language": "Language",
+    "selectLanguage": "Select Language"
+  },
+  "stats": {
+    "title": "Stats",
+    "subtitle": "Your Supplement Analysis",
+    "timeRanges": {
+      "7d": "7D",
+      "30d": "30D",
+      "90d": "90D",
+      "all": "All"
+    },
+    "adherence": "Adherence",
+    "longestStreak": "Longest Streak",
+    "supplements": "Supplements",
+    "wearableData": "Wearable Data",
+    "connectWearable": "Connect Wearable",
+    "connectWearableHint": "Connect Garmin, Whoop, or Oura in",
+    "forDeeperInsights": "for deeper insights",
+    "chart": "Progress",
+    "filter": "Filter",
+    "wellbeing": "Wellbeing",
+    "sleep": "Sleep",
+    "energy": "Energy",
+    "focus": "Focus",
+    "noDataForPeriod": "No data for this period",
+    "aiAnalysis": {
+      "title": "Helix Analysis",
+      "collecting": "Collecting Data",
+      "daysForSignificance": "Still {days} days for statistical significance",
+      "aiGenerated": "AI-generated summary",
+      "analyzing": "Analyzing your data...",
+      "collectMore": "Collect more data for personalized analysis...",
+      "progressToAnalysis": "Progress to Analysis",
+      "generateNew": "Generate new analysis"
+    },
+    "supplementDetails": "Supplement Details",
+    "checkIns": "Check-ins",
+    "daysStreak": "{count} day streak",
+    "noCheckIns": "No check-ins in this period",
+    "badges": {
+      "title": "Badges",
+      "unlocked": "Unlocked (tap for details)",
+      "inProgress": "In Progress (tap for details)",
+      "challenge": "Challenge",
+      "progress": "Progress",
+      "unlockedStatus": "Unlocked",
+      "notUnlocked": "Not yet unlocked",
+      "categories": {
+        "streak": "Streak",
+        "milestone": "Milestone",
+        "consistency": "Consistency",
+        "special": "Special",
+        "quest": "Quest"
+      },
+      "requirements": {
+        "streak": "{count} days in a row taking supplements",
+        "milestone": "Reach {count} check-ins",
+        "consistency": "{count}% adherence in 30 days",
+        "stack": "Have {count} supplements in stack",
+        "journal": "Make {count} journal entries"
+      }
+    }
+  },
+  "workout": {
+    "title": "Workout",
+    "subtitle": "Your training today",
+    "noActiveWorkout": "No active workout",
+    "startWorkout": "Start Workout",
+    "endWorkout": "End Workout",
+    "workoutActive": "Workout Active",
+    "workoutTypes": {
+      "strength": "Strength",
+      "cardio": "Cardio",
+      "hiit": "HIIT",
+      "yoga": "Yoga",
+      "running": "Running",
+      "cycling": "Cycling",
+      "swimming": "Swimming",
+      "other": "Other"
+    },
+    "timing": {
+      "now": "Now",
+      "in30min": "In 30 Min",
+      "in1h": "In 1 Hour",
+      "custom": "Custom Time"
+    },
+    "duration": {
+      "title": "Estimated Duration",
+      "30min": "30 min",
+      "45min": "45 min",
+      "60min": "60 min",
+      "90min": "90 min"
+    },
+    "phases": {
+      "rest": "Rest",
+      "pre": "Pre-Workout",
+      "intra": "Training",
+      "post": "Post-Workout"
+    },
+    "supplements": {
+      "preWorkout": "Pre-Workout Supplements",
+      "intraWorkout": "Intra-Workout Supplements",
+      "postWorkout": "Post-Workout Supplements",
+      "noSupplements": "No supplements for this phase",
+      "minutesBefore": "{minutes} min before",
+      "minutesAfter": "{minutes} min after",
+      "during": "During training"
+    },
+    "hydration": {
+      "title": "Hydration",
+      "goal": "Goal",
+      "add250ml": "+250ml",
+      "add500ml": "+500ml",
+      "reset": "Reset"
+    },
+    "timer": {
+      "elapsed": "Elapsed",
+      "remaining": "Remaining",
+      "startsIn": "Starts in"
+    }
+  },
+  "dosageModal": {
+    "addToStack": "Add to Stack",
+    "editDosage": "Edit Dosage",
+    "dosage": "Dosage",
+    "amount": "Amount",
+    "default": "Default",
+    "intakeTime": "Intake Time (optional)",
+    "units": {
+      "mg": "mg",
+      "g": "g",
+      "ml": "ml",
+      "iu": "IU",
+      "mcg": "mcg",
+      "capsules": "Capsules",
+      "tablets": "Tablets",
+      "drops": "Drops"
+    }
+  },
+  "scanModal": {
+    "title": "Supplement Scanner",
+    "poweredBy": "Powered by Helix AI",
+    "takePhoto": "Take a photo of your supplement label",
+    "comboRecognized": "Combo products are also recognized.",
+    "analyze": "Analyze",
+    "new": "New",
+    "analyzing": "Helix analyzing...",
+    "patience": "Just a moment...",
+    "saving": "Saving...",
+    "detected": "Detected",
+    "confidence": {
+      "high": "Certain",
+      "medium": "Likely",
+      "low": "Uncertain"
+    },
+    "inLibrary": "Already in your Library!",
+    "notInLibrary": "Not in Library",
+    "canSuggest": "You can suggest it!",
+    "suggest": "Suggest",
+    "inLibraryBtn": "In Library",
+    "comboDetected": "Combo product detected",
+    "ingredientPhotoHint": "To capture ingredients, take a photo of the nutrition table or enter manually.",
+    "photoIngredients": "Photo ingredient amounts",
+    "enterManually": "Enter manually",
+    "addIngredients": "Add ingredients",
+    "ingredientName": "Name (e.g., Vitamin D3)",
+    "ingredientAmount": "Amount",
+    "ingredients": "Ingredients",
+    "activeIngredients": "{count} active ingredients",
+    "whatHappens": "What happens when saving?",
+    "saveInfo": "• Added to your personal Library\n• Submitted to central system for review",
+    "savedAndSubmitted": "Saved & submitted!",
+    "savedInfo": "Added to personal Library and sent to central system."
+  },
+  "helix": {
+    "welcome": [
+      "Hey! I'm Helix, your bio-coach. Together we'll optimize your cellular health.",
+      "Welcome back, Biohacker! Ready for today's dose of optimization?"
+    ],
+    "morningGreeting": [
+      "Good morning! Cortisol peak detected. Perfect time for sunlight and protein.",
+      "Rise and shine! Your adenosine receptors are receptive now. Coffee can wait, sunlight can't!",
+      "Morning! Fun fact: The first 30 minutes after waking are crucial for your daily rhythm."
+    ],
+    "noonGreeting": [
+      "Lunchtime! Your digestive fire burns strongest now. Perfect for the main meal.",
+      "High noon! Your body temperature is highest now - optimal time for demanding tasks."
+    ],
+    "eveningGreeting": [
+      "Evening mode activated! Time to wind down the nervous system. Less blue light, more relaxation.",
+      "Evening approaches. Your body starts producing melatonin precursors. Support it!"
+    ],
+    "bedtimeGreeting": [
+      "Bedtime approaches! The next 8 hours are your biggest biohack tool. Use them wisely.",
+      "Glymphatic system incoming! During sleep, your brain clears 60% more toxins. Treat yourself!"
+    ],
+    "checkIn": [
+      "{supplement} logged! Your future self thanks you.",
+      "Check! {supplement} is in. Consistency beats perfection, always.",
+      "{supplement} recorded. Fun fact: It takes ~66 days for a habit to become automatic.",
+      "{supplement} checked in. Your mitochondria are applauding right now."
+    ],
+    "supplementAdded": [
+      "{supplement} in the stack! Your enzymes will be happy.",
+      "New element unlocked: {supplement}! Good choice.",
+      "{supplement} added! Quality decision. The dose makes the poison - and the benefit."
+    ],
+    "supplementRemoved": [
+      "{supplement} removed. Sometimes less is more. Respect for the conscious decision.",
+      "Stack optimized! {supplement} out. Periodization makes sense for supplements too."
+    ],
+    "streakMilestone": [
+      "{streak} days streak! Your mitochondria are throwing a little ATP party.",
+      "Amazing! {streak} days in a row. Your gene expression is measurably optimizing.",
+      "{streak}-day streak! This is no coincidence anymore, this is identity. You ARE a biohacker."
+    ],
+    "levelUp": [
+      "LEVEL UP! You're now Level {level}! New quests unlocked.",
+      "Level {level} reached! Your cellular competence is rising. Keep it up!"
+    ],
+    "questCompleted": [
+      "Quest completed! +{xp} XP. Your dopamine system celebrates - sustainably.",
+      "Mission Complete! You've proven you're serious about this."
+    ],
+    "questUnlocked": [
+      "New quest available! Your dopamine system is already looking forward to the reward.",
+      "Quest unlocked! Ready for the next challenge?"
+    ],
+    "inactivity": [
+      "Hey, I'm spinning here alone... Your stack is waiting for the daily check-in.",
+      "Small reminder: Consistency > Perfection. Your stack is waiting.",
+      "Your supplements are waiting. A small check-in for big impact?"
+    ],
+    "emptyStack": [
+      "Your stack is still empty! Time to explore the Bio-Lab.",
+      "No supplements in stack? Let's change that! The Bio-Lab awaits."
+    ],
+    "error": [
+      "That didn't work. No worries - even DNA makes replication errors sometimes.",
+      "Small glitch in the system. Even mitochondria need a restart sometimes."
+    ],
+    "firstCheckIn": [
+      "Your first check-in! The journey begins. Every expert was once a beginner.",
+      "First check-in in the book! You just took the most important step: Starting."
+    ],
+    "allDone": [
+      "All done for today! Time to enjoy the fruits. Your body thanks you.",
+      "Stack completed! You gave it your all today. Rest is now the best biohack."
+    ],
+    "journalComplete": [
+      "Journal logged! Self-reflection is the key to optimization.",
+      "Perfect! Your daily log helps me recognize patterns.",
+      "Journal entry saved! Consistency in tracking brings better insights.",
+      "Your bio-logbook grows. The more data, the smarter my recommendations become."
+    ],
+    "journalWelcome": [
+      "Time for self-reflection! How was your day yesterday?",
+      "Your daily check-in makes the difference. Let's go!",
+      "Every data point brings us closer to your optimal protocol."
+    ],
+    "journalEdit": [
+      "Good idea to update the data. Precision matters!",
+      "Adjusting is totally okay – better data = better insights."
+    ],
+    "libraryWelcome": [
+      "Welcome to the BioLab! Here you'll find evidence-based supplements.",
+      "Swipe through the collection – every supplement with evidence level!",
+      "The BioLab awaits you. Which molecule shall it be today?"
+    ],
+    "libraryBrowsing": [
+      "Interesting choice! Check out the evidence and optimal dosage.",
+      "Every supplement has its strengths. Find the right one for your goals!"
+    ],
+    "libraryScan": [
+      "Camera ready! Show me your supplement label.",
+      "I'll analyze the ingredients for you. Hold still!"
+    ],
+    "statsWelcome": [
+      "Your bio-data at a glance. Let's discover patterns!",
+      "Statistics are the mirror of your optimization. What do you see?"
+    ],
+    "statsGoodProgress": [
+      "Strong development! Your curves are pointing up. Keep going!",
+      "The data speaks for itself – you're making real progress!",
+      "Impressive! Your body thanks you for the consistency."
+    ],
+    "statsBadProgress": [
+      "Small dip in the data? No problem – every day is a new chance.",
+      "The curve shows optimization potential. Let's find the levers!"
+    ],
+    "profileWelcome": [
+      "Your bio-profile! Here you can see your journey at a glance.",
+      "Level {level} – you've already achieved quite a bit!"
+    ],
+    "onboardingWelcome": [
+      "Hey! I'm Helix, your personal bio-coach. Let's get started!",
+      "Welcome! Together we'll optimize your cellular health. Ready?"
+    ],
+    "onboardingGoalSelected": [
+      "Good choice! I'll tailor my recommendations accordingly.",
+      "Perfect! Your goal is now my focus."
+    ],
+    "onboardingComplete": [
+      "Setup complete! Your personalized dashboard awaits.",
+      "Ready for optimization! Let's start your first quest."
+    ],
+    "streakCelebration": [
+      "{streak} days streak! That's real dedication. Your cells are celebrating!",
+      "Wow, {streak} days in a row! You're redefining what's possible.",
+      "{streak}-day streak! Science shows: Consistency beats intensity."
+    ]
+  }
+}

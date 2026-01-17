@@ -3,19 +3,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LineChart, User, TrendingUp, FlaskConical } from 'lucide-react';
 import { clsx } from 'clsx';
-import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { HomeIcon, JournalIcon, LibraryIcon, StatsIcon, WorkoutIcon } from '@/components/icons/NavIcons';
 
 export function BottomNav() {
     const pathname = usePathname();
+    const t = useTranslations('nav');
 
     const links = [
-        { href: '/', label: 'Home', icon: Home },
-        { href: '/journal', label: 'Journal', icon: LineChart },
-        { href: '/library', label: 'Library', icon: FlaskConical }, // New dedicated page
-        { href: '/stats', label: 'Stats', icon: TrendingUp }, // Analytics & Tracking
-        { href: '/profile', label: 'Profile', icon: User },
+        { href: '/', labelKey: 'home' as const, icon: HomeIcon },
+        { href: '/journal', labelKey: 'journal' as const, icon: JournalIcon },
+        { href: '/workout', labelKey: 'workout' as const, icon: WorkoutIcon },
+        { href: '/library', labelKey: 'library' as const, icon: LibraryIcon },
+        { href: '/stats', labelKey: 'stats' as const, icon: StatsIcon },
     ];
 
     return (
@@ -31,26 +32,27 @@ export function BottomNav() {
                 {links.map((link) => {
                     const isActive = pathname === link.href;
                     const Icon = link.icon;
+                    const label = t(link.labelKey);
 
                     return (
                         <Link 
                             key={link.href} 
                             href={link.href} 
                             className="flex flex-col items-center justify-center gap-1.5 min-w-[56px] py-2"
-                            aria-label={link.label}
+                            aria-label={label}
                             aria-current={isActive ? 'page' : undefined}
                         >
                             <div className={clsx(
                                 "p-2.5 rounded-xl transition-all duration-300",
                                 isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
                             )}>
-                                <Icon size={28} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
+                                <Icon size={28} aria-hidden="true" />
                             </div>
                             <span className={clsx(
                                 "text-[11px] font-medium transition-colors leading-none",
                                 isActive ? "text-primary" : "text-muted-foreground"
                             )}>
-                                {link.label}
+                                {label}
                             </span>
                         </Link>
                     );

@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { clsx } from 'clsx';
 import { HelixProvider } from '@/components/coach';
 import { DisclaimerOverlay } from '@/components/ui/DisclaimerOverlay';
 import { FloatingChat } from '@/components/agent/FloatingChat';
+import { I18nProvider } from '@/components/i18n';
 
-// Space Grotesk - moderner, technischer Look passend zum Biohacking-Theme
-const spaceGrotesk = Space_Grotesk({ 
+// Plus Jakarta Sans - Premium, modern, cleaner Look
+const plusJakarta = Plus_Jakarta_Sans({ 
   subsets: ["latin"],
-  variable: '--font-space-grotesk'
+  variable: '--font-plus-jakarta'
 });
 
 export const metadata: Metadata = {
@@ -33,22 +34,24 @@ export default function RootLayout({
   return (
     <html lang="de" className="dark" suppressHydrationWarning>
       <body className={clsx(
-        spaceGrotesk.className, 
+        plusJakarta.className, 
         "bg-background text-foreground min-h-screen selection:bg-primary selection:text-primary-foreground"
       )}>
-        <HelixProvider>
-          <DisclaimerOverlay />
-          <div className="relative flex min-h-screen flex-col overflow-hidden sm:mx-auto sm:max-w-md sm:border-x sm:border-border">
-            {/* Background Ambient Glows */}
-            <div className="fixed top-[-10%] left-[-10%] h-[50vh] w-[50vh] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-            <div className="fixed bottom-[-10%] right-[-10%] h-[50vh] w-[50vh] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+        <I18nProvider>
+          <HelixProvider>
+            <DisclaimerOverlay />
+            <div className="relative flex min-h-screen flex-col overflow-hidden sm:mx-auto sm:max-w-md sm:border-x sm:border-border">
+              {/* Background Ambient Glows */}
+              <div className="fixed top-[-10%] left-[-10%] h-[50vh] w-[50vh] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+              <div className="fixed bottom-[-10%] right-[-10%] h-[50vh] w-[50vh] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
-            <main className="flex-1 flex flex-col relative z-10 pb-safe">
-              {children}
-            </main>
-          </div>
-          <FloatingChat />
-        </HelixProvider>
+              <main className="flex-1 flex flex-col relative z-10 pb-safe">
+                {children}
+              </main>
+            </div>
+            <FloatingChat />
+          </HelixProvider>
+        </I18nProvider>
       </body>
     </html>
   );

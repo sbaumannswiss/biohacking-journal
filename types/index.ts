@@ -36,3 +36,58 @@ export type DailyMetric = {
 }
 
 export type TimeOfDay = 'morning' | 'noon' | 'evening' | 'bedtime'
+
+// ============================================
+// WORKOUT TYPES
+// ============================================
+
+export type WorkoutPhase = 'rest' | 'pre' | 'intra' | 'post'
+
+export type WorkoutType = 
+    | 'strength' 
+    | 'cardio' 
+    | 'hiit' 
+    | 'yoga' 
+    | 'running' 
+    | 'cycling' 
+    | 'swimming' 
+    | 'other'
+
+export type WorkoutSource = 'garmin' | 'healthconnect' | 'apple_health' | 'manual'
+
+export interface ScheduledWorkout {
+    id: string
+    userId: string
+    plannedTime: string  // ISO timestamp
+    type: WorkoutType
+    estimatedDuration: number  // minutes
+    confirmed: boolean
+    phase: WorkoutPhase
+}
+
+export interface DetectedWorkout {
+    id: string
+    userId: string
+    startTime: string  // ISO timestamp
+    endTime: string
+    type: WorkoutType
+    durationMinutes: number
+    caloriesBurned?: number
+    avgHeartRate?: number
+    source: WorkoutSource
+}
+
+export interface WorkoutSupplementTiming {
+    phase: WorkoutPhase[]  // Which phases this supplement is relevant for
+    minutesBefore?: number  // For pre-workout: how many minutes before
+    minutesAfter?: number   // For post-workout: how many minutes after
+    reason: string          // Why this timing is optimal
+}
+
+export interface ActiveWorkout {
+    id: string
+    type: WorkoutType
+    startTime: string  // ISO timestamp
+    estimatedDuration: number
+    phase: WorkoutPhase
+}
