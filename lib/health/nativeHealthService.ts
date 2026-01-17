@@ -145,16 +145,23 @@ export async function getStepsData(
   if (!Health) return [];
 
   try {
-    const result = await Health.queryAggregated({
+    const result = await Health.readSamples({
       dataType: 'steps',
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-      bucket: 'day',
+      limit: 1000,
     });
 
-    return (result.data || []).map((item: { startDate: string; value: number }) => ({
-      date: item.startDate.split('T')[0],
-      steps: Math.round(item.value),
+    // Aggregiere Samples nach Tag
+    const dailySteps = new Map<string, number>();
+    for (const sample of result.samples || []) {
+      const date = sample.startDate.split('T')[0];
+      dailySteps.set(date, (dailySteps.get(date) || 0) + sample.value);
+    }
+
+    return Array.from(dailySteps.entries()).map(([date, steps]) => ({
+      date,
+      steps: Math.round(steps),
     }));
   } catch (e) {
     console.error('Fehler beim Laden der Schritte:', e);
@@ -173,32 +180,24 @@ export async function getHeartRateData(
   if (!Health) return [];
 
   try {
-    const [hrResult, restingResult] = await Promise.all([
-      Health.queryAggregated({
-        dataType: 'heartRate',
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        bucket: 'day',
-      }),
-      Health.queryAggregated({
-        dataType: 'restingHeartRate',
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        bucket: 'day',
-      }).catch(() => ({ data: [] })),
-    ]);
+    const hrResult = await Health.readSamples({
+      dataType: 'heartRate',
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      limit: 1000,
+    });
 
-    const restingMap = new Map(
-      (restingResult.data || []).map((item: { startDate: string; value: number }) => [
-        item.startDate.split('T')[0],
-        item.value,
-      ])
-    );
+    // Aggregiere nach Tag (Durchschnitt berechnen)
+    const dailyHR = new Map<string, { sum: number; count: number }>();
+    for (const sample of hrResult.samples || []) {
+      const date = sample.startDate.split('T')[0];
+      const existing = dailyHR.get(date) || { sum: 0, count: 0 };
+      dailyHR.set(date, { sum: existing.sum + sample.value, count: existing.count + 1 });
+    }
 
-    return (hrResult.data || []).map((item: { startDate: string; value: number }) => ({
-      date: item.startDate.split('T')[0],
-      avgHeartRate: Math.round(item.value),
-      restingHeartRate: restingMap.get(item.startDate.split('T')[0]) as number | undefined,
+    return Array.from(dailyHR.entries()).map(([date, data]) => ({
+      date,
+      avgHeartRate: Math.round(data.sum / data.count),
     }));
   } catch (e) {
     console.error('Fehler beim Laden der Herzfrequenz:', e);
@@ -218,25 +217,10 @@ export async function getSleepData(
   deepSleepMinutes?: number;
   remSleepMinutes?: number;
 }[]> {
-  const Health = await getHealthPlugin();
-  if (!Health) return [];
-
-  try {
-    const result = await Health.queryAggregated({
-      dataType: 'sleepAnalysis',
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      bucket: 'day',
-    });
-
-    return (result.data || []).map((item: { startDate: string; value: number }) => ({
-      date: item.startDate.split('T')[0],
-      sleepDurationHours: Math.round((item.value / 60) * 10) / 10, // Minuten zu Stunden
-    }));
-  } catch (e) {
-    console.error('Fehler beim Laden der Schlafdaten:', e);
-    return [];
-  }
+  // Schlaf-Daten werden über Wearable-Integrationen (Garmin, Oura, etc.) geladen
+  // Health Connect/HealthKit Sleep-Analyse ist nicht im verwendeten Plugin verfügbar
+  console.log('getSleepData: Verwende Wearable-Integration für Schlafdaten', startDate, endDate);
+  return [];
 }
 
 /**
@@ -246,25 +230,10 @@ export async function getHRVData(
   startDate: Date,
   endDate: Date
 ): Promise<{ date: string; hrvAverage: number }[]> {
-  const Health = await getHealthPlugin();
-  if (!Health) return [];
-
-  try {
-    const result = await Health.queryAggregated({
-      dataType: 'heartRateVariability',
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      bucket: 'day',
-    });
-
-    return (result.data || []).map((item: { startDate: string; value: number }) => ({
-      date: item.startDate.split('T')[0],
-      hrvAverage: Math.round(item.value),
-    }));
-  } catch (e) {
-    console.error('Fehler beim Laden der HRV-Daten:', e);
-    return [];
-  }
+  // HRV-Daten werden über Wearable-Integrationen (Garmin, Oura, etc.) geladen
+  // Health Connect/HealthKit HRV ist nicht im verwendeten Plugin verfügbar
+  console.log('getHRVData: Verwende Wearable-Integration für HRV-Daten', startDate, endDate);
+  return [];
 }
 
 /**
@@ -274,25 +243,10 @@ export async function getSpO2Data(
   startDate: Date,
   endDate: Date
 ): Promise<{ date: string; spo2Average: number }[]> {
-  const Health = await getHealthPlugin();
-  if (!Health) return [];
-
-  try {
-    const result = await Health.queryAggregated({
-      dataType: 'oxygenSaturation',
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      bucket: 'day',
-    });
-
-    return (result.data || []).map((item: { startDate: string; value: number }) => ({
-      date: item.startDate.split('T')[0],
-      spo2Average: Math.round(item.value * 100), // 0-1 zu Prozent
-    }));
-  } catch (e) {
-    console.error('Fehler beim Laden der SpO2-Daten:', e);
-    return [];
-  }
+  // SpO2-Daten werden über Wearable-Integrationen (Garmin, Oura, etc.) geladen
+  // Health Connect/HealthKit SpO2 ist nicht im verwendeten Plugin verfügbar
+  console.log('getSpO2Data: Verwende Wearable-Integration für SpO2-Daten', startDate, endDate);
+  return [];
 }
 
 /**
