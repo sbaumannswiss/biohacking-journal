@@ -113,15 +113,41 @@ export interface LifestylePattern {
 export interface SupplementWarning {
   supplementId: string;
   supplementName: string;
-  type: 'interaction' | 'timing' | 'dosage' | 'contraindication';
+  type: 'interaction' | 'timing' | 'dosage' | 'contraindication' | 'medication';
   severity: 'info' | 'warning' | 'critical';
   message: string;
   affectedSupplements?: string[];
 }
 
+// Chronotyp
+export type Chronotype = 'early' | 'normal' | 'late' | 'irregular';
+
+// Aktivitätslevel
+export type ActivityLevel = 'sedentary' | 'moderate' | 'active' | 'athlete';
+
+// Koffein-Konsum
+export type CaffeineLevel = 'none' | 'low' | 'moderate' | 'high';
+
+// User-Profil aus Onboarding
+export interface UserProfile {
+  name?: string;
+  ageGroup?: string;
+  gender?: string;
+  weight?: string;
+  chronotype?: Chronotype;
+  activityLevel?: ActivityLevel;
+  caffeineLevel?: CaffeineLevel;
+  dietType?: string;
+  allergies?: string[];
+  medications?: string[];
+  goals?: string[];
+  wearables?: string[];
+}
+
 // User-Analyse-Kontext
 export interface UserAnalysisContext {
   userId: string;
+  profile?: UserProfile;
   journalHistory: JournalEntry[];
   checkInHistory: CheckInData[];
   currentStack: {

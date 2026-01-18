@@ -37,10 +37,6 @@ export function FloatingChat() {
 
   // Hide on onboarding page
   const isOnboarding = pathname === '/onboarding';
-  
-  if (isOnboarding) {
-    return null;
-  }
 
   // DNA Helix animation speed based on mood
   const helixSpeed = helixMood === 'excited' ? 1.5 : 
@@ -77,6 +73,11 @@ export function FloatingChat() {
       }]);
     }
   }, [isOpen, messages.length]);
+
+  // Hide on onboarding page (after all hooks)
+  if (isOnboarding) {
+    return null;
+  }
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading || !userId) return;

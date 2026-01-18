@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useAnonymousUser } from '@/hooks/useAnonymousUser';
 import { getDailyStats, getSupplementStats, DailyStats, SupplementStats, getUserStreak, getUserStack, getMetricsHistory, getQuestStats } from '@/lib/supabaseService';
@@ -43,6 +44,7 @@ const METRIC_COLORS = {
 export default function StatsPage() {
     const { userId } = useAnonymousUser();
     const { triggerMessage } = useHelix();
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [selectedRange, setSelectedRange] = useState(30);
     const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
@@ -356,19 +358,25 @@ export default function StatsPage() {
 
                     {/* Wearable Hinweis wenn nicht verbunden */}
                     {!hasWearableConnection && (
-                        <div className="glass-panel rounded-2xl p-4 border border-dashed border-white/10">
+                        <button
+                            onClick={() => router.push('/profile')}
+                            className="w-full glass-panel rounded-2xl p-4 border border-dashed border-white/10 hover:border-primary/30 hover:bg-white/5 transition-all text-left"
+                        >
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-primary/10 rounded-lg">
                                     <Activity size={20} className="text-primary" />
                                 </div>
-                                <div>
+                                <div className="flex-1">
                                     <h4 className="text-sm font-medium text-foreground">Wearable verbinden</h4>
                                     <p className="text-xs text-muted-foreground">
-                                        Verbinde Garmin, Whoop oder Oura im <span className="text-primary">Profil</span> für tiefere Insights
+                                        Verbinde Garmin, Whoop oder Oura für tiefere Insights
                                     </p>
                                 </div>
+                                <div className="text-muted-foreground">
+                                    →
+                                </div>
                             </div>
-                        </div>
+                        </button>
                     )}
 
                     {/* Multigraph */}

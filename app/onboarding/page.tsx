@@ -1207,6 +1207,7 @@ function Step6Signup({
   signupData,
   onSignupChange,
   onSignup,
+  onSkip,
   isLoading,
   error,
   isAuthenticated
@@ -1215,6 +1216,7 @@ function Step6Signup({
   signupData: SignupData;
   onSignupChange: (updates: Partial<SignupData>) => void;
   onSignup: () => Promise<void>;
+  onSkip: () => void;
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
@@ -1418,6 +1420,15 @@ function Step6Signup({
       <p className="text-xs text-center text-muted-foreground">
         Du erhältst eine Bestätigungs-E-Mail. Du kannst die App trotzdem sofort nutzen.
       </p>
+      
+      {/* Skip Button (Dev/Test only) */}
+      <button
+        type="button"
+        onClick={onSkip}
+        className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors mt-4"
+      >
+        Ohne Konto fortfahren (Test)
+      </button>
     </motion.div>
   );
 }
@@ -1889,6 +1900,7 @@ export default function OnboardingPage() {
               signupData={signupData}
               onSignupChange={updateSignupData}
               onSignup={handleSignup}
+              onSkip={handleNext}
               isLoading={isLoading}
               error={signupError}
               isAuthenticated={isAuthenticated}

@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
-import { getUserStack, getUserXP, getUserStreak, getMetricsHistory, getTodayCheckIns, getCheckInHistory } from '@/lib/supabaseService';
+import { getUserStack, getUserXP, getUserStreak, getMetricsHistory, getTodayCheckIns, getCheckInHistory, getOnboardingProfile, OnboardingProfile } from '@/lib/supabaseService';
 import { SUPPLEMENT_LIBRARY } from '@/data/supplements';
-import { createRecommendationService, Recommendation, JournalEntry, CheckInData, findStackWarnings, SupplementWarning } from '@/lib/recommendations';
+import { createRecommendationService, Recommendation, JournalEntry, CheckInData, findStackWarnings, SupplementWarning, UserProfile } from '@/lib/recommendations';
 import { calculateLevel } from '@/lib/xpSystem';
 
 export interface UserContext {
@@ -11,6 +11,7 @@ export interface UserContext {
     xp: number;
     level: number;
   };
+  profile?: UserProfile;
   stack: {
     id: string;
     name: string;
@@ -58,6 +59,28 @@ export interface UserContext {
     date: string;
     time: string;
     is_first_session: boolean;
+  };
+}
+
+/**
+ * Konvertiert OnboardingProfile zu UserProfile für Recommendations
+ */
+function convertToUserProfile(onboarding: OnboardingProfile | null): UserProfile | undefined {
+  if (!onboarding) return undefined;
+  
+  return {
+    name: onboarding.name,
+    ageGroup: onboarding.ageGroup,
+    gender: onboarding.gender,
+    weight: onboarding.weight,
+    chronotype: onboarding.chronotype as UserProfile['chronotype'],
+    activityLevel: onboarding.activityLevel as UserProfile['activityLevel'],
+    caffeineLevel: onboarding.caffeineLevel as UserProfile['caffeineLevel'],
+    dietType: onboarding.dietType,
+    allergies: onboarding.allergies,
+    medications: onboarding.medications,
+    goals: onboarding.goals,
+    wearables: onboarding.wearables,
   };
 }
 
@@ -135,15 +158,19 @@ function detectPatterns(
 }
 
 export async function buildUserContext(userId: string): Promise<UserContext> {
-  // Fetch all data in parallel
-  const [stack, xp, streak, metricsRaw, todayCheckIns, checkInHistoryRaw] = await Promise.all([
+  // Fetch all data in parallel (including profile)
+  const [stack, xp, streak, metricsRaw, todayCheckIns, checkInHistoryRaw, onboardingProfile] = await Promise.all([
     getUserStack(userId),
     getUserXP(userId),
     getUserStreak(userId),
     getMetricsHistory(userId, 30), // Erweitert auf 30 Tage für bessere Analyse
     getTodayCheckIns(userId),
     getCheckInHistory(userId, 30),
+    getOnboardingProfile(userId),
   ]);
+  
+  // Convert onboarding profile to UserProfile
+  const profile = convertToUserProfile(onboardingProfile);
   
   // Format stack with supplement info
   const formattedStack = stack.map(item => {
@@ -216,6 +243,7 @@ export async function buildUserContext(userId: string): Promise<UserContext> {
   try {
     const warningContext = {
       userId,
+      profile, // Include user profile for medication warnings
       journalHistory: metricsRaw.map(m => ({
         date: m.date,
         sleep: m.sleep || 5,
@@ -260,6 +288,7 @@ export async function buildUserContext(userId: string): Promise<UserContext> {
       xp,
       level: calculateLevel(xp),
     },
+    profile,
     stack: formattedStack,
     metrics_last_7_days: metrics.slice(0, 7), // Nur letzte 7 Tage für Anzeige
     checkins_today: todayCheckIns,

@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { SuccessOverlay } from '@/components/ui/SuccessOverlay';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { getUserStack, getUserXP, getUserStreak, logCheckIn, getTodayCheckIns, StackItem } from '@/lib/supabaseService';
+import { getUserStack, getUserXP, getUserStreak, logCheckIn, getTodayCheckIns, StackItem, getOnboardingProfile } from '@/lib/supabaseService';
 import { useHelix, getTimeBasedGreeting } from '@/components/coach';
 import { calculateLevel, getLevelProgress, XP_VALUES } from '@/lib/xpSystem';
 import { SUPPLEMENT_LIBRARY } from '@/data/supplements';
@@ -25,6 +25,7 @@ import { StreakModal } from '@/components/dashboard/StreakModal';
 import { addToStack } from '@/lib/supabaseService';
 import { useTranslations } from 'next-intl';
 import { EmailConfirmBanner } from '@/components/auth';
+import { useTourSafe } from '@/components/tour';
 
 // Zeit-Mapping für Supplement-Filterung
 // Matches against best_time values from supplements.ts
@@ -83,6 +84,7 @@ export default function Home() {
   const userId = user?.id || null;
   const timeOfDay = useTimeOfDay();
   const { triggerMessage } = useHelix();
+  const tour = useTourSafe();
   const t = useTranslations('home');
   const tCommon = useTranslations('common');
   
@@ -94,6 +96,7 @@ export default function Home() {
   const [userLevel, setUserLevel] = useState(1);
   const [streak, setStreak] = useState(0);
   const [userStack, setUserStack] = useState<StackItem[]>([]);
+  const [userName, setUserName] = useState<string>('');
   
   // UI State
   const [loading, setLoading] = useState(true);
@@ -144,12 +147,18 @@ export default function Home() {
     setDataLoading(true);
     
     try {
-      const [stackData, xpData, streakData, todayCheckIns] = await Promise.all([
+      const [stackData, xpData, streakData, todayCheckIns, profileData] = await Promise.all([
         getUserStack(userId),
         getUserXP(userId),
         getUserStreak(userId),
-        getTodayCheckIns(userId)
+        getTodayCheckIns(userId),
+        getOnboardingProfile(userId)
       ]);
+      
+      // Namen aus Profil setzen
+      if (profileData?.name) {
+        setUserName(profileData.name);
+      }
       
       // Stack-Einträge mit lokalen Supplement-Daten anreichern
       // ABER: Custom-Supplements behalten ihre Daten aus getUserStack
@@ -193,19 +202,19 @@ export default function Home() {
       return;
     }
     
-    // Wenn onboarded aber nicht eingeloggt, zum Login
-    if (!isAuthenticated) {
-      router.push('/login?redirect=/');
-      return;
-    }
-    
+    // Kein Auth-Redirect - Login findet im Onboarding statt, anonyme Nutzung erlaubt
     setLoading(false);
   }, [router, userLoading, isAuthenticated]);
 
   // Daten laden wenn User-ID verfügbar
   useEffect(() => {
-    if (userId && !loading) {
-      loadUserData();
+    if (!loading) {
+      if (userId) {
+        loadUserData();
+      } else {
+        // Keine userId - trotzdem dataLoading beenden
+        setDataLoading(false);
+      }
     }
   }, [userId, loading, loadUserData]);
 
@@ -397,7 +406,7 @@ export default function Home() {
       />
 
       {/* Header Section */}
-      <header className="px-4 pt-8 pb-4 relative">
+      <header data-tour-id="home-dashboard" className="px-4 pt-8 pb-4 relative">
         {/* E-Mail Bestätigungs-Banner */}
         <EmailConfirmBanner className="mb-4" />
         
@@ -410,13 +419,13 @@ export default function Home() {
               aria-label="Profil öffnen"
               className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold text-lg hover:scale-105 active:scale-95 transition-transform"
             >
-              B
+              {userName ? userName.charAt(0).toUpperCase() : 'B'}
             </button>
             <div>
               <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-primary/80">
                 {t(`greeting.${timeOfDay as TimeKey}`)},
               </h1>
-              <span className="text-primary font-bold text-xl">{t('biohacker')}</span>
+              <span className="text-primary font-bold text-xl">{userName || t('biohacker')}</span>
             </div>
           </div>
         </div>
@@ -424,9 +433,7 @@ export default function Home() {
         {/* XP Display + Buttons - Grid Layout für gleiche Höhe */}
         <div className="grid grid-cols-[1fr_auto] gap-2">
           {/* XP Display - links */}
-          <div data-tour-id="home-xp">
-            <XPDisplay xp={userXP} />
-          </div>
+          <XPDisplay xp={userXP} />
 
           {/* Buttons - rechts, 3er Grid */}
           <div className="grid grid-rows-3 gap-1.5">
@@ -574,6 +581,7 @@ export default function Home() {
                         icon={item.supplement?.icon}
                         isCompleted={completedSupplements.has(item.supplement_id)}
                         defaultTime={item.custom_time}
+                        isMedication={item.isMedication}
                         onCheckIn={() => handleXPUpdate(item.supplement?.name, item.supplement_id)}
                         onUndoCheckIn={async () => {
                           // Entferne aus completedSupplements
@@ -868,6 +876,16 @@ export default function Home() {
           triggerMessage('supplementAdded', { supplement: 'Kombi-Präparat' });
         }}
       />
+
+      {/* DEBUG: Tour starten Button - später entfernen */}
+      {tour && !tour.isActive && (
+        <button
+          onClick={() => tour.startTour()}
+          className="fixed top-20 right-4 z-50 px-3 py-1.5 bg-purple-500 text-white text-xs rounded-lg"
+        >
+          Tour starten
+        </button>
+      )}
 
       <BottomNav />
     </div>

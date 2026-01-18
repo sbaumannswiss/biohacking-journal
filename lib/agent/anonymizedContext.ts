@@ -41,6 +41,16 @@ export interface AnonymizedContext {
   // Allgemeine Patterns (ohne Supplement-Namen)
   hasPositivePatterns: boolean;
   hasNegativePatterns: boolean;
+  
+  // Profil (kategorisch/anonymisiert - keine personenbezogenen Daten)
+  ageCategory?: 'young_adult' | 'adult' | 'middle_age' | 'senior';
+  activityCategory?: 'sedentary' | 'moderate' | 'active' | 'athlete';
+  chronotype?: 'early' | 'normal' | 'late' | 'irregular';
+  goalCount?: number;
+  primaryGoals?: string[];
+  hasMedications?: boolean;
+  hasAllergies?: boolean;
+  dietCategory?: 'standard' | 'vegetarian' | 'vegan' | 'restricted';
 }
 
 /**
@@ -150,9 +160,43 @@ function getTimeOfDay(timeStr: string): AnonymizedContext['timeOfDay'] {
 }
 
 /**
+ * Kategorisiert Altersgruppe
+ */
+function categorizeAge(ageGroup?: string): AnonymizedContext['ageCategory'] {
+  if (!ageGroup) return undefined;
+  
+  switch (ageGroup) {
+    case '18-25': return 'young_adult';
+    case '26-35': 
+    case '36-45': return 'adult';
+    case '46-55': return 'middle_age';
+    case '56+': return 'senior';
+    default: return undefined;
+  }
+}
+
+/**
+ * Kategorisiert Ernährungsform
+ */
+function categorizeDiet(dietType?: string): AnonymizedContext['dietCategory'] {
+  if (!dietType) return undefined;
+  
+  switch (dietType) {
+    case 'vegetarian': return 'vegetarian';
+    case 'vegan': return 'vegan';
+    case 'keto':
+    case 'paleo':
+    case 'fasting': return 'restricted';
+    default: return 'standard';
+  }
+}
+
+/**
  * Anonymisiert den User-Kontext für OpenAI
  */
 export function anonymizeContext(context: UserContext): AnonymizedContext {
+  const profile = context.profile;
+  
   return {
     // Engagement
     streakCategory: categorizeStreak(context.user.streak),
@@ -184,6 +228,16 @@ export function anonymizeContext(context: UserContext): AnonymizedContext {
     // Patterns
     hasPositivePatterns: context.patterns.some(p => p.direction === 'positive'),
     hasNegativePatterns: context.patterns.some(p => p.direction === 'negative'),
+    
+    // Profil (anonymisiert)
+    ageCategory: categorizeAge(profile?.ageGroup),
+    activityCategory: profile?.activityLevel as AnonymizedContext['activityCategory'],
+    chronotype: profile?.chronotype as AnonymizedContext['chronotype'],
+    goalCount: profile?.goals?.length,
+    primaryGoals: profile?.goals?.slice(0, 3),
+    hasMedications: profile?.medications && profile.medications.length > 0 && !profile.medications.includes('none'),
+    hasAllergies: profile?.allergies && profile.allergies.length > 0,
+    dietCategory: categorizeDiet(profile?.dietType),
   };
 }
 
@@ -191,11 +245,33 @@ export function anonymizeContext(context: UserContext): AnonymizedContext {
  * Formatiert anonymisierten Kontext für den Prompt
  */
 export function formatAnonymizedContextForPrompt(context: AnonymizedContext): string {
+  // Chronotyp-Label für bessere Lesbarkeit
+  const chronotypeLabels: Record<string, string> = {
+    early: 'early bird (wakes before 7am)',
+    normal: 'normal (wakes 7-9am)',
+    late: 'night owl (wakes after 9am)',
+    irregular: 'irregular schedule',
+  };
+  
+  // Profil-Sektion nur wenn Daten vorhanden
+  const hasProfileData = context.ageCategory || context.chronotype || context.primaryGoals?.length;
+  
+  const profileSection = hasProfileData ? `
+USER_PROFILE:
+- Age category: ${context.ageCategory || 'unknown'}
+- Activity level: ${context.activityCategory || 'unknown'}
+- Chronotype: ${context.chronotype ? chronotypeLabels[context.chronotype] : 'unknown'}
+- Primary goals: ${context.primaryGoals?.join(', ') || 'none set'}
+- Diet: ${context.dietCategory || 'standard'}
+- Takes medications: ${context.hasMedications ? 'yes (interactions checked)' : 'no'}
+- Has allergies: ${context.hasAllergies ? 'yes' : 'no'}
+` : '';
+
   return `
 ANONYMIZED_USER_CONTEXT:
 - Engagement: ${context.streakCategory} streak, ${context.levelCategory} level
 - Stack: ${context.stackSize} supplements (categories: ${context.stackCategories.join(', ') || 'none'})
-
+${profileSection}
 WELLNESS_TRENDS:
 - Sleep: ${context.sleepLevel} (${context.sleepTrend})
 - Energy: ${context.energyLevel} (${context.energyTrend})

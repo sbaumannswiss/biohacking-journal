@@ -40,6 +40,7 @@ interface StackItemCardProps {
     icon?: string;
     isCompleted?: boolean;
     defaultTime?: string;
+    isMedication?: boolean; // Medikamente haben andere Darstellung
     onCheckIn?: () => void;
     onUndoCheckIn?: () => void;
     onRemove?: () => void;
@@ -53,6 +54,7 @@ export function StackItemCard({
     icon,
     isCompleted = false,
     defaultTime,
+    isMedication = false,
     onCheckIn,
     onUndoCheckIn,
     onRemove,
@@ -158,9 +160,13 @@ export function StackItemCard({
             <div
                 className={clsx(
                     "w-full p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 border relative group",
-                    isChecked
-                        ? "bg-primary/10 border-primary/30"
-                        : "bg-card/60 border-white/5 hover:border-white/20 hover:bg-card/80"
+                    isMedication
+                        ? isChecked
+                            ? "bg-amber-500/10 border-amber-500/30"
+                            : "bg-amber-950/30 border-amber-500/10 hover:border-amber-500/30 hover:bg-amber-950/40"
+                        : isChecked
+                            ? "bg-primary/10 border-primary/30"
+                            : "bg-card/60 border-white/5 hover:border-white/20 hover:bg-card/80"
                 )}
             >
                 {/* Checkbox Ring - Clickable */}
@@ -172,14 +178,18 @@ export function StackItemCard({
                     aria-pressed={isChecked}
                     className={clsx(
                         "w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all duration-300 flex-shrink-0 cursor-pointer",
-                        isChecked 
-                            ? "bg-primary border-primary hover:bg-primary/90" 
-                            : "border-white/20 bg-transparent hover:border-primary/50 hover:bg-primary/10",
+                        isMedication
+                            ? isChecked 
+                                ? "bg-amber-500 border-amber-500 hover:bg-amber-500/90" 
+                                : "border-amber-500/30 bg-transparent hover:border-amber-500/50 hover:bg-amber-500/10"
+                            : isChecked 
+                                ? "bg-primary border-primary hover:bg-primary/90" 
+                                : "border-white/20 bg-transparent hover:border-primary/50 hover:bg-primary/10",
                         "active:scale-95"
                     )}
                 >
                     {isLoading ? (
-                        <Loader2 size={18} className="animate-spin text-primary" aria-hidden="true" />
+                        <Loader2 size={18} className={clsx("animate-spin", isMedication ? "text-amber-500" : "text-primary")} aria-hidden="true" />
                     ) : isChecked ? (
                         <motion.div
                             initial={{ scale: 0 }}
@@ -190,7 +200,10 @@ export function StackItemCard({
                         </motion.div>
                     ) : (
                         <motion.div
-                            className="w-5 h-5 rounded-full bg-white/5 group-hover:bg-primary/20 transition-colors"
+                            className={clsx(
+                                "w-5 h-5 rounded-full transition-colors",
+                                isMedication ? "bg-amber-500/10 group-hover:bg-amber-500/20" : "bg-white/5 group-hover:bg-primary/20"
+                            )}
                             whileHover={{ scale: 1.1 }}
                             aria-hidden="true"
                         />
@@ -199,22 +212,36 @@ export function StackItemCard({
 
                 {/* Content */}
                 <div className="flex-1 text-left">
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2">
                         <span className={clsx(
                             "font-semibold transition-colors duration-300",
-                            isChecked ? "text-primary" : "text-foreground"
+                            isMedication
+                                ? isChecked ? "text-amber-400" : "text-amber-300"
+                                : isChecked ? "text-primary" : "text-foreground"
                         )}>
                             {supplementName}
                         </span>
+                        {isMedication && (
+                            <span className="px-1.5 py-0.5 text-[10px] rounded bg-amber-500/20 text-amber-400 font-medium">
+                                MED
+                            </span>
+                        )}
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => setShowDosageModal(true)}
-                        className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-                    >
-                        {currentDosage}
-                        <Pencil size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
+                    {isMedication ? (
+                        // Medikamente: Nur Dosierung anzeigen, keine Zeitauswahl
+                        <span className="text-xs text-amber-400/60">
+                            {currentDosage || 'Nach ärztlicher Anweisung'}
+                        </span>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setShowDosageModal(true)}
+                            className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                        >
+                            {currentDosage}
+                            <Pencil size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                    )}
                 </div>
 
                 {/* Remove Button (small icon) */}

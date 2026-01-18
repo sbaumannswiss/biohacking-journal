@@ -19,6 +19,10 @@ export {
 export {
   analyzeTimingForStack,
   generateTimingRecommendations,
+  getChronotypeTimes,
+  adjustTimeForChronotype,
+  getPersonalizedTimeLabel,
+  isCaffeineTooLate,
 } from './timingOptimizer';
 
 // Dosage Advisor
@@ -48,6 +52,7 @@ export {
   checkStackSpecificWarnings,
   generateWarningRecommendations,
   checkNewSupplementWarnings,
+  checkMedicationInteractions,
 } from './interactionWarner';
 
 // Re-export the main service

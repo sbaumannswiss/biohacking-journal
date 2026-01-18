@@ -37,24 +37,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected Routes - Redirect zu Login wenn nicht authentifiziert
-  const protectedPaths = ['/journal', '/library', '/stats', '/profile', '/biohack', '/workout'];
-  const publicPaths = ['/login', '/signup', '/waitlist', '/privacy', '/auth/callback'];
+  // Kein Auth-Redirect in der App - Login findet ausschließlich im Onboarding statt
+  // Anonyme Nutzung ist erlaubt, User-ID wird via useAnonymousUser() generiert
   
   const path = request.nextUrl.pathname;
-  const isProtectedPath = protectedPaths.some(p => path.startsWith(p));
-  const isPublicPath = publicPaths.some(p => path.startsWith(p));
 
-  if (isProtectedPath && !user) {
-    // Nicht eingeloggt -> Redirect zu Login
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('redirect', path);
-    return NextResponse.redirect(url);
-  }
-
+  // Wenn bereits eingeloggt und auf Login-Seite -> Redirect zu Home
   if (user && (path === '/login' || path === '/signup')) {
-    // Bereits eingeloggt -> Redirect zu Home
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);

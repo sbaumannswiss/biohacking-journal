@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "STAX - Waitlist",
+  title: "STAX - Waitinglist",
   description: "Werde Teil der STAX-Revolution. Trage dich in die Warteliste ein!",
 };
 

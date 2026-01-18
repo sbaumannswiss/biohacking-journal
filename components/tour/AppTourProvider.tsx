@@ -41,13 +41,15 @@ export function AppTourProvider({ children }: AppTourProviderProps) {
   const pathname = usePathname();
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isNavigating, setIsNavigating] = useState(false);
 
   const steps = TOUR_STEPS;
   const currentStepData = isActive && steps[currentStep] ? steps[currentStep] : null;
 
   // Check if tour should auto-start (after onboarding)
   useEffect(() => {
+    // Only check on home page
+    if (pathname !== '/') return;
+    
     const shouldStartTour = localStorage.getItem('stax_start_tour');
     const tourCompleted = localStorage.getItem('stax_tour_completed');
     
@@ -60,24 +62,17 @@ export function AppTourProvider({ children }: AppTourProviderProps) {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [pathname]);
 
   // Navigate to correct route when step changes
   useEffect(() => {
-    if (!isActive || !currentStepData || isNavigating) return;
+    if (!isActive || !currentStepData) return;
 
     const targetRoute = currentStepData.route;
     if (pathname !== targetRoute) {
-      setIsNavigating(true);
       router.push(targetRoute);
-      
-      // Wait for navigation to complete
-      const timer = setTimeout(() => {
-        setIsNavigating(false);
-      }, 300);
-      return () => clearTimeout(timer);
     }
-  }, [isActive, currentStep, currentStepData, pathname, router, isNavigating]);
+  }, [isActive, currentStep, currentStepData, pathname, router]);
 
   const startTour = useCallback(() => {
     setCurrentStep(0);

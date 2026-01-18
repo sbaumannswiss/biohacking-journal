@@ -1,17 +1,26 @@
 'use client';
 
 import { BottomNav } from '@/components/layout/BottomNav';
-import { User, Settings, Shield, Award, Flame, Zap, Calendar, Loader2, TrendingUp, Watch, Scale, BarChart3, Download, Trash2, LogOut } from 'lucide-react';
+import { User, Settings, Shield, Award, Flame, Zap, Calendar, Loader2, TrendingUp, Watch, Scale, BarChart3, Download, Trash2, LogOut, Brain, Moon, Battery, Coffee, Activity, Heart, Utensils, Pill, Target, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { getUserStreak, getUserXP, getUserStack, getCheckInHistory } from '@/lib/supabaseService';
+import { getUserStreak, getUserXP, getUserStack, getCheckInHistory, getOnboardingProfile, OnboardingProfile, updateProfileMedications, addMedicationToStack, removeFromStack, getUserStackIds } from '@/lib/supabaseService';
+import { supabase } from '@/lib/supabase';
+import { MedicationModal, StackMedication } from '@/components/ui/MedicationModal';
 import { calculateLevel, getLevelProgress, getLevelTitle } from '@/lib/xpSystem';
 import { WearableConnectCard } from '@/components/wearables';
 import { getConnectedProviders, WearableProvider } from '@/lib/wearables';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { 
+    JOURNAL_QUESTION_STRUCTURE, 
+    getHiddenQuestions, 
+    toggleQuestionVisibility,
+    type CategoryKey 
+} from '@/data/journalQuestions';
+import { FileText } from 'lucide-react';
 
 export default function ProfilePage() {
     const t = useTranslations('profile');
@@ -44,6 +53,47 @@ export default function ProfilePage() {
     // Body metrics
     const [bodyWeight, setBodyWeight] = useState<number>(70);
     const [editingWeight, setEditingWeight] = useState(false);
+    
+    // Onboarding Profile
+    const [onboardingProfile, setOnboardingProfile] = useState<OnboardingProfile | null>(null);
+    const [showProfile, setShowProfile] = useState(false);
+    const [showMedicationModal, setShowMedicationModal] = useState(false);
+    const [stackMedications, setStackMedications] = useState<StackMedication[]>([]);
+    
+    // Settings Section State
+    const [showSettings, setShowSettings] = useState(false);
+    
+    // Journal Questions State
+    const [hiddenQuestions, setHiddenQuestions] = useState<string[]>([]);
+    
+    // Password Reset State
+    const [isResettingPassword, setIsResettingPassword] = useState(false);
+    
+    // Load hidden questions from localStorage
+    useEffect(() => {
+        setHiddenQuestions(getHiddenQuestions());
+    }, []);
+    
+    const handleToggleQuestion = (questionId: string) => {
+        const newHidden = toggleQuestionVisibility(questionId);
+        setHiddenQuestions(newHidden);
+    };
+    
+    // Password Reset Handler
+    const handlePasswordReset = async () => {
+        if (!user?.email) return;
+        setIsResettingPassword(true);
+        try {
+            await supabase.auth.resetPasswordForEmail(user.email, {
+                redirectTo: `${window.location.origin}/auth/reset-password`
+            });
+            setToast('Passwort-Reset E-Mail gesendet');
+        } catch {
+            setToast('Fehler beim Senden der E-Mail');
+        } finally {
+            setIsResettingPassword(false);
+        }
+    };
 
     // Level Berechnung aus neuem XP-System
     const levelProgress = getLevelProgress(totalXP);
@@ -88,11 +138,24 @@ export default function ProfilePage() {
                 getUserStreak(userId),
                 getUserXP(userId),
                 getUserStack(userId),
-                getCheckInHistory(userId, 30) // Letzte 30 Tage
-            ]).then(([streakData, xpData, stackData, checkInHistory]) => {
+                getCheckInHistory(userId, 30), // Letzte 30 Tage
+                getOnboardingProfile(userId),
+                getUserStackIds(userId)
+            ]).then(([streakData, xpData, stackData, checkInHistory, profileData, stackIds]) => {
+                // Set onboarding profile
+                setOnboardingProfile(profileData);
                 setStreak(streakData);
                 setTotalXP(xpData);
                 setStackSize(stackData.length);
+                
+                // Extract medications from stack (med: prefix) with their times
+                const medsInStack: StackMedication[] = stackData
+                    .filter((item: any) => item.supplement_id.startsWith('med:'))
+                    .map((item: any) => ({
+                        name: item.supplement_id.replace('med:', ''),
+                        time: (item.custom_time as 'morning' | 'noon' | 'evening' | 'bedtime') || 'morning',
+                    }));
+                setStackMedications(medsInStack);
                 
                 // Adherence berechnen: Check-Ins / (Stack-Size * Tage mit mindestens einem Check-In)
                 if (stackData.length > 0 && checkInHistory.length > 0) {
@@ -118,8 +181,11 @@ export default function ProfilePage() {
                 console.error('Error loading profile data:', error);
                 setDataLoading(false);
             });
+        } else if (!userLoading) {
+            // Kein User eingeloggt, aber Auth-Check abgeschlossen
+            setDataLoading(false);
         }
-    }, [userId]);
+    }, [userId, userLoading]);
 
     const handleInteraction = (feature: string) => {
         setToast(tCommon('comingSoon', { feature }));
@@ -290,6 +356,211 @@ export default function ProfilePage() {
                     </motion.div>
                 )}
 
+                {/* Onboarding Profile Section */}
+                {onboardingProfile && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.25 }}
+                        className="space-y-4"
+                    >
+                        {/* Profile Header */}
+                        <button
+                            onClick={() => setShowProfile(!showProfile)}
+                            className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-purple-500/20 rounded-lg">
+                                    <User size={20} className="text-purple-400" />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className="font-medium text-foreground">Mein Profil</h3>
+                                    <p className="text-xs text-muted-foreground">
+                                        {onboardingProfile.goals?.length || 0} Ziele • {onboardingProfile.chronotype === 'early' ? 'Frühaufsteher' : onboardingProfile.chronotype === 'late' ? 'Nachtmensch' : onboardingProfile.chronotype === 'normal' ? 'Normal' : 'Unregelmäßig'}
+                                    </p>
+                                </div>
+                            </div>
+                            <motion.div
+                                animate={{ rotate: showProfile ? 180 : 0 }}
+                                className="text-muted-foreground"
+                            >
+                                ▼
+                            </motion.div>
+                        </button>
+
+                        {/* Profile Content */}
+                        <AnimatePresence>
+                            {showProfile && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="space-y-3 overflow-hidden"
+                                >
+                                    {/* Goals */}
+                                    {onboardingProfile.goals && onboardingProfile.goals.length > 0 && (
+                                        <div className="glass-panel p-4 rounded-xl">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <Target size={16} className="text-primary" />
+                                                <span className="text-sm font-medium">Meine Ziele</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {onboardingProfile.goals.map((goal) => {
+                                                    const goalLabels: Record<string, { label: string; color: string }> = {
+                                                        focus: { label: 'Fokus', color: 'bg-blue-500/20 text-blue-400' },
+                                                        sleep: { label: 'Schlaf', color: 'bg-indigo-500/20 text-indigo-400' },
+                                                        energy: { label: 'Energie', color: 'bg-yellow-500/20 text-yellow-400' },
+                                                        recovery: { label: 'Erholung', color: 'bg-green-500/20 text-green-400' },
+                                                        stress: { label: 'Stress', color: 'bg-pink-500/20 text-pink-400' },
+                                                        immunity: { label: 'Immunsystem', color: 'bg-cyan-500/20 text-cyan-400' },
+                                                        longevity: { label: 'Longevity', color: 'bg-purple-500/20 text-purple-400' },
+                                                        fitness: { label: 'Fitness', color: 'bg-orange-500/20 text-orange-400' },
+                                                    };
+                                                    const g = goalLabels[goal] || { label: goal, color: 'bg-white/10 text-foreground' };
+                                                    return (
+                                                        <span key={goal} className={`px-3 py-1 rounded-full text-xs font-medium ${g.color}`}>
+                                                            {g.label}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Lifestyle Grid */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {/* Chronotype */}
+                                        <div className="glass-panel p-3 rounded-xl">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Moon size={14} className="text-indigo-400" />
+                                                <span className="text-xs text-muted-foreground">Chronotyp</span>
+                                            </div>
+                                            <span className="text-sm font-medium">
+                                                {onboardingProfile.chronotype === 'early' ? 'Frühaufsteher' :
+                                                 onboardingProfile.chronotype === 'late' ? 'Nachtmensch' :
+                                                 onboardingProfile.chronotype === 'normal' ? 'Normal' : 'Unregelmäßig'}
+                                            </span>
+                                        </div>
+
+                                        {/* Activity Level */}
+                                        <div className="glass-panel p-3 rounded-xl">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Activity size={14} className="text-orange-400" />
+                                                <span className="text-xs text-muted-foreground">Aktivität</span>
+                                            </div>
+                                            <span className="text-sm font-medium">
+                                                {onboardingProfile.activityLevel === 'sedentary' ? 'Wenig aktiv' :
+                                                 onboardingProfile.activityLevel === 'moderate' ? 'Moderat' :
+                                                 onboardingProfile.activityLevel === 'active' ? 'Aktiv' : 'Athlet'}
+                                            </span>
+                                        </div>
+
+                                        {/* Caffeine */}
+                                        <div className="glass-panel p-3 rounded-xl">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Coffee size={14} className="text-amber-400" />
+                                                <span className="text-xs text-muted-foreground">Koffein</span>
+                                            </div>
+                                            <span className="text-sm font-medium">
+                                                {onboardingProfile.caffeineLevel === 'none' ? 'Kein' :
+                                                 onboardingProfile.caffeineLevel === 'low' ? 'Wenig' :
+                                                 onboardingProfile.caffeineLevel === 'moderate' ? 'Moderat' : 'Viel'}
+                                            </span>
+                                        </div>
+
+                                        {/* Diet */}
+                                        <div className="glass-panel p-3 rounded-xl">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Utensils size={14} className="text-green-400" />
+                                                <span className="text-xs text-muted-foreground">Ernährung</span>
+                                            </div>
+                                            <span className="text-sm font-medium">
+                                                {onboardingProfile.dietType === 'omnivore' ? 'Omnivor' :
+                                                 onboardingProfile.dietType === 'vegetarian' ? 'Vegetarisch' :
+                                                 onboardingProfile.dietType === 'vegan' ? 'Vegan' :
+                                                 onboardingProfile.dietType === 'keto' ? 'Keto' :
+                                                 onboardingProfile.dietType === 'paleo' ? 'Paleo' :
+                                                 onboardingProfile.dietType === 'fasting' ? 'Intervallfasten' : onboardingProfile.dietType || '-'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Medications Section */}
+                                    <div className="glass-panel p-3 rounded-xl">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Pill size={14} className="text-amber-400" />
+                                                <span className="text-xs text-muted-foreground">Medikamente</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowMedicationModal(true)}
+                                                className="text-xs text-amber-400 hover:underline"
+                                            >
+                                                Bearbeiten
+                                            </button>
+                                        </div>
+                                        {onboardingProfile.medications && onboardingProfile.medications.length > 0 && !onboardingProfile.medications.includes('none') ? (
+                                            <div className="mt-2">
+                                                <div className="flex flex-wrap gap-1">
+                                                    {onboardingProfile.medications.map((med) => {
+                                                        const medLabels: Record<string, string> = {
+                                                            'blood-thinners': 'Blutverdünner',
+                                                            'antidepressants': 'Antidepressiva',
+                                                            'blood-pressure': 'Blutdruckmed.',
+                                                            'thyroid': 'Schilddrüse',
+                                                            'diabetes': 'Diabetes',
+                                                            'birth-control': 'Verhütung',
+                                                        };
+                                                        return (
+                                                            <span key={med} className="px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-400">
+                                                                {medLabels[med] || med}
+                                                            </span>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <p className="text-[10px] text-amber-400/70 mt-1.5">
+                                                    Interaktionen werden geprüft
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                Keine angegeben
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Allergies */}
+                                    {onboardingProfile.allergies && onboardingProfile.allergies.length > 0 && (
+                                        <div className="glass-panel p-3 rounded-xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Heart size={14} className="text-red-400" />
+                                                <span className="text-xs text-muted-foreground">Allergien/Unverträglichkeiten</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-1">
+                                                {onboardingProfile.allergies.map((allergy) => (
+                                                    <span key={allergy} className="px-2 py-0.5 rounded-full text-xs bg-red-500/10 text-red-400">
+                                                        {allergy === 'gluten' ? 'Gluten' :
+                                                         allergy === 'lactose' ? 'Laktose' :
+                                                         allergy === 'nuts' ? 'Nüsse' :
+                                                         allergy === 'soy' ? 'Soja' :
+                                                         allergy === 'shellfish' ? 'Meeresfrüchte' :
+                                                         allergy === 'eggs' ? 'Eier' : allergy}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Edit Hint */}
+                                    <p className="text-xs text-muted-foreground text-center py-2">
+                                        Profildaten können im Onboarding geändert werden
+                                    </p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
+                )}
+
                 {/* Wearables Section */}
                 <motion.div
                     initial={{ opacity: 0 }}
@@ -357,82 +628,227 @@ export default function ProfilePage() {
                     </AnimatePresence>
                 </motion.div>
 
-                {/* Language Switcher */}
-                <div className="space-y-2">
-                    <LanguageSwitcher />
-                </div>
-                
-                {/* Body Weight */}
+                {/* Settings Section */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="glass-panel p-4 rounded-xl"
+                    transition={{ delay: 0.35 }}
+                    className="space-y-4"
                 >
-                    <div className="flex items-center justify-between">
+                    {/* Settings Header */}
+                    <button
+                        onClick={() => setShowSettings(!showSettings)}
+                        className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                    >
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-cyan-500/20 rounded-lg">
-                                <Scale size={20} className="text-cyan-400" />
+                            <div className="p-2 bg-primary/20 rounded-lg">
+                                <Settings size={20} className="text-primary" />
                             </div>
-                            <div>
-                                <h3 className="font-medium text-foreground text-sm">Körpergewicht</h3>
-                                <p className="text-xs text-muted-foreground">Für Hydration & Dosierungen</p>
+                            <div className="text-left">
+                                <h3 className="font-medium text-foreground">Einstellungen</h3>
+                                <p className="text-xs text-muted-foreground">
+                                    Sprache, Journal, Account
+                                </p>
                             </div>
                         </div>
-                        
-                        {editingWeight ? (
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="number"
-                                    value={bodyWeight}
-                                    onChange={(e) => setBodyWeight(Number(e.target.value))}
-                                    className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-center text-foreground font-mono"
-                                    min={20}
-                                    max={300}
-                                    autoFocus
-                                />
-                                <span className="text-sm text-muted-foreground">kg</span>
-                                <button
-                                    onClick={() => saveBodyWeight(bodyWeight)}
-                                    className="px-3 py-1 bg-primary text-primary-foreground rounded-lg text-xs font-medium"
-                                >
-                                    OK
-                                </button>
-                            </div>
-                        ) : (
-                            <button
-                                onClick={() => setEditingWeight(true)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                            >
-                                <span className="text-lg font-bold text-foreground">{bodyWeight}</span>
-                                <span className="text-sm text-muted-foreground">kg</span>
-                            </button>
-                        )}
-                    </div>
-                </motion.div>
+                        <motion.div
+                            animate={{ rotate: showSettings ? 180 : 0 }}
+                            className="text-muted-foreground"
+                        >
+                            ▼
+                        </motion.div>
+                    </button>
 
-                {/* Menu */}
-                <div className="space-y-2">
-                    <button
-                        onClick={() => handleInteraction(t('accountSettings'))}
-                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
-                    >
-                        <div className="p-2 bg-white/5 rounded-lg group-hover:text-primary transition-colors">
-                            <Settings size={20} />
-                        </div>
-                        <span className="font-medium">{t('accountSettings')}</span>
-                    </button>
-                    
-                    <button
-                        onClick={() => handleInteraction(t('achievements'))}
-                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
-                    >
-                        <div className="p-2 bg-white/5 rounded-lg group-hover:text-primary transition-colors">
-                            <Award size={20} />
-                        </div>
-                        <span className="font-medium">{t('achievements')}</span>
-                    </button>
-                </div>
+                    {/* Settings Content */}
+                    <AnimatePresence>
+                        {showSettings && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="space-y-4 overflow-hidden"
+                            >
+                                {/* Language */}
+                                <div className="glass-panel p-4 rounded-xl">
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                        Sprache
+                                    </h4>
+                                    <LanguageSwitcher />
+                                </div>
+
+                                {/* Body Weight */}
+                                <div className="glass-panel p-4 rounded-xl">
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                        Körpergewicht
+                                    </h4>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-cyan-500/20 rounded-lg">
+                                                <Scale size={18} className="text-cyan-400" />
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">Für Hydration & Dosierungen</p>
+                                        </div>
+                                        
+                                        {editingWeight ? (
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="number"
+                                                    value={bodyWeight}
+                                                    onChange={(e) => setBodyWeight(Number(e.target.value))}
+                                                    className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-center text-foreground font-mono"
+                                                    min={20}
+                                                    max={300}
+                                                    autoFocus
+                                                />
+                                                <span className="text-sm text-muted-foreground">kg</span>
+                                                <button
+                                                    onClick={() => saveBodyWeight(bodyWeight)}
+                                                    className="px-3 py-1 bg-primary text-primary-foreground rounded-lg text-xs font-medium"
+                                                >
+                                                    OK
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setEditingWeight(true)}
+                                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                                            >
+                                                <span className="text-lg font-bold text-foreground">{bodyWeight}</span>
+                                                <span className="text-sm text-muted-foreground">kg</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Journal Questions */}
+                                <div className="glass-panel p-4 rounded-xl">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            Journal-Fragen
+                                        </h4>
+                                        {hiddenQuestions.length > 0 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                {hiddenQuestions.length} ausgeblendet
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mb-4">
+                                        Blende Fragen aus, die für dich nicht relevant sind
+                                    </p>
+                                    
+                                    <div className="space-y-4">
+                                        {(Object.entries(JOURNAL_QUESTION_STRUCTURE) as [CategoryKey, typeof JOURNAL_QUESTION_STRUCTURE[CategoryKey]][]).map(([categoryKey, questions]) => {
+                                            const categoryLabels: Record<CategoryKey, string> = {
+                                                sleepRecovery: 'Schlaf & Erholung',
+                                                lifestyle: 'Lifestyle',
+                                                mental: 'Mental',
+                                                body: 'Körper',
+                                            };
+                                            
+                                            const questionLabels: Record<string, string> = {
+                                                slept_well: 'Gut geschlafen',
+                                                slept_through: 'Durchgeschlafen',
+                                                woke_rested: 'Erholt aufgewacht',
+                                                training: 'Training absolviert',
+                                                alcohol: 'Alkohol getrunken',
+                                                caffeine_late: 'Spätes Koffein',
+                                                morning_sun: 'Morgensonne',
+                                                screen_before_bed: 'Screen vor dem Schlafen',
+                                                stressed: 'Gestresst',
+                                                focused: 'Fokussiert',
+                                                good_mood: 'Gute Stimmung',
+                                                anxious: 'Ängstlich',
+                                                digestion_ok: 'Verdauung OK',
+                                                hydrated: 'Gut hydriert',
+                                                sick: 'Krank',
+                                            };
+                                            
+                                            return (
+                                                <div key={categoryKey} className="border-t border-white/5 pt-3 first:border-0 first:pt-0">
+                                                    <h5 className="text-xs font-medium text-muted-foreground mb-2">
+                                                        {categoryLabels[categoryKey]}
+                                                    </h5>
+                                                    <div className="space-y-1">
+                                                        {questions.map((q) => (
+                                                            <div 
+                                                                key={q.id}
+                                                                className="flex items-center justify-between py-1.5"
+                                                            >
+                                                                <span className={`text-sm ${hiddenQuestions.includes(q.id) ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                                                                    {questionLabels[q.id] || q.id}
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => handleToggleQuestion(q.id)}
+                                                                    className={`w-11 h-6 rounded-full transition-colors relative ${
+                                                                        hiddenQuestions.includes(q.id) 
+                                                                            ? 'bg-white/10' 
+                                                                            : 'bg-primary'
+                                                                    }`}
+                                                                >
+                                                                    <motion.div
+                                                                        className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow"
+                                                                        animate={{ 
+                                                                            left: hiddenQuestions.includes(q.id) ? 2 : 22 
+                                                                        }}
+                                                                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                                                                    />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    
+                                    {hiddenQuestions.length > 0 && (
+                                        <button
+                                            onClick={() => {
+                                                localStorage.removeItem('stax_hidden_journal_questions');
+                                                setHiddenQuestions([]);
+                                            }}
+                                            className="w-full py-2 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors border-t border-white/5"
+                                        >
+                                            Alle Fragen wieder einblenden
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Account */}
+                                <div className="glass-panel p-4 rounded-xl">
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                        Account
+                                    </h4>
+                                    
+                                    {user?.email ? (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-muted-foreground">E-Mail</span>
+                                                <span className="text-sm text-foreground font-mono">{user.email}</span>
+                                            </div>
+                                            <button
+                                                onClick={handlePasswordReset}
+                                                disabled={isResettingPassword}
+                                                className="w-full py-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                {isResettingPassword ? (
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                ) : (
+                                                    <Shield size={16} />
+                                                )}
+                                                Passwort ändern
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">
+                                            Kein Account verbunden
+                                        </p>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
 
                 {/* DSGVO Section */}
                 <div className="space-y-2 pt-4">
@@ -551,6 +967,50 @@ export default function ProfilePage() {
                         </motion.div>
                     )}
                 </AnimatePresence>
+
+                {/* Medication Modal */}
+                <MedicationModal
+                    isOpen={showMedicationModal}
+                    onClose={() => setShowMedicationModal(false)}
+                    currentMedications={onboardingProfile?.medications || []}
+                    stackMedications={stackMedications}
+                    onSave={async (medications, addToStackMeds = []) => {
+                        if (!userId) return;
+                        
+                        // 1. Profil-Medikamente aktualisieren
+                        const result = await updateProfileMedications(userId, medications);
+                        if (!result.success) {
+                            setToast('Fehler beim Speichern');
+                            setTimeout(() => setToast(null), 2000);
+                            return;
+                        }
+                        
+                        // 2. Stack-Änderungen verarbeiten
+                        const currentStackMedNames = new Set(stackMedications.map(m => m.name));
+                        const newStackMedNames = new Set(addToStackMeds.map(m => m.name));
+                        
+                        // Medikamente zum Stack hinzufügen oder aktualisieren
+                        for (const med of addToStackMeds) {
+                            await addMedicationToStack(userId, med.name, med.time);
+                        }
+                        
+                        // Medikamente aus Stack entfernen (die nicht mehr in newStackMeds sind)
+                        for (const med of stackMedications) {
+                            if (!newStackMedNames.has(med.name)) {
+                                await removeFromStack(userId, `med:${med.name}`);
+                            }
+                        }
+                        
+                        // Update local state
+                        setOnboardingProfile(prev => prev ? {
+                            ...prev,
+                            medications,
+                        } : null);
+                        setStackMedications(addToStackMeds);
+                        setToast('Medikamente aktualisiert');
+                        setTimeout(() => setToast(null), 2000);
+                    }}
+                />
             </main>
 
             <BottomNav />

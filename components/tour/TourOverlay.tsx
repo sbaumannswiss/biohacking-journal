@@ -51,6 +51,12 @@ export function TourOverlay() {
     }
   }, [tour?.currentStepData]);
 
+  // Reset isReady when step changes to prevent animation glitch
+  useEffect(() => {
+    setIsReady(false);
+    setTargetRect(null);
+  }, [tour?.currentStep]);
+
   // Measure on step change and window resize
   useEffect(() => {
     if (!tour?.isActive) {
@@ -58,8 +64,8 @@ export function TourOverlay() {
       return;
     }
 
-    // Initial delay to let page render
-    const initialTimer = setTimeout(measureTarget, 100);
+    // Delay to let page render and reset complete
+    const initialTimer = setTimeout(measureTarget, 200);
     
     // Re-measure on resize
     window.addEventListener('resize', measureTarget);
@@ -82,55 +88,12 @@ export function TourOverlay() {
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
-  // Calculate popup position
-  const getPopupPosition = () => {
-    if (!targetRect) {
-      // Center fallback
-      return {
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-      };
-    }
-
-    const position = currentStepData.position;
-    const popupHeight = 220;
-    const popupWidth = 320;
-    const margin = 16;
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-
-    switch (position) {
-      case 'bottom':
-        return {
-          top: Math.min(targetRect.bottom + margin, viewportHeight - popupHeight - margin),
-          left: Math.max(margin, Math.min(targetRect.left + (targetRect.width / 2) - (popupWidth / 2), viewportWidth - popupWidth - margin)),
-        };
-      case 'top':
-        return {
-          top: Math.max(margin, targetRect.top - popupHeight - margin),
-          left: Math.max(margin, Math.min(targetRect.left + (targetRect.width / 2) - (popupWidth / 2), viewportWidth - popupWidth - margin)),
-        };
-      case 'left':
-        return {
-          top: targetRect.top + (targetRect.height / 2) - (popupHeight / 2),
-          left: Math.max(margin, targetRect.left - popupWidth - margin),
-        };
-      case 'right':
-        return {
-          top: targetRect.top + (targetRect.height / 2) - (popupHeight / 2),
-          left: Math.min(targetRect.right + margin, viewportWidth - popupWidth - margin),
-        };
-      default:
-        return {
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-        };
-    }
+  // Popup always centered at bottom - consistent positioning above BottomNav
+  const popupStyle = {
+    bottom: 120, // Above BottomNav
+    left: '50%',
+    transform: 'translateX(-50%)',
   };
-
-  const popupStyle = getPopupPosition();
 
   return (
     <AnimatePresence>

@@ -9,6 +9,138 @@ import {
   UserAnalysisContext,
 } from './types';
 
+// ============================================
+// MEDICATION INTERACTIONS
+// Wissenschaftlich belegte Interaktionen zwischen
+// Medikamenten und Supplements
+// ============================================
+
+interface MedicationInteraction {
+  contraindicated: string[];  // Absolute Kontraindikation
+  warning: string[];          // Vorsicht geboten
+  info: string[];             // Info zur Absorption etc.
+}
+
+const MEDICATION_INTERACTIONS: Record<string, MedicationInteraction> = {
+  'blood-thinners': {
+    contraindicated: ['omega-3', 'fish-oil', 'fischöl', 'vitamin-e', 'ginkgo', 'garlic', 'knoblauch', 'ginger', 'ingwer'],
+    warning: ['curcumin', 'turmeric', 'kurkuma', 'nattokinase', 'bromelain'],
+    info: ['vitamin-k'],  // Interagiert mit Warfarin-Dosierung
+  },
+  'antidepressants': {
+    contraindicated: ['st-johns-wort', 'johanniskraut', '5-htp', 'sam-e', 'l-tryptophan'],
+    warning: ['rhodiola', 'l-tyrosine', 'tyrosin', 'ginseng'],
+    info: ['omega-3'],  // Kann synergistisch wirken
+  },
+  'blood-pressure': {
+    contraindicated: ['licorice', 'süßholz', 'ephedra', 'ma-huang'],
+    warning: ['caffeine', 'koffein', 'ginseng', 'yohimbine'],
+    info: ['coq10', 'magnesium'],  // Kann blutdrucksenkend wirken
+  },
+  'thyroid': {
+    contraindicated: [],
+    warning: ['soy', 'soja', 'kelp', 'iodine', 'jod'],
+    info: ['calcium', 'iron', 'eisen'],  // Mind. 4h Abstand
+  },
+  'diabetes': {
+    contraindicated: [],
+    warning: ['chromium', 'chrom', 'alpha-lipoic', 'berberine', 'cinnamon', 'zimt', 'bitter-melon'],
+    info: ['magnesium', 'vitamin-d'],  // Kann Insulin-Sensitivität beeinflussen
+  },
+  'birth-control': {
+    contraindicated: ['st-johns-wort', 'johanniskraut'],
+    warning: ['activated-charcoal', 'aktivkohle'],
+    info: ['probiotics', 'probiotika'],  // Bei Durchfall
+  },
+};
+
+/**
+ * Prüft Medikamenten-Interaktionen basierend auf User-Profil
+ */
+export function checkMedicationInteractions(
+  context: UserAnalysisContext
+): SupplementWarning[] {
+  const warnings: SupplementWarning[] = [];
+  const medications = context.profile?.medications || [];
+  
+  if (medications.length === 0 || medications.includes('none')) {
+    return warnings;
+  }
+  
+  for (const medication of medications) {
+    const interactions = MEDICATION_INTERACTIONS[medication];
+    if (!interactions) continue;
+    
+    for (const stackItem of context.currentStack) {
+      const idLower = stackItem.supplementId.toLowerCase();
+      const nameLower = stackItem.supplementName.toLowerCase();
+      
+      // Contraindicated - kritisch
+      for (const contra of interactions.contraindicated) {
+        if (idLower.includes(contra) || nameLower.includes(contra)) {
+          warnings.push({
+            supplementId: stackItem.supplementId,
+            supplementName: stackItem.supplementName,
+            type: 'medication',
+            severity: 'critical',
+            message: `${stackItem.supplementName} ist KONTRAINDIZIERT mit ${getMedicationLabel(medication)}. Ärztliche Beratung erforderlich!`,
+            affectedSupplements: [stackItem.supplementName],
+          });
+        }
+      }
+      
+      // Warning - Vorsicht
+      for (const warn of interactions.warning) {
+        if (idLower.includes(warn) || nameLower.includes(warn)) {
+          warnings.push({
+            supplementId: stackItem.supplementId,
+            supplementName: stackItem.supplementName,
+            type: 'medication',
+            severity: 'warning',
+            message: `${stackItem.supplementName} kann mit ${getMedicationLabel(medication)} interagieren. Mit Arzt absprechen.`,
+            affectedSupplements: [stackItem.supplementName],
+          });
+        }
+      }
+      
+      // Info - Hinweise
+      for (const info of interactions.info) {
+        if (idLower.includes(info) || nameLower.includes(info)) {
+          warnings.push({
+            supplementId: stackItem.supplementId,
+            supplementName: stackItem.supplementName,
+            type: 'medication',
+            severity: 'info',
+            message: `${stackItem.supplementName} kann die Wirkung von ${getMedicationLabel(medication)} beeinflussen. Monitoring empfohlen.`,
+            affectedSupplements: [stackItem.supplementName],
+          });
+        }
+      }
+    }
+  }
+  
+  return warnings;
+}
+
+/**
+ * Lesbare Labels für Medikamenten-Kategorien
+ */
+function getMedicationLabel(medicationId: string): string {
+  const labels: Record<string, string> = {
+    'blood-thinners': 'Blutverdünnern',
+    'antidepressants': 'Antidepressiva',
+    'blood-pressure': 'Blutdruckmedikamenten',
+    'thyroid': 'Schilddrüsenmedikamenten',
+    'diabetes': 'Diabetes-Medikamenten',
+    'birth-control': 'Verhütungsmitteln',
+  };
+  return labels[medicationId] || medicationId;
+}
+
+// ============================================
+// SUPPLEMENT WARNINGS
+// ============================================
+
 // Bekannte Warnungen und Kontraindikationen
 interface WarningRule {
   trigger: string[];
@@ -164,6 +296,7 @@ export function findStackWarnings(
   const warnings: SupplementWarning[] = [];
   const seenWarnings = new Set<string>();
   
+  // 1. Standard-Supplement-Warnungen
   for (const stackItem of context.currentStack) {
     for (const rule of WARNING_RULES) {
       if (matchesWarningTrigger(stackItem.supplementId, stackItem.supplementName, rule.trigger)) {
@@ -182,6 +315,39 @@ export function findStackWarnings(
           type: rule.type,
           severity: rule.severity,
           message: rule.message,
+        });
+      }
+    }
+  }
+  
+  // 2. Medikamenten-Interaktionen (wenn Profil vorhanden)
+  if (context.profile?.medications && context.profile.medications.length > 0) {
+    const medicationWarnings = checkMedicationInteractions(context);
+    for (const medWarn of medicationWarnings) {
+      const warningKey = `med-${medWarn.supplementId}-${medWarn.message.slice(0, 20)}`;
+      if (!seenWarnings.has(warningKey)) {
+        seenWarnings.add(warningKey);
+        warnings.push(medWarn);
+      }
+    }
+  }
+  
+  // 3. Koffein-Warnung basierend auf Profil
+  if (context.profile?.caffeineLevel === 'high') {
+    const caffeineSupps = context.currentStack.filter(s => 
+      s.supplementId.toLowerCase().includes('caffeine') ||
+      s.supplementName.toLowerCase().includes('koffein')
+    );
+    if (caffeineSupps.length > 0) {
+      const warningKey = 'caffeine-high-intake';
+      if (!seenWarnings.has(warningKey)) {
+        seenWarnings.add(warningKey);
+        warnings.push({
+          supplementId: 'caffeine',
+          supplementName: 'Koffein',
+          type: 'dosage',
+          severity: 'warning',
+          message: 'Du konsumierst bereits viel Koffein (300mg+). Supplements mit Koffein können zu Überdosierung führen.',
         });
       }
     }

@@ -11,38 +11,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useHelix } from '@/components/coach';
 import { useTranslations } from 'next-intl';
-
-// Question IDs and categories - questions are translated via i18n
-const JOURNAL_QUESTION_STRUCTURE = {
-    'sleepRecovery': [
-        { id: 'slept_well', positive: true },
-        { id: 'slept_through', positive: true },
-        { id: 'woke_rested', positive: true },
-    ],
-    'lifestyle': [
-        { id: 'training', positive: true },
-        { id: 'alcohol', positive: false },
-        { id: 'caffeine_late', positive: false },
-        { id: 'morning_sun', positive: true },
-        { id: 'screen_before_bed', positive: false },
-    ],
-    'mental': [
-        { id: 'stressed', positive: false },
-        { id: 'focused', positive: true },
-        { id: 'good_mood', positive: true },
-        { id: 'anxious', positive: false },
-    ],
-    'body': [
-        { id: 'digestion_ok', positive: true },
-        { id: 'hydrated', positive: true },
-        { id: 'sick', positive: false },
-    ],
-} as const;
-
-type QuestionId = typeof JOURNAL_QUESTION_STRUCTURE[keyof typeof JOURNAL_QUESTION_STRUCTURE][number]['id'];
-type CategoryKey = keyof typeof JOURNAL_QUESTION_STRUCTURE;
-
-const ALL_QUESTION_IDS = Object.values(JOURNAL_QUESTION_STRUCTURE).flat();
+import { 
+    JOURNAL_QUESTION_STRUCTURE, 
+    ALL_QUESTION_IDS, 
+    getHiddenQuestions,
+    type CategoryKey 
+} from '@/data/journalQuestions';
 
 
 export default function JournalPage() {
@@ -89,6 +63,13 @@ export default function JournalPage() {
     // Countdown bis Mitternacht
     const [timeUntilMidnight, setTimeUntilMidnight] = useState('');
     
+    // Hidden Questions (from profile settings)
+    const [hiddenQuestions, setHiddenQuestions] = useState<string[]>([]);
+    
+    // Load hidden questions from localStorage
+    useEffect(() => {
+        setHiddenQuestions(getHiddenQuestions());
+    }, []);
 
     // Toggle Answer
     const setAnswer = (questionId: string, value: boolean) => {
@@ -517,13 +498,20 @@ export default function JournalPage() {
                 </section>
 
                 {/* Whoop-Style Questions */}
-                {(Object.entries(JOURNAL_QUESTION_STRUCTURE) as [CategoryKey, typeof JOURNAL_QUESTION_STRUCTURE[CategoryKey]][]).map(([categoryKey, questions]) => (
+                {(Object.entries(JOURNAL_QUESTION_STRUCTURE) as [CategoryKey, typeof JOURNAL_QUESTION_STRUCTURE[CategoryKey]][]).map(([categoryKey, questions]) => {
+                    // Filter out hidden questions
+                    const visibleQuestions = questions.filter(q => !hiddenQuestions.includes(q.id));
+                    
+                    // Skip category if all questions are hidden
+                    if (visibleQuestions.length === 0) return null;
+                    
+                    return (
                     <section key={categoryKey} className="glass-panel rounded-2xl p-5 border border-white/5">
                         <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
                             {t(`categories.${categoryKey}`)}
                         </h3>
                         <div className="space-y-3">
-                            {questions.map((q) => (
+                            {visibleQuestions.map((q) => (
                                 <motion.div 
                                     key={q.id} 
                                     className="flex items-center justify-between"
@@ -544,15 +532,26 @@ export default function JournalPage() {
                                             className={cn(
                                                 "w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative overflow-hidden",
                                                 answers[q.id] === false
-                                                    ? "bg-white/20 text-white"
+                                                    ? q.positive
+                                                        ? "bg-orange-500 text-white"
+                                                        : "bg-primary text-primary-foreground"
                                                     : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
                                             )}
                                             whileTap={{ scale: 0.9 }}
                                             whileHover={{ scale: 1.05 }}
+                                            style={answers[q.id] === false && !q.positive ? { boxShadow: '0 0 20px rgba(167,243,208,0.4)' } : {}}
                                         >
                                             <motion.div animate={answers[q.id] === false ? { rotate: [0, -10, 10, 0] } : {}} transition={{ duration: 0.3 }}>
                                                 <X size={18} strokeWidth={2.5} aria-hidden="true" />
                                             </motion.div>
+                                            {answers[q.id] === false && !q.positive && (
+                                                <motion.div
+                                                    className="absolute inset-0 bg-white/20 rounded-xl"
+                                                    initial={{ scale: 0, opacity: 0.5 }}
+                                                    animate={{ scale: 2, opacity: 0 }}
+                                                    transition={{ duration: 0.4 }}
+                                                />
+                                            )}
                                         </motion.button>
                                         
                                         <motion.button
@@ -592,7 +591,8 @@ export default function JournalPage() {
                             ))}
                         </div>
                     </section>
-                ))}
+                    );
+                })}
                 
                 {/* Notes Section */}
                 <section className="glass-panel rounded-2xl p-5 border border-white/5">

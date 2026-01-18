@@ -26,7 +26,16 @@ CREATE INDEX IF NOT EXISTS idx_user_quests_status ON user_quests(status);
 -- RLS aktivieren
 ALTER TABLE user_quests ENABLE ROW LEVEL SECURITY;
 
--- Policy: Jeder kann seine eigenen Quests lesen/schreiben
-CREATE POLICY "Users can manage their own quests" ON user_quests
-    FOR ALL USING (true);
+-- Policy: Nur authentifizierte User können ihre eigenen Quests verwalten
+CREATE POLICY "Secure: Users can view own quests" ON user_quests
+    FOR SELECT USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Secure: Users can insert own quests" ON user_quests
+    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+CREATE POLICY "Secure: Users can update own quests" ON user_quests
+    FOR UPDATE USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Secure: Users can delete own quests" ON user_quests
+    FOR DELETE USING (auth.uid()::text = user_id);
 

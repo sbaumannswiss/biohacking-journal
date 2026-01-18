@@ -14,6 +14,8 @@ export interface StackItem {
     custom_time?: string;
     // Supplement data (wird lokal gemappt, nicht aus DB)
     supplement?: Supplement;
+    // True if this is a medication (med: prefix)
+    isMedication?: boolean;
 }
 
 export interface CheckIn {
@@ -126,6 +128,62 @@ export async function addToStack(
 }
 
 /**
+ * Medikament zum Stack hinzufügen (für Check-in Tracking)
+ * Medikamente werden mit "med:" Prefix gespeichert
+ */
+export async function addMedicationToStack(
+    userId: string,
+    medicationName: string,
+    time?: string, // morning, noon, evening, bedtime
+    dosage?: string
+): Promise<{ success: boolean; error?: string }> {
+    if (!supabase) {
+        return { success: false, error: 'Supabase nicht konfiguriert' };
+    }
+    
+    const supplementId = `med:${medicationName}`;
+    
+    try {
+        // Prüfen ob bereits im Stack
+        const { data: existing } = await supabase
+            .from('user_stack')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('supplement_id', supplementId)
+            .maybeSingle();
+
+        if (existing) {
+            // Update time if already exists
+            const { error: updateError } = await supabase
+                .from('user_stack')
+                .update({ custom_time: time })
+                .eq('user_id', userId)
+                .eq('supplement_id', supplementId);
+            
+            if (updateError) throw updateError;
+            return { success: true };
+        }
+
+        // Hinzufügen mit Tageszeit (vom User gewählt)
+        const { error } = await supabase
+            .from('user_stack')
+            .insert({
+                user_id: userId,
+                supplement_id: supplementId,
+                custom_dosage: dosage,
+                custom_time: time, // User-definierte Zeit
+            });
+
+        if (error) throw error;
+
+        return { success: true };
+    } catch (error: any) {
+        console.error('addMedicationToStack error:', error);
+        return { success: false, error: error.message || 'Fehler beim Hinzufügen' };
+    }
+}
+
+/**
  * Supplement aus dem Stack entfernen
  */
 export async function removeFromStack(
@@ -184,6 +242,27 @@ export async function getUserStack(userId: string): Promise<StackItem[]> {
 
         // Map supplement data
         const result = (data || []).map(item => {
+            // Check if it's a medication
+            if (item.supplement_id.startsWith('med:')) {
+                const medName = item.supplement_id.replace('med:', '');
+                return {
+                    ...item,
+                    isMedication: true,
+                    supplement: {
+                        id: item.supplement_id,
+                        name: medName,
+                        description: 'Medikament - keine Empfehlungen',
+                        benefits: [],
+                        evidence_level: 0,
+                        optimal_dosage: item.custom_dosage || '',
+                        best_time: 'any',
+                        icon: 'Pill',
+                        emoji: '💊',
+                        isMedication: true,
+                    } as Supplement & { isMedication: boolean }
+                };
+            }
+            
             // Check if it's a custom supplement
             if (item.supplement_id.startsWith('custom:')) {
                 const customId = item.supplement_id.replace('custom:', '');
@@ -1016,6 +1095,7 @@ export async function updateUserProfile(
             .from('profiles')
             .update({
                 display_name: profile.name,
+                onboarding_data: onboardingData,
                 // DSGVO-Einwilligungen bei Signup bereits erteilt
                 privacy_accepted_at: new Date().toISOString(),
                 health_data_consent_at: new Date().toISOString(),
@@ -1062,6 +1142,89 @@ export async function getUserProfile(userId: string): Promise<{
     } catch (error) {
         console.error('getUserProfile error:', error);
         return null;
+    }
+}
+
+/**
+ * Holt die Onboarding-Daten eines Users
+ */
+export async function getOnboardingProfile(userId: string): Promise<OnboardingProfile | null> {
+    if (!supabase) return null;
+    
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('display_name, onboarding_data')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+        if (!data?.onboarding_data) return null;
+
+        const od = data.onboarding_data as Record<string, unknown>;
+        
+        return {
+            name: data.display_name || '',
+            ageGroup: od.age_group as string | undefined,
+            gender: od.gender as string | undefined,
+            weight: od.weight as string | undefined,
+            chronotype: od.chronotype as string | undefined,
+            activityLevel: od.activity_level as string | undefined,
+            caffeineLevel: od.caffeine_level as string | undefined,
+            dietType: od.diet_type as string | undefined,
+            allergies: od.allergies as string[] | undefined,
+            medications: od.medications as string[] | undefined,
+            goals: od.goals as string[] | undefined,
+            wearables: od.wearables as string[] | undefined,
+        };
+    } catch (error) {
+        console.error('getOnboardingProfile error:', error);
+        return null;
+    }
+}
+
+/**
+ * Aktualisiert nur die Medikamente im Profil
+ * Für die Profil-Seite (Medikamenten-Verwaltung)
+ */
+export async function updateProfileMedications(
+    userId: string,
+    medications: string[]
+): Promise<{ success: boolean; error?: string }> {
+    if (!supabase) {
+        return { success: false, error: 'Supabase nicht konfiguriert' };
+    }
+    
+    try {
+        // Erst aktuelle onboarding_data laden
+        const { data: current, error: fetchError } = await supabase
+            .from('profiles')
+            .select('onboarding_data')
+            .eq('id', userId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        // Medikamente aktualisieren
+        const updatedData = {
+            ...(current?.onboarding_data || {}),
+            medications,
+        };
+
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                onboarding_data: updatedData,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', userId);
+
+        if (error) throw error;
+
+        return { success: true };
+    } catch (error: any) {
+        console.error('updateProfileMedications error:', error);
+        return { success: false, error: error.message || 'Fehler beim Speichern' };
     }
 }
 
