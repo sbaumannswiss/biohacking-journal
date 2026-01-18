@@ -81,7 +81,7 @@ export default function ProfilePage() {
     
     // Password Reset Handler
     const handlePasswordReset = async () => {
-        if (!user?.email) return;
+        if (!user?.email || !supabase) return;
         setIsResettingPassword(true);
         try {
             await supabase.auth.resetPasswordForEmail(user.email, {
