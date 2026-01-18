@@ -1879,7 +1879,17 @@ export default function OnboardingPage() {
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
               Schritt {step} von {TOTAL_STEPS}
             </span>
-            <div className="w-8" /> {/* Spacer */}
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.setItem('stax_onboarding_completed', 'true');
+                localStorage.setItem('stax_disclaimer_accepted', 'true');
+                router.push('/');
+              }}
+              className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+            >
+              Skip
+            </button>
           </div>
           <ProgressBar step={step} total={TOTAL_STEPS} />
         </motion.header>
