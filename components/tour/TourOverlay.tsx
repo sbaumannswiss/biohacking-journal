@@ -19,6 +19,29 @@ export function TourOverlay() {
   const tour = useTourSafe();
   const [targetRect, setTargetRect] = useState<TargetRect | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [bottomNavHeight, setBottomNavHeight] = useState(120); // Fallback
+
+  // Measure BottomNav height dynamically
+  useEffect(() => {
+    const measureBottomNav = () => {
+      const nav = document.querySelector('[data-bottom-nav]');
+      if (nav) {
+        const rect = nav.getBoundingClientRect();
+        setBottomNavHeight(rect.height + 16); // +16px spacing
+      }
+    };
+    
+    measureBottomNav();
+    window.addEventListener('resize', measureBottomNav);
+    
+    // Also measure after a short delay to catch late renders
+    const timer = setTimeout(measureBottomNav, 100);
+    
+    return () => {
+      window.removeEventListener('resize', measureBottomNav);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Find and measure target element
   const measureTarget = useCallback(() => {
@@ -88,9 +111,9 @@ export function TourOverlay() {
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
-  // Popup always centered at bottom - consistent positioning above BottomNav
+  // Popup always centered at bottom - dynamically positioned above BottomNav
   const popupStyle = {
-    bottom: 120, // Above BottomNav
+    bottom: bottomNavHeight,
     left: '50%',
     transform: 'translateX(-50%)',
   };
@@ -158,7 +181,7 @@ export function TourOverlay() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.95 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="absolute w-[320px] bg-card/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+          className="absolute w-[min(320px,calc(100vw-32px))] bg-card/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
           style={popupStyle}
         >
           {/* Header with icon and step counter */}

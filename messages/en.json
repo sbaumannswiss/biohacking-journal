@@ -97,6 +97,7 @@
     "saveChanges": "Save Changes",
     "saving": "Saving...",
     "saved": "Saved!",
+    "savedWithXP": "Saved! +50 XP",
     "vsYesterday": "vs yesterday",
     "untilTomorrow": "Until tomorrow",
     "categories": {
@@ -145,7 +146,8 @@
     "removeConfirmText": "{name} will be removed from your stack.",
     "deleteFromLibrary": "Delete from Library?",
     "deleteConfirmText": "This product will be permanently deleted and cannot be restored.",
-    "addedToStack": "{name} added to {stackName}"
+    "addedToStack": "{name} added to {stackName}",
+    "pagination": "Card {index} of {total}"
   },
   "profile": {
     "title": "Profile",

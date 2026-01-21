@@ -11,11 +11,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useHelix } from '@/components/coach';
 import { useTranslations } from 'next-intl';
-import { 
-    JOURNAL_QUESTION_STRUCTURE, 
-    ALL_QUESTION_IDS, 
+import {
+    JOURNAL_QUESTION_STRUCTURE,
+    ALL_QUESTION_IDS,
     getHiddenQuestions,
-    type CategoryKey 
+    type CategoryKey
 } from '@/data/journalQuestions';
 
 
@@ -24,7 +24,7 @@ export default function JournalPage() {
     const { triggerMessage } = useHelix();
     const t = useTranslations('journal');
     const tCommon = useTranslations('common');
-    
+
     // State für bereits geloggt
     const [hasLoggedToday, setHasLoggedToday] = useState(false);
     const [todayData, setTodayData] = useState<{
@@ -35,37 +35,37 @@ export default function JournalPage() {
     } | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isFirstLog, setIsFirstLog] = useState(true);
-    
+
     // Slider Metrics (0-10)
     const [sleep, setSleep] = useState(7);
     const [energy, setEnergy] = useState(7);
     const [focus, setFocus] = useState(7);
     const [mood, setMood] = useState(7);
-    
+
     // Toggle Answers (Whoop-Style)
     const [answers, setAnswers] = useState<Record<string, boolean | null>>({});
-    
+
     // Notes
     const [notes, setNotes] = useState('');
-    
+
     // UI State
     const [showSliders, setShowSliders] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pageLoading, setPageLoading] = useState(true);
-    
+
     // Graph Daten
     const [graphData, setGraphData] = useState<number[]>([]);
     const [graphLoading, setGraphLoading] = useState(true);
     const [previousDayData, setPreviousDayData] = useState<{ sleep: number; energy: number; focus: number } | null>(null);
-    
+
     // Countdown bis Mitternacht
     const [timeUntilMidnight, setTimeUntilMidnight] = useState('');
-    
+
     // Hidden Questions (from profile settings)
     const [hiddenQuestions, setHiddenQuestions] = useState<string[]>([]);
-    
+
     // Load hidden questions from localStorage
     useEffect(() => {
         setHiddenQuestions(getHiddenQuestions());
@@ -78,16 +78,16 @@ export default function JournalPage() {
             [questionId]: prev[questionId] === value ? null : value
         }));
     };
-    
+
     // Berechne Score
     const getAnswerScore = () => {
         let positive = 0;
         let negative = 0;
-        
+
         ALL_QUESTION_IDS.forEach(q => {
             const answer = answers[q.id];
             if (answer === null || answer === undefined) return;
-            
+
             if (q.positive) {
                 if (answer) positive++;
                 else negative++;
@@ -96,7 +96,7 @@ export default function JournalPage() {
                 else negative++;
             }
         });
-        
+
         return { positive, negative, total: positive + negative };
     };
 
@@ -123,13 +123,13 @@ export default function JournalPage() {
             const midnight = new Date(now);
             midnight.setHours(24, 0, 0, 0);
             const diff = midnight.getTime() - now.getTime();
-            
+
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            
+
             setTimeUntilMidnight(`${hours}h ${minutes}m`);
         };
-        
+
         updateCountdown();
         const interval = setInterval(updateCountdown, 60000);
         return () => clearInterval(interval);
@@ -139,7 +139,7 @@ export default function JournalPage() {
     useEffect(() => {
         if (userId) {
             setPageLoading(true);
-            
+
             Promise.all([
                 getTodayMetrics(userId),
                 getMetricsHistory(userId, 7)
@@ -170,13 +170,13 @@ export default function JournalPage() {
                         setNotes(todayResult.data.notes);
                     }
                 }
-                
+
                 // Graph Daten
-                const averages = historyData.map(d => 
+                const averages = historyData.map(d =>
                     Math.round(((d.sleep || 5) + (d.energy || 5) + (d.focus || 5)) / 3 * 10)
                 );
                 setGraphData(averages.length > 0 ? averages : []);
-                
+
                 // Vorheriger Tag für Trend
                 if (historyData.length >= 2) {
                     const yesterday = historyData[historyData.length - 2];
@@ -186,7 +186,7 @@ export default function JournalPage() {
                         focus: yesterday.focus,
                     });
                 }
-                
+
                 setGraphLoading(false);
                 setPageLoading(false);
             }).catch(err => {
@@ -197,19 +197,25 @@ export default function JournalPage() {
         }
     }, [userId]);
 
+    // Earned XP State
+    const [earnedXP, setEarnedXP] = useState(false);
+
     const handleSave = async () => {
         if (!userId) return;
-        
+
+        // Capture logic
+        const wasFirstLog = isFirstLog;
+
         setIsSaving(true);
         setError(null);
-        
+
         const stressScore = (answers['stressed'] ? 7 : 3) + (answers['anxious'] ? 2 : 0);
         const motivationScore = answers['focused'] ? 8 : answers['good_mood'] ? 7 : 5;
         const digestionScore = answers['digestion_ok'] ? 8 : 4;
 
-        const result = await saveDailyMetrics(userId, { 
-            sleep, 
-            energy, 
+        const result = await saveDailyMetrics(userId, {
+            sleep,
+            energy,
             focus,
             mood,
             stress: stressScore,
@@ -225,24 +231,31 @@ export default function JournalPage() {
 
         if (result.success) {
             setSaved(true);
+            if (wasFirstLog) {
+                setEarnedXP(true);
+            }
+
             if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
-            
+
             // Update lokaler State
             setTodayData({ sleep, energy, focus, mood });
             setHasLoggedToday(true);
             setIsEditMode(false);
-            
+
             // XP nur beim ersten Log
-            if (isFirstLog) {
+            if (wasFirstLog) {
                 triggerMessage('journalComplete');
                 setIsFirstLog(false);
             }
-            
+
             // Update Graph
             const newAverage = Math.round(((sleep + energy + focus + mood) / 4) * 10);
             setGraphData(prev => [...prev.slice(-6), newAverage]);
-            
-            setTimeout(() => setSaved(false), 2000);
+
+            setTimeout(() => {
+                setSaved(false);
+                setEarnedXP(false);
+            }, 2000);
         } else {
             setError(result.error || 'Fehler beim Speichern');
         }
@@ -282,14 +295,14 @@ export default function JournalPage() {
 
                 <main className="flex-1 px-6 space-y-6">
                     {/* Success Header */}
-                    <motion.section 
+                    <motion.section
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="glass-panel rounded-2xl p-6 border border-primary/30 text-center relative overflow-hidden"
                     >
                         {/* Background Glow */}
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none" />
-                        
+
                         <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
@@ -304,7 +317,7 @@ export default function JournalPage() {
                                     <Check size={40} className="text-primary" strokeWidth={3} />
                                 </motion.div>
                             </div>
-                            
+
                             <h2 className="text-xl font-bold text-foreground mb-1">
                                 {t('alreadyLogged')}
                             </h2>
@@ -312,7 +325,7 @@ export default function JournalPage() {
                     </motion.section>
 
                     {/* Score Card */}
-                    <motion.section 
+                    <motion.section
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
@@ -336,10 +349,10 @@ export default function JournalPage() {
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* Big Score */}
                         <div className="text-center mb-6">
-                            <motion.div 
+                            <motion.div
                                 className="text-6xl font-black text-primary"
                                 initial={{ scale: 0.5, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
@@ -383,7 +396,7 @@ export default function JournalPage() {
                     </motion.div>
 
                     {/* Countdown & Edit */}
-                    <motion.section 
+                    <motion.section
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
@@ -399,7 +412,7 @@ export default function JournalPage() {
                                     <div className="text-xs text-muted-foreground">{t('inTime', { time: timeUntilMidnight })}</div>
                                 </div>
                             </div>
-                            
+
                             <button
                                 onClick={() => setIsEditMode(true)}
                                 className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-foreground hover:bg-white/10 transition-colors"
@@ -411,7 +424,7 @@ export default function JournalPage() {
                     </motion.section>
 
                     {/* Motivation Footer */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 }}
@@ -452,7 +465,7 @@ export default function JournalPage() {
                         </button>
                     )}
                 </div>
-                
+
                 {/* Beschreibung für Zeitraum */}
                 <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-xl">
                     <p className="text-xs text-primary/80">
@@ -461,8 +474,8 @@ export default function JournalPage() {
                 </div>
             </header>
 
-                <main className="flex-1 px-6 space-y-6">
-                    <ActivityGraph data={graphData} loading={graphLoading} />
+            <main className="flex-1 px-6 space-y-6">
+                <ActivityGraph data={graphData} loading={graphLoading} />
 
                 {/* Slider Section */}
                 <section className="glass-panel rounded-2xl p-5 border border-white/5">
@@ -478,7 +491,7 @@ export default function JournalPage() {
                         </h3>
                         <ChevronDown size={16} className={cn("text-muted-foreground transition-transform", showSliders && "rotate-180")} />
                     </button>
-                    
+
                     <AnimatePresence>
                         {showSliders && (
                             <motion.div
@@ -501,99 +514,99 @@ export default function JournalPage() {
                 {(Object.entries(JOURNAL_QUESTION_STRUCTURE) as [CategoryKey, typeof JOURNAL_QUESTION_STRUCTURE[CategoryKey]][]).map(([categoryKey, questions]) => {
                     // Filter out hidden questions
                     const visibleQuestions = questions.filter(q => !hiddenQuestions.includes(q.id));
-                    
+
                     // Skip category if all questions are hidden
                     if (visibleQuestions.length === 0) return null;
-                    
+
                     return (
-                    <section key={categoryKey} className="glass-panel rounded-2xl p-5 border border-white/5">
-                        <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
-                            {t(`categories.${categoryKey}`)}
-                        </h3>
-                        <div className="space-y-3">
-                            {visibleQuestions.map((q) => (
-                                <motion.div 
-                                    key={q.id} 
-                                    className="flex items-center justify-between"
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.05 }}
-                                >
-                                    <span className="text-sm text-foreground">{t(`questions.${q.id}`)}</span>
-                                    <div className="flex gap-2">
-                                        <motion.button
-                                            type="button"
-                                            onClick={() => {
-                                                setAnswer(q.id, false);
-                                                if (navigator.vibrate) navigator.vibrate(15);
-                                            }}
-                                            aria-label={`${t(`questions.${q.id}`)} - No`}
-                                            aria-pressed={answers[q.id] === false}
-                                            className={cn(
-                                                "w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative overflow-hidden",
-                                                answers[q.id] === false
-                                                    ? q.positive
-                                                        ? "bg-orange-500 text-white"
-                                                        : "bg-primary text-primary-foreground"
-                                                    : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
-                                            )}
-                                            whileTap={{ scale: 0.9 }}
-                                            whileHover={{ scale: 1.05 }}
-                                            style={answers[q.id] === false && !q.positive ? { boxShadow: '0 0 20px rgba(167,243,208,0.4)' } : {}}
-                                        >
-                                            <motion.div animate={answers[q.id] === false ? { rotate: [0, -10, 10, 0] } : {}} transition={{ duration: 0.3 }}>
-                                                <X size={18} strokeWidth={2.5} aria-hidden="true" />
-                                            </motion.div>
-                                            {answers[q.id] === false && !q.positive && (
-                                                <motion.div
-                                                    className="absolute inset-0 bg-white/20 rounded-xl"
-                                                    initial={{ scale: 0, opacity: 0.5 }}
-                                                    animate={{ scale: 2, opacity: 0 }}
-                                                    transition={{ duration: 0.4 }}
-                                                />
-                                            )}
-                                        </motion.button>
-                                        
-                                        <motion.button
-                                            type="button"
-                                            onClick={() => {
-                                                setAnswer(q.id, true);
-                                                if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
-                                            }}
-                                            aria-label={`${t(`questions.${q.id}`)} - Yes`}
-                                            aria-pressed={answers[q.id] === true}
-                                            className={cn(
-                                                "w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative overflow-hidden",
-                                                answers[q.id] === true
-                                                    ? q.positive 
-                                                        ? "bg-primary text-primary-foreground" 
-                                                        : "bg-orange-500 text-white"
-                                                    : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
-                                            )}
-                                            whileTap={{ scale: 0.9 }}
-                                            whileHover={{ scale: 1.05 }}
-                                            style={answers[q.id] === true && q.positive ? { boxShadow: '0 0 20px rgba(167,243,208,0.4)' } : {}}
-                                        >
-                                            <motion.div animate={answers[q.id] === true ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}>
-                                                <Check size={18} strokeWidth={2.5} aria-hidden="true" />
-                                            </motion.div>
-                                            {answers[q.id] === true && q.positive && (
-                                                <motion.div
-                                                    className="absolute inset-0 bg-white/20 rounded-xl"
-                                                    initial={{ scale: 0, opacity: 0.5 }}
-                                                    animate={{ scale: 2, opacity: 0 }}
-                                                    transition={{ duration: 0.4 }}
-                                                />
-                                            )}
-                                        </motion.button>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </section>
+                        <section key={categoryKey} className="glass-panel rounded-2xl p-5 border border-white/5">
+                            <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
+                                {t(`categories.${categoryKey}`)}
+                            </h3>
+                            <div className="space-y-3">
+                                {visibleQuestions.map((q) => (
+                                    <motion.div
+                                        key={q.id}
+                                        className="flex items-center justify-between"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.05 }}
+                                    >
+                                        <span className="text-sm text-foreground">{t(`questions.${q.id}`)}</span>
+                                        <div className="flex gap-2">
+                                            <motion.button
+                                                type="button"
+                                                onClick={() => {
+                                                    setAnswer(q.id, false);
+                                                    if (navigator.vibrate) navigator.vibrate(15);
+                                                }}
+                                                aria-label={`${t(`questions.${q.id}`)} - No`}
+                                                aria-pressed={answers[q.id] === false}
+                                                className={cn(
+                                                    "w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative overflow-hidden",
+                                                    answers[q.id] === false
+                                                        ? q.positive
+                                                            ? "bg-orange-500 text-white"
+                                                            : "bg-primary text-primary-foreground"
+                                                        : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
+                                                )}
+                                                whileTap={{ scale: 0.9 }}
+                                                whileHover={{ scale: 1.05 }}
+                                                style={answers[q.id] === false && !q.positive ? { boxShadow: '0 0 20px rgba(167,243,208,0.4)' } : {}}
+                                            >
+                                                <motion.div animate={answers[q.id] === false ? { rotate: [0, -10, 10, 0] } : {}} transition={{ duration: 0.3 }}>
+                                                    <X size={18} strokeWidth={2.5} aria-hidden="true" />
+                                                </motion.div>
+                                                {answers[q.id] === false && !q.positive && (
+                                                    <motion.div
+                                                        className="absolute inset-0 bg-white/20 rounded-xl"
+                                                        initial={{ scale: 0, opacity: 0.5 }}
+                                                        animate={{ scale: 2, opacity: 0 }}
+                                                        transition={{ duration: 0.4 }}
+                                                    />
+                                                )}
+                                            </motion.button>
+
+                                            <motion.button
+                                                type="button"
+                                                onClick={() => {
+                                                    setAnswer(q.id, true);
+                                                    if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+                                                }}
+                                                aria-label={`${t(`questions.${q.id}`)} - Yes`}
+                                                aria-pressed={answers[q.id] === true}
+                                                className={cn(
+                                                    "w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative overflow-hidden",
+                                                    answers[q.id] === true
+                                                        ? q.positive
+                                                            ? "bg-primary text-primary-foreground"
+                                                            : "bg-orange-500 text-white"
+                                                        : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
+                                                )}
+                                                whileTap={{ scale: 0.9 }}
+                                                whileHover={{ scale: 1.05 }}
+                                                style={answers[q.id] === true && q.positive ? { boxShadow: '0 0 20px rgba(167,243,208,0.4)' } : {}}
+                                            >
+                                                <motion.div animate={answers[q.id] === true ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}>
+                                                    <Check size={18} strokeWidth={2.5} aria-hidden="true" />
+                                                </motion.div>
+                                                {answers[q.id] === true && q.positive && (
+                                                    <motion.div
+                                                        className="absolute inset-0 bg-white/20 rounded-xl"
+                                                        initial={{ scale: 0, opacity: 0.5 }}
+                                                        animate={{ scale: 2, opacity: 0 }}
+                                                        transition={{ duration: 0.4 }}
+                                                    />
+                                                )}
+                                            </motion.button>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </section>
                     );
                 })}
-                
+
                 {/* Notes Section */}
                 <section className="glass-panel rounded-2xl p-5 border border-white/5">
                     <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">
@@ -611,12 +624,12 @@ export default function JournalPage() {
                         <span>{notes.length}/280</span>
                     </div>
                 </section>
-                
+
                 {/* Summary & Save */}
                 <section className="space-y-3">
                     <AnimatePresence>
                         {answeredCount > 0 && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
@@ -633,7 +646,7 @@ export default function JournalPage() {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                    
+
                     <motion.button
                         onClick={() => {
                             handleSave();
@@ -645,8 +658,8 @@ export default function JournalPage() {
                         aria-label={isEditMode ? 'Änderungen speichern' : 'Journal speichern'}
                         className={cn(
                             "w-full font-bold py-4 px-4 rounded-2xl flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed relative overflow-hidden",
-                            saved 
-                                ? "bg-green-500 text-white" 
+                            saved
+                                ? "bg-green-500 text-white"
                                 : "bg-primary text-primary-foreground hover:shadow-lg hover:shadow-primary/20"
                         )}
                     >
@@ -663,7 +676,7 @@ export default function JournalPage() {
                                     <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ duration: 0.4 }}>
                                         <Check size={24} strokeWidth={3} aria-hidden="true" />
                                     </motion.div>
-                                    <span>{t('saved')}</span>
+                                    <span>{earnedXP ? t('savedWithXP') : t('saved')}</span>
                                 </motion.div>
                             ) : (
                                 <motion.div key="save" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2">
@@ -672,7 +685,7 @@ export default function JournalPage() {
                                 </motion.div>
                             )}
                         </AnimatePresence>
-                        
+
                         {saved && (
                             <>
                                 {[...Array(8)].map((_, i) => (
@@ -689,7 +702,7 @@ export default function JournalPage() {
                     </motion.button>
 
                     {error && (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: -10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-2 text-red-400 text-sm"

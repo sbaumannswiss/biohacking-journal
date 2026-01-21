@@ -97,6 +97,7 @@
     "saveChanges": "Änderungen speichern",
     "saving": "Speichern...",
     "saved": "Gespeichert!",
+    "savedWithXP": "Gespeichert! +50 XP",
     "vsYesterday": "vs gestern",
     "untilTomorrow": "Bis morgen",
     "categories": {
@@ -145,7 +146,8 @@
     "removeConfirmText": "{name} wird aus deinem Stack entfernt.",
     "deleteFromLibrary": "Aus Library löschen?",
     "deleteConfirmText": "Dieses Produkt wird permanent gelöscht und kann nicht wiederhergestellt werden.",
-    "addedToStack": "{name} zum {stackName} hinzugefügt"
+    "addedToStack": "{name} zum {stackName} hinzugefügt",
+    "pagination": "Karte {index} von {total}"
   },
   "profile": {
     "title": "Profil",

@@ -233,7 +233,7 @@ export function FloatingChat() {
         onClick={() => setIsOpen(!isOpen)}
         className="fixed z-50 w-12 h-12 rounded-full cursor-pointer"
         style={{ 
-          top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+          top: 'calc(env(safe-area-inset-top, 0px) + 40px)',
           right: '16px',
         }}
         whileHover={{ scale: 1.1 }}
