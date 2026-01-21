@@ -111,7 +111,7 @@ export async function requestHealthPermissions(): Promise<HealthPermissionStatus
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     await Health.requestAuthorization({
       read: HEALTH_DATA_TYPES.read as any,
       write: [],

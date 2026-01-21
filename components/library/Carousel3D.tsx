@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Supplement } from '@/data/supplements';
 import { SupplementCard3D } from './SupplementCard3D';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface Carousel3DProps {
     supplements: Supplement[];
@@ -24,6 +25,21 @@ export function Carousel3D({
     onDeleteFromLibrary,
     initialIndex,
 }: Carousel3DProps) {
+    const t = useTranslations('library');
+    const [cardWidth, setCardWidth] = useState(280);
+
+    // Responsive Card Width
+    useEffect(() => {
+        const handleResize = () => {
+            const width = Math.min(280, window.innerWidth * 0.75);
+            setCardWidth(width);
+        };
+
+        handleResize(); // Init
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const [activeIndex, setActiveIndex] = useState(initialIndex || 0);
     const [isDragging, setIsDragging] = useState(false);
     const dragStartX = useRef(0);
@@ -123,8 +139,7 @@ export function Carousel3D({
             return { display: 'none' };
         }
 
-        const cardWidth = 280;
-        const peekAmount = 120; // Mehr sichtbar von seitlichen Karten
+        const peekAmount = cardWidth * 0.45; // Relativ zur Breite (ca 120px bei 280px Breite)
 
         // ZENTRUM-KARTE (absOffset === 0)
         if (absOffset === 0) {
@@ -141,10 +156,10 @@ export function Carousel3D({
 
         // ERSTE SEITLICHE KARTEN (absOffset === 1)
         if (absOffset === 1) {
-            const translateX = offset > 0 
+            const translateX = offset > 0
                 ? cardWidth - peekAmount + 20  // Rechts
                 : -(cardWidth - peekAmount + 20); // Links
-            
+
             return {
                 transform: `translate3d(${translateX}px, 0, -80px) rotateY(${offset * -25}deg) scale(0.88)`,
                 opacity: 0.75,
@@ -157,10 +172,10 @@ export function Carousel3D({
         }
 
         // ZWEITE SEITLICHE KARTEN (absOffset === 2) - Peek-Effekt
-        const translateX = offset > 0 
+        const translateX = offset > 0
             ? cardWidth * 1.4  // Weiter rechts
             : -(cardWidth * 1.4); // Weiter links
-        
+
         return {
             transform: `translate3d(${translateX}px, 0, -200px) rotateY(${offset * -35}deg) scale(0.7)`,
             opacity: 0.4,
@@ -186,7 +201,7 @@ export function Carousel3D({
             {/* Carousel Container - Enhanced 3D Perspective */}
             <div
                 ref={containerRef}
-                className="relative w-full h-[480px] flex items-center justify-center"
+                className="relative w-full h-[min(480px,60vh)] flex items-center justify-center"
                 style={{
                     perspective: '1200px',
                     WebkitPerspective: '1200px',
@@ -213,10 +228,10 @@ export function Carousel3D({
                 onTouchEnd={handleDragEnd}
             >
                 {/* Cards Container - preserve-3d MUSS hier sein */}
-                <div 
+                <div
                     className="relative flex items-center justify-center"
-                    style={{ 
-                        width: '100%', 
+                    style={{
+                        width: '100%',
                         height: '100%',
                         transformStyle: 'preserve-3d',
                         WebkitTransformStyle: 'preserve-3d',
@@ -227,7 +242,7 @@ export function Carousel3D({
                         {supplements.map((supplement, index) => {
                             const offset = index - activeIndex;
                             const absOffset = Math.abs(offset);
-                            
+
                             if (absOffset > 1) return null;
 
                             const slideDirection = offset > 0 ? 1 : offset < 0 ? -1 : 0;
@@ -242,21 +257,21 @@ export function Carousel3D({
                                         transformStyle: 'preserve-3d',
                                         WebkitTransformStyle: 'preserve-3d',
                                     }}
-                                    initial={{ 
+                                    initial={{
                                         opacity: 0,
                                         x: slideDirection * 500,
                                         z: -200,
                                         scale: 0.7,
                                         rotateY: slideDirection * 25
                                     }}
-                                    animate={{ 
+                                    animate={{
                                         opacity: cardStyle.opacity,
                                         x: absOffset === 0 ? 0 : (offset > 0 ? 80 : -80),
                                         z: absOffset === 0 ? 50 : -120,
                                         scale: absOffset === 0 ? 1.05 : 0.85,
                                         rotateY: absOffset === 0 ? 0 : (offset > 0 ? -15 : 15)
                                     }}
-                                    exit={{ 
+                                    exit={{
                                         opacity: 0,
                                         x: -slideDirection * 500,
                                         z: -200,
@@ -331,9 +346,7 @@ export function Carousel3D({
                     <ChevronLeft size={20} />
                 </button>
                 <span className="text-sm text-white/70 min-w-[6rem] text-center">
-                    <span className="text-primary font-bold">{activeIndex + 1}</span>
-                    <span className="text-white/40 mx-1">von</span>
-                    <span className="font-medium">{supplements.length}</span>
+                    {t('pagination', { index: activeIndex + 1, total: supplements.length })}
                 </span>
                 <button
                     onClick={goToNext}

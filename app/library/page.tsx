@@ -32,6 +32,27 @@ function LibraryContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [initialIndex, setInitialIndex] = useState<number | undefined>(undefined);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [bottomNavHeight, setBottomNavHeight] = useState(96);
+
+    // BottomNav Höhe messen
+    useEffect(() => {
+        const measureBottomNav = () => {
+            const nav = document.querySelector('[data-bottom-nav]');
+            if (nav) {
+                const rect = nav.getBoundingClientRect();
+                setBottomNavHeight(rect.height + 16);
+            }
+        };
+        
+        measureBottomNav();
+        window.addEventListener('resize', measureBottomNav);
+        const timer = setTimeout(measureBottomNav, 100);
+        
+        return () => {
+            window.removeEventListener('resize', measureBottomNav);
+            clearTimeout(timer);
+        };
+    }, []);
 
     // Supplement-Typ Kategorien (basierend auf Namen/ID)
     const CATEGORY_RULES: { name: string; match: (s: Supplement) => boolean }[] = [
@@ -133,7 +154,7 @@ function LibraryContent() {
     // Erweiterte Suche + Filter: Name, Benefits, Description, ID, Emoji
     const filteredSupplements = useMemo(() => {
         // Zuerst: Kategorie/Benefit-Filter anwenden
-        let result = getFilteredByCategory(allSupplements, activeFilter);
+        const result = getFilteredByCategory(allSupplements, activeFilter);
         
         // Dann: Suchtext prüfen
         const searchLower = search.toLowerCase().trim();
@@ -610,13 +631,14 @@ function LibraryContent() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
                         className={cn(
-                            "fixed bottom-24 left-1/2 -translate-x-1/2 z-50",
+                            "fixed left-1/2 -translate-x-1/2 z-50",
                             "px-4 py-3 rounded-xl backdrop-blur-md shadow-lg",
                             "border text-sm font-medium",
                             toast.type === 'success' 
                                 ? "bg-primary/20 border-primary/30 text-primary"
                                 : "bg-red-500/20 border-red-500/30 text-red-400"
                         )}
+                        style={{ bottom: bottomNavHeight }}
                     >
                         {toast.message}
                     </motion.div>

@@ -51,10 +51,10 @@ export function generateMockDayData(
   const weekendBonus = isWeekend ? 0.5 : 0;
 
   // Supplement-Effekte simulieren
-  let magnesiumBonus = supplements.includes('magnesium') ? 0.8 : 0;
-  let ashwagandhaBonus = supplements.includes('ashwagandha') ? -0.5 : 0; // Stress-Reduktion
-  let creatineBonus = supplements.includes('creatine') ? 0.3 : 0;
-  let omega3Bonus = supplements.includes('omega-3') ? 0.4 : 0;
+  const magnesiumBonus = supplements.includes('magnesium') ? 0.8 : 0;
+  const ashwagandhaBonus = supplements.includes('ashwagandha') ? -0.5 : 0; // Stress-Reduktion
+  const creatineBonus = supplements.includes('creatine') ? 0.3 : 0;
+  const omega3Bonus = supplements.includes('omega-3') ? 0.4 : 0;
 
   // Basis-Schlafqualität
   const sleepScore = Math.min(10, Math.max(1, 
