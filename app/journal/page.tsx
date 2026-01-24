@@ -548,7 +548,7 @@ export default function JournalPage() {
                                                         ? q.positive
                                                             ? "bg-orange-500 text-white"
                                                             : "bg-primary text-primary-foreground"
-                                                        : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
+                                                        : "bg-muted/30 text-muted-foreground/50 hover:bg-muted/50 hover:text-muted-foreground"
                                                 )}
                                                 whileTap={{ scale: 0.9 }}
                                                 whileHover={{ scale: 1.05 }}
@@ -581,7 +581,7 @@ export default function JournalPage() {
                                                         ? q.positive
                                                             ? "bg-primary text-primary-foreground"
                                                             : "bg-orange-500 text-white"
-                                                        : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
+                                                        : "bg-muted/30 text-muted-foreground/50 hover:bg-muted/50 hover:text-muted-foreground"
                                                 )}
                                                 whileTap={{ scale: 0.9 }}
                                                 whileHover={{ scale: 1.05 }}

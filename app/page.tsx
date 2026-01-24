@@ -445,10 +445,10 @@ export default function Home() {
               {userName ? userName.charAt(0).toUpperCase() : 'B'}
             </button>
             <div>
-              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-primary/80">
+              <h1 className="text-2xl font-bold text-foreground">
                 {t(`greeting.${timeOfDay as TimeKey}`)},
               </h1>
-              <span className="text-primary font-bold text-xl">{userName || t('biohacker')}</span>
+              <span className="text-primary dark:text-primary font-bold text-xl">{userName || t('biohacker')}</span>
             </div>
           </div>
         </div>
@@ -520,7 +520,7 @@ export default function Home() {
                   "flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl font-medium text-xs transition-all relative",
                   isActive 
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                    : "bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground",
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
                   isCurrent && !isActive && "ring-1 ring-primary/30"
                 )}
               >
@@ -639,7 +639,7 @@ export default function Home() {
                 </>
               ) : userStack.length > 0 ? (
                 // User hat Supplements, aber keine für diese Tageszeit
-                <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed border-white/10 rounded-2xl bg-white/5">
+                <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed border-border rounded-2xl bg-muted/30">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3 text-primary">
                     <Droplets size={24} />
                   </div>
@@ -765,7 +765,7 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => setShowQuests(false)}
-                  className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                  className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors"
                 >
                   <X size={20} className="text-muted-foreground" />
                 </button>

@@ -594,7 +594,7 @@ function Step1Welcome({ onNext }: { onNext: () => void }) {
         className="mb-8"
       >
         <SpeechBubble className="max-w-sm">
-          <h1 className="text-xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-primary">
+          <h1 className="text-xl font-bold mb-2 text-foreground">
             Hi, ich bin Helix!
           </h1>
           <p className="text-muted-foreground">
@@ -1645,7 +1645,7 @@ function Step8Paywall({
           transition={{ delay: 0.3 }}
           className="mt-4"
         >
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-primary">
+          <h2 className="text-2xl font-bold text-foreground">
             Perfekt, {data.name || 'User'}!
           </h2>
           <p className="text-muted-foreground mt-2">

@@ -345,13 +345,13 @@ function LibraryContent() {
                     transition={{ delay: 0.15 }}
                     className="relative group"
                 >
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors" size={16} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={16} />
                     <input
                         type="text"
                         placeholder={t('searchPlaceholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-14 py-3.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all"
+                        className="w-full bg-card/50 border border-border rounded-2xl pl-11 pr-14 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:bg-card/80 transition-all"
                     />
                     {/* Camera Scan Button */}
                     <button
@@ -364,7 +364,7 @@ function LibraryContent() {
                     {search && (
                         <button
                             onClick={() => setSearch('')}
-                            className="absolute right-14 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                            className="absolute right-14 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
                             ✕
                         </button>
@@ -387,7 +387,7 @@ function LibraryContent() {
                                 "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
                                 activeFilter === null
                                     ? "bg-primary text-black"
-                                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                             )}
                         >
                             {t('all')}
@@ -402,7 +402,7 @@ function LibraryContent() {
                                     "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
                                     activeFilter === cat.name
                                         ? "bg-primary text-black"
-                                        : "bg-white/10 text-white/80 hover:bg-white/15 hover:text-white border border-white/10"
+                                        : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground border border-border"
                                 )}
                             >
                                 {cat.name}
@@ -410,7 +410,7 @@ function LibraryContent() {
                         ))}
                         
                         {/* Trenner */}
-                        <div className="w-px bg-white/20 mx-1" />
+                        <div className="w-px bg-border mx-1" />
                         
                         {/* Benefit-Tags (Sleep, Energy, etc.) */}
                         {benefitTags.map(benefit => (
@@ -421,7 +421,7 @@ function LibraryContent() {
                                     "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
                                     activeFilter === benefit
                                         ? "bg-primary text-black"
-                                        : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                                 )}
                             >
                                 {benefit}
