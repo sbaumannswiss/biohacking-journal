@@ -91,3 +91,28 @@ export interface ActiveWorkout {
     estimatedDuration: number
     phase: WorkoutPhase
 }
+
+// ============================================
+// CALENDAR TYPES
+// ============================================
+
+export interface CalendarTimeConfig {
+    hour: number
+    minute: number
+}
+
+export interface CalendarSettingsDB {
+    id: string
+    user_id: string
+    enabled: boolean
+    alert_minutes: number
+    custom_times: Record<TimeOfDay, CalendarTimeConfig>
+    created_at: string
+    updated_at: string
+}
+
+export interface SupplementCalendarSync {
+    supplementId: string
+    calendarEventId: string
+    syncedAt: string
+}
