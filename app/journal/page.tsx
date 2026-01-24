@@ -329,7 +329,7 @@ export default function JournalPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="glass-panel rounded-2xl p-5 border border-white/5"
+                        className="glass-panel rounded-2xl p-5 border border-overlay-light"
                     >
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -340,7 +340,7 @@ export default function JournalPage() {
                                     "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full",
                                     trend.direction === 'up' && "bg-green-500/20 text-green-400",
                                     trend.direction === 'down' && "bg-red-500/20 text-red-400",
-                                    trend.direction === 'stable' && "bg-white/10 text-muted-foreground"
+                                    trend.direction === 'stable' && "bg-overlay-medium text-muted-foreground"
                                 )}>
                                     {trend.direction === 'up' && <TrendingUp size={12} />}
                                     {trend.direction === 'down' && <TrendingDown size={12} />}
@@ -376,7 +376,7 @@ export default function JournalPage() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.3 + i * 0.05 }}
-                                    className="bg-white/5 rounded-xl p-3 text-center"
+                                    className="bg-overlay-light rounded-xl p-3 text-center"
                                 >
                                     <metric.icon size={16} className={cn("mx-auto mb-1", metric.color)} />
                                     <div className="text-lg font-bold text-foreground">{metric.value}</div>
@@ -400,7 +400,7 @@ export default function JournalPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="glass-panel rounded-2xl p-5 border border-white/5"
+                        className="glass-panel rounded-2xl p-5 border border-overlay-light"
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -415,7 +415,7 @@ export default function JournalPage() {
 
                             <button
                                 onClick={() => setIsEditMode(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-foreground hover:bg-white/10 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-overlay-light border border-overlay-medium rounded-xl text-sm font-medium text-foreground hover:bg-overlay-medium transition-colors"
                             >
                                 <Pencil size={14} />
                                 {tCommon('edit')}
@@ -459,7 +459,7 @@ export default function JournalPage() {
                     {isEditMode && (
                         <button
                             onClick={() => setIsEditMode(false)}
-                            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                            className="p-2 rounded-full bg-overlay-light hover:bg-overlay-medium transition-colors"
                         >
                             <X size={20} className="text-muted-foreground" />
                         </button>
@@ -478,7 +478,7 @@ export default function JournalPage() {
                 <ActivityGraph data={graphData} loading={graphLoading} />
 
                 {/* Slider Section */}
-                <section className="glass-panel rounded-2xl p-5 border border-white/5">
+                <section className="glass-panel rounded-2xl p-5 border border-overlay-light">
                     <button
                         type="button"
                         onClick={() => setShowSliders(!showSliders)}
@@ -519,7 +519,7 @@ export default function JournalPage() {
                     if (visibleQuestions.length === 0) return null;
 
                     return (
-                        <section key={categoryKey} className="glass-panel rounded-2xl p-5 border border-white/5">
+                        <section key={categoryKey} className="glass-panel rounded-2xl p-5 border border-overlay-light">
                             <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
                                 {t(`categories.${categoryKey}`)}
                             </h3>
@@ -559,7 +559,7 @@ export default function JournalPage() {
                                                 </motion.div>
                                                 {answers[q.id] === false && !q.positive && (
                                                     <motion.div
-                                                        className="absolute inset-0 bg-white/20 rounded-xl"
+                                                        className="absolute inset-0 bg-overlay-strong rounded-xl"
                                                         initial={{ scale: 0, opacity: 0.5 }}
                                                         animate={{ scale: 2, opacity: 0 }}
                                                         transition={{ duration: 0.4 }}
@@ -592,7 +592,7 @@ export default function JournalPage() {
                                                 </motion.div>
                                                 {answers[q.id] === true && q.positive && (
                                                     <motion.div
-                                                        className="absolute inset-0 bg-white/20 rounded-xl"
+                                                        className="absolute inset-0 bg-overlay-strong rounded-xl"
                                                         initial={{ scale: 0, opacity: 0.5 }}
                                                         animate={{ scale: 2, opacity: 0 }}
                                                         transition={{ duration: 0.4 }}
@@ -608,7 +608,7 @@ export default function JournalPage() {
                 })}
 
                 {/* Notes Section */}
-                <section className="glass-panel rounded-2xl p-5 border border-white/5">
+                <section className="glass-panel rounded-2xl p-5 border border-overlay-light">
                     <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">
                         {t('notes')}
                     </h3>
@@ -617,7 +617,7 @@ export default function JournalPage() {
                         onChange={(e) => setNotes(e.target.value.slice(0, 280))}
                         placeholder={t('notesPlaceholder')}
                         aria-label={t('notes')}
-                        className="w-full h-20 p-3 bg-white/5 border border-white/10 rounded-xl text-foreground text-sm placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/50 transition-all"
+                        className="w-full h-20 p-3 bg-overlay-light border border-overlay-medium rounded-xl text-foreground text-sm placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/50 transition-all"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
                         <span>{answeredCount}/{ALL_QUESTION_IDS.length} {t('answered')}</span>

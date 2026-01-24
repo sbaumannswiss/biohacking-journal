@@ -166,7 +166,7 @@ export function StackItemCard({
                             : "bg-amber-950/30 border-amber-500/10 hover:border-amber-500/30 hover:bg-amber-950/40"
                         : isChecked
                             ? "bg-primary/10 border-primary/30"
-                            : "bg-card/60 border-white/5 hover:border-white/20 hover:bg-card/80"
+                            : "bg-card/60 border-overlay-light hover:border-overlay-strong hover:bg-card/80"
                 )}
             >
                 {/* Checkbox Ring - Clickable */}
@@ -184,7 +184,7 @@ export function StackItemCard({
                                 : "border-amber-500/30 bg-transparent hover:border-amber-500/50 hover:bg-amber-500/10"
                             : isChecked 
                                 ? "bg-primary border-primary hover:bg-primary/90" 
-                                : "border-white/20 bg-transparent hover:border-primary/50 hover:bg-primary/10",
+                                : "border-overlay-strong bg-transparent hover:border-primary/50 hover:bg-primary/10",
                         "active:scale-95"
                     )}
                 >
@@ -202,7 +202,7 @@ export function StackItemCard({
                         <motion.div
                             className={clsx(
                                 "w-5 h-5 rounded-full transition-colors",
-                                isMedication ? "bg-amber-500/10 group-hover:bg-amber-500/20" : "bg-white/5 group-hover:bg-primary/20"
+                                isMedication ? "bg-amber-500/10 group-hover:bg-amber-500/20" : "bg-overlay-light group-hover:bg-primary/20"
                             )}
                             whileHover={{ scale: 1.1 }}
                             aria-hidden="true"
@@ -317,7 +317,7 @@ export function StackItemCard({
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowConfirmDelete(false)}
-                                    className="flex-1 py-3 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors"
+                                    className="flex-1 py-3 px-4 bg-overlay-light border border-overlay-medium rounded-xl font-medium text-foreground hover:bg-overlay-medium transition-colors"
                                 >
                                     Abbrechen
                                 </button>

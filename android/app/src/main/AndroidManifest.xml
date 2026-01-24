@@ -56,6 +56,10 @@
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Calendar Permissions für Supplement-Erinnerungen -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
     <!-- Health Connect Permissions -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />

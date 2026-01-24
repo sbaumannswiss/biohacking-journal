@@ -22,7 +22,7 @@ export function BottomNav() {
     return (
         <nav 
             data-bottom-nav
-            className="fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-white/5 sm:max-w-md sm:mx-auto overflow-hidden"
+            className="fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-overlay-border sm:max-w-md sm:mx-auto overflow-hidden"
             role="navigation"
             aria-label="Hauptnavigation"
         >

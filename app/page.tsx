@@ -532,7 +532,7 @@ export default function Home() {
                   {count > 0 && (
                     <span className={cn(
                       "min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold",
-                      isActive ? "bg-white/20 text-primary-foreground" : "bg-primary/20 text-primary"
+                      isActive ? "bg-overlay-strong text-primary-foreground" : "bg-primary/20 text-primary"
                     )}>
                       {count}
                     </span>
@@ -853,7 +853,7 @@ export default function Home() {
               )}
 
               {/* Footer */}
-              <div className="mt-6 pt-4 border-t border-white/5 text-center">
+              <div className="mt-6 pt-4 border-t border-overlay-light text-center">
                 <p className="text-xs text-muted-foreground">
                   {t('quests.resetInfo')}
                 </p>

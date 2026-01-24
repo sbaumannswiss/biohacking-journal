@@ -367,7 +367,7 @@ export default function ProfilePage() {
                                 {levelProgress.xpInCurrentLevel}/{levelProgress.xpRequiredForNextLevel} XP
                             </span>
                         </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-2 bg-overlay-medium rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full bg-gradient-to-r from-primary/70 to-primary"
                                 initial={{ width: 0 }}
@@ -389,7 +389,7 @@ export default function ProfilePage() {
                         {/* Profile Header */}
                         <button
                             onClick={() => setShowProfile(!showProfile)}
-                            className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                            className="w-full flex items-center justify-between p-4 rounded-xl bg-overlay-light hover:bg-overlay-medium transition-colors"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-purple-500/20 rounded-lg">
@@ -438,7 +438,7 @@ export default function ProfilePage() {
                                                         longevity: { label: 'Longevity', color: 'bg-purple-500/20 text-purple-400' },
                                                         fitness: { label: 'Fitness', color: 'bg-orange-500/20 text-orange-400' },
                                                     };
-                                                    const g = goalLabels[goal] || { label: goal, color: 'bg-white/10 text-foreground' };
+                                                    const g = goalLabels[goal] || { label: goal, color: 'bg-overlay-medium text-foreground' };
                                                     return (
                                                         <span key={goal} className={`px-3 py-1 rounded-full text-xs font-medium ${g.color}`}>
                                                             {g.label}
@@ -593,7 +593,7 @@ export default function ProfilePage() {
                     {/* Wearables Header */}
                     <button
                         onClick={() => setShowWearables(!showWearables)}
-                        className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full flex items-center justify-between p-4 rounded-xl bg-overlay-light hover:bg-overlay-medium transition-colors"
                     >
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-primary/20 rounded-lg">
@@ -660,7 +660,7 @@ export default function ProfilePage() {
                     {/* Settings Header */}
                     <button
                         onClick={() => setShowSettings(!showSettings)}
-                        className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full flex items-center justify-between p-4 rounded-xl bg-overlay-light hover:bg-overlay-medium transition-colors"
                     >
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-primary/20 rounded-lg">
@@ -725,7 +725,7 @@ export default function ProfilePage() {
                                                                     type="number"
                                                                     value={bodyWeight}
                                                                     onChange={(e) => setBodyWeight(Number(e.target.value))}
-                                                                    className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-center text-foreground font-mono"
+                                                                    className="w-16 px-2 py-1 bg-overlay-medium border border-overlay-strong rounded-lg text-center text-foreground font-mono"
                                                                     min={20}
                                                                     max={300}
                                                                     autoFocus
@@ -741,7 +741,7 @@ export default function ProfilePage() {
                                                         ) : (
                                                             <button
                                                                 onClick={() => setEditingWeight(true)}
-                                                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                                                                className="flex items-center gap-2 px-3 py-1.5 bg-overlay-light hover:bg-overlay-medium rounded-lg transition-colors"
                                                             >
                                                                 <span className="text-lg font-bold text-foreground">{bodyWeight}</span>
                                                                 <span className="text-sm text-muted-foreground">kg</span>
@@ -775,9 +775,9 @@ export default function ProfilePage() {
                                                         {/* Time Customizer Button */}
                                                         <button
                                                             onClick={() => setShowTimeCustomizer(true)}
-                                                            className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                                            className="w-full flex items-center gap-4 p-3 rounded-xl bg-overlay-light hover:bg-overlay-medium transition-colors"
                                                         >
-                                                            <div className="p-2 bg-white/5 rounded-lg">
+                                                            <div className="p-2 bg-overlay-light rounded-lg">
                                                                 <Clock size={18} className="text-muted-foreground" />
                                                             </div>
                                                             <div className="flex-1 text-left">
@@ -835,7 +835,7 @@ export default function ProfilePage() {
                                             };
                                             
                                             return (
-                                                <div key={categoryKey} className="border-t border-white/5 pt-3 first:border-0 first:pt-0">
+                                                <div key={categoryKey} className="border-t border-overlay-light pt-3 first:border-0 first:pt-0">
                                                     <h5 className="text-xs font-medium text-muted-foreground mb-2">
                                                         {categoryLabels[categoryKey]}
                                                     </h5>
@@ -852,7 +852,7 @@ export default function ProfilePage() {
                                                                     onClick={() => handleToggleQuestion(q.id)}
                                                                     className={`w-11 h-6 rounded-full transition-colors relative ${
                                                                         hiddenQuestions.includes(q.id) 
-                                                                            ? 'bg-white/10' 
+                                                                            ? 'bg-overlay-medium' 
                                                                             : 'bg-primary'
                                                                     }`}
                                                                 >
@@ -878,7 +878,7 @@ export default function ProfilePage() {
                                                 localStorage.removeItem('stax_hidden_journal_questions');
                                                 setHiddenQuestions([]);
                                             }}
-                                            className="w-full py-2 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors border-t border-white/5"
+                                            className="w-full py-2 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors border-t border-overlay-light"
                                         >
                                             Alle Fragen wieder einblenden
                                         </button>
@@ -900,7 +900,7 @@ export default function ProfilePage() {
                                             <button
                                                 onClick={handlePasswordReset}
                                                 disabled={isResettingPassword}
-                                                className="w-full py-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                                                className="w-full py-2.5 bg-overlay-light hover:bg-overlay-medium rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                                             >
                                                 {isResettingPassword ? (
                                                     <Loader2 size={16} className="animate-spin" />
@@ -931,7 +931,7 @@ export default function ProfilePage() {
                     <button
                         onClick={handleExportData}
                         disabled={isExporting}
-                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
+                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-overlay-light transition-colors text-left group"
                     >
                         <div className="p-2 bg-emerald-500/20 rounded-lg">
                             {isExporting ? (
@@ -949,7 +949,7 @@ export default function ProfilePage() {
                     {/* Datenschutzerklärung */}
                     <a
                         href="/privacy"
-                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left group"
+                        className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-overlay-light transition-colors text-left group"
                     >
                         <div className="p-2 bg-white/5 rounded-lg group-hover:text-primary transition-colors">
                             <Shield size={20} />
@@ -1029,7 +1029,7 @@ export default function ProfilePage() {
                                     </button>
                                     <button
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        className="w-full py-3 bg-white/10 rounded-xl font-semibold hover:bg-white/20 transition-colors"
+                                        className="w-full py-3 bg-overlay-medium rounded-xl font-semibold hover:bg-overlay-strong transition-colors"
                                     >
                                         Abbrechen
                                     </button>

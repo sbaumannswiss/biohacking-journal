@@ -27,6 +27,14 @@
 
   --color-success: var(--success);
 
+  /* Overlay Colors for theme-aware backgrounds/borders */
+  --color-overlay-subtle: var(--overlay-subtle);
+  --color-overlay-light: var(--overlay-light);
+  --color-overlay-medium: var(--overlay-medium);
+  --color-overlay-strong: var(--overlay-strong);
+  --color-overlay-text: var(--overlay-text);
+  --color-overlay-border: var(--overlay-border);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -83,6 +91,14 @@
     --radius: 2rem;
     /* 32px - Phantom Style */
 
+    /* Overlay Farben fuer Light Mode (dunkel auf hell) */
+    --overlay-subtle: rgba(0, 0, 0, 0.03);
+    --overlay-light: rgba(0, 0, 0, 0.05);
+    --overlay-medium: rgba(0, 0, 0, 0.08);
+    --overlay-strong: rgba(0, 0, 0, 0.12);
+    --overlay-text: rgba(0, 0, 0, 0.4);
+    --overlay-border: rgba(0, 0, 0, 0.08);
+
     /* Phantom x Brilliant Palette (Light Mode - Fallback/Inverse) */
     --background: hsl(240 20% 98%);
     --foreground: hsl(240 20% 10%);
@@ -123,6 +139,14 @@
   }
 
   .dark {
+    /* Overlay Farben fuer Dark Mode (hell auf dunkel) */
+    --overlay-subtle: rgba(255, 255, 255, 0.03);
+    --overlay-light: rgba(255, 255, 255, 0.05);
+    --overlay-medium: rgba(255, 255, 255, 0.08);
+    --overlay-strong: rgba(255, 255, 255, 0.12);
+    --overlay-text: rgba(255, 255, 255, 0.4);
+    --overlay-border: rgba(255, 255, 255, 0.08);
+
     /* Phantom x Brilliant Palette (Dark Mode - Primary) */
     --background: hsl(240 20% 10%);
     /* Deep Indigo (#14141F) */
@@ -184,7 +208,8 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl;
+    @apply bg-card/60 backdrop-blur-xl shadow-2xl;
+    border: 1px solid var(--overlay-border);
   }
 
   /* Tactile Button (Brilliant Style) */

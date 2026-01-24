@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="200" height="240">
+  <defs>
+    <linearGradient id="top" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00E5CC"/>
+      <stop offset="100%" stop-color="#5FFFEA"/>
+    </linearGradient>
+    <linearGradient id="left" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00D4B8"/>
+      <stop offset="100%" stop-color="#009980"/>
+    </linearGradient>
+    <linearGradient id="right" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00C4A8"/>
+      <stop offset="100%" stop-color="#007760"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Isometrischer W�rfel -->
+  <polygon points="50,10 90,32 50,54 10,32" fill="url(#top)"/>
+  <polygon points="10,32 50,54 50,100 10,78" fill="url(#left)"/>
+  <polygon points="90,32 90,78 50,100 50,54" fill="url(#right)"/>
+  
+  <!-- S auf Oberseite (isometrisch verzerrt) -->
+  <g transform="translate(50,32)">
+    <path d="M-18,-12 L12,-12 L18,-8 L-12,-8 L-12,-2 L18,-2 L18,4 L-18,4 L-18,-2 L12,-2 L12,-8 L-18,-8 Z"
+          fill="#004840" 
+          opacity="0.45"
+          transform="matrix(1,0.5,-1,0.5,0,0) scale(0.4)"/>
+  </g>
+  
+  <!-- Dekorative Linien Oberseite -->
+  <g stroke="#005550" stroke-width="1" opacity="0.35">
+    <line x1="22" y1="27" x2="50" y2="41"/>
+    <line x1="26" y1="30" x2="54" y2="44"/>
+    <line x1="30" y1="33" x2="58" y2="47"/>
+  </g>
+  
+  <!-- Dekorative Linien rechte Seite -->
+  <g stroke="#005544" stroke-width="0.75" opacity="0.25">
+    <line x1="54" y1="60" x2="86" y2="46"/>
+    <line x1="54" y1="70" x2="86" y2="56"/>
+    <line x1="54" y1="80" x2="86" y2="66"/>
+  </g>
+</svg>

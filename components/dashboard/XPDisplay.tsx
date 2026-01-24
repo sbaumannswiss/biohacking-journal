@@ -44,7 +44,7 @@ export function XPDisplay({ xp }: XPDisplayProps) {
 
             {/* Progress Bar - More visible */}
             <div className="mt-3">
-                <div className="h-2.5 w-full bg-white/10 rounded-full overflow-hidden relative border border-white/5">
+                <div className="h-2.5 w-full bg-overlay-medium rounded-full overflow-hidden relative border border-overlay-subtle">
                     <motion.div
                         className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary/80 via-primary to-primary/90 rounded-full"
                         style={{ boxShadow: '0 0 10px rgba(79, 255, 176, 0.4)' }}

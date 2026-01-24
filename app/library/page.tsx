@@ -507,7 +507,7 @@ function LibraryContent() {
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowConfirmRemove(false)}
-                                    className="flex-1 py-3 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors"
+                                    className="flex-1 py-3 px-4 bg-overlay-light border border-overlay-medium rounded-xl font-medium text-foreground hover:bg-overlay-medium transition-colors"
                                 >
                                     {tCommon('cancel')}
                                 </button>
@@ -566,7 +566,7 @@ function LibraryContent() {
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowConfirmDelete(false)}
-                                    className="flex-1 py-3 px-4 bg-white/5 border border-white/10 rounded-xl font-medium text-foreground hover:bg-white/10 transition-colors"
+                                    className="flex-1 py-3 px-4 bg-overlay-light border border-overlay-medium rounded-xl font-medium text-foreground hover:bg-overlay-medium transition-colors"
                                 >
                                     {tCommon('cancel')}
                                 </button>
