@@ -1,7 +1,8 @@
 'use client';
 
 import { BottomNav } from '@/components/layout/BottomNav';
-import { User, Settings, Shield, Award, Flame, Zap, Calendar, Loader2, TrendingUp, Watch, Scale, BarChart3, Download, Trash2, LogOut, Brain, Moon, Battery, Coffee, Activity, Heart, Utensils, Pill, Target, ChevronRight } from 'lucide-react';
+import { User, Settings, Shield, Award, Flame, Zap, Calendar, Loader2, TrendingUp, Watch, Scale, BarChart3, Download, Trash2, LogOut, Brain, Moon, Battery, Coffee, Activity, Heart, Utensils, Pill, Target, ChevronRight, Clock } from 'lucide-react';
+import { CalendarSyncToggle, TimeCustomizer } from '@/components/calendar';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,6 +13,7 @@ import { calculateLevel, getLevelProgress, getLevelTitle } from '@/lib/xpSystem'
 import { WearableConnectCard } from '@/components/wearables';
 import { getConnectedProviders, WearableProvider } from '@/lib/wearables';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { ThemeToggle } from '@/components/theme';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { 
@@ -68,6 +70,15 @@ export default function ProfilePage() {
     
     // Password Reset State
     const [isResettingPassword, setIsResettingPassword] = useState(false);
+    
+    // Calendar Sync State
+    const [showTimeCustomizer, setShowTimeCustomizer] = useState(false);
+    const [supplementsForSync, setSupplementsForSync] = useState<{
+        id: string;
+        name: string;
+        dosage?: string;
+        defaultTime: 'morning' | 'noon' | 'evening' | 'bedtime';
+    }[]>([]);
     
     // Load hidden questions from localStorage
     useEffect(() => {
@@ -156,6 +167,17 @@ export default function ProfilePage() {
                         time: (item.custom_time as 'morning' | 'noon' | 'evening' | 'bedtime') || 'morning',
                     }));
                 setStackMedications(medsInStack);
+                
+                // Extract supplements for calendar sync (exclude medications)
+                const supplementsToSync = stackData
+                    .filter((item: any) => !item.supplement_id.startsWith('med:') && item.supplement)
+                    .map((item: any) => ({
+                        id: item.supplement_id,
+                        name: item.supplement?.name || item.supplement_id,
+                        dosage: item.custom_dosage || item.supplement?.optimal_dosage,
+                        defaultTime: ((item.custom_time || item.supplement?.best_time || 'morning') as 'morning' | 'noon' | 'evening' | 'bedtime'),
+                    }));
+                setSupplementsForSync(supplementsToSync);
                 
                 // Adherence berechnen: Check-Ins / (Stack-Size * Tage mit mindestens einem Check-In)
                 if (stackData.length > 0 && checkInHistory.length > 0) {
@@ -676,49 +698,98 @@ export default function ProfilePage() {
                                     <LanguageSwitcher />
                                 </div>
 
-                                {/* Body Weight */}
+                                {/* Theme Toggle */}
                                 <div className="glass-panel p-4 rounded-xl">
                                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                                        Körpergewicht
+                                        Erscheinungsbild
                                     </h4>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-cyan-500/20 rounded-lg">
-                                                <Scale size={18} className="text-cyan-400" />
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">Für Hydration & Dosierungen</p>
-                                        </div>
-                                        
-                                        {editingWeight ? (
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="number"
-                                                    value={bodyWeight}
-                                                    onChange={(e) => setBodyWeight(Number(e.target.value))}
-                                                    className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-center text-foreground font-mono"
-                                                    min={20}
-                                                    max={300}
-                                                    autoFocus
-                                                />
-                                                <span className="text-sm text-muted-foreground">kg</span>
-                                                <button
-                                                    onClick={() => saveBodyWeight(bodyWeight)}
-                                                    className="px-3 py-1 bg-primary text-primary-foreground rounded-lg text-xs font-medium"
-                                                >
-                                                    OK
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <button
-                                                onClick={() => setEditingWeight(true)}
-                                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                                            >
-                                                <span className="text-lg font-bold text-foreground">{bodyWeight}</span>
-                                                <span className="text-sm text-muted-foreground">kg</span>
-                                            </button>
-                                        )}
-                                    </div>
+                                    <ThemeToggle />
                                 </div>
+
+{/* Body Weight */}
+                                                <div className="glass-panel p-4 rounded-xl">
+                                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                                        Körpergewicht
+                                                    </h4>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2 bg-cyan-500/20 rounded-lg">
+                                                                <Scale size={18} className="text-cyan-400" />
+                                                            </div>
+                                                            <p className="text-xs text-muted-foreground">Für Hydration & Dosierungen</p>
+                                                        </div>
+                                                        
+                                                        {editingWeight ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="number"
+                                                                    value={bodyWeight}
+                                                                    onChange={(e) => setBodyWeight(Number(e.target.value))}
+                                                                    className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-center text-foreground font-mono"
+                                                                    min={20}
+                                                                    max={300}
+                                                                    autoFocus
+                                                                />
+                                                                <span className="text-sm text-muted-foreground">kg</span>
+                                                                <button
+                                                                    onClick={() => saveBodyWeight(bodyWeight)}
+                                                                    className="px-3 py-1 bg-primary text-primary-foreground rounded-lg text-xs font-medium"
+                                                                >
+                                                                    OK
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => setEditingWeight(true)}
+                                                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                                                            >
+                                                                <span className="text-lg font-bold text-foreground">{bodyWeight}</span>
+                                                                <span className="text-sm text-muted-foreground">kg</span>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Calendar Sync */}
+                                                <div className="glass-panel p-4 rounded-xl">
+                                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                                        Kalender-Erinnerungen
+                                                    </h4>
+                                                    <div className="space-y-3">
+                                                        <CalendarSyncToggle
+                                                            supplements={supplementsForSync}
+                                                            onSyncComplete={(success, failed) => {
+                                                                if (failed === 0) {
+                                                                    setToast(`${success} Supplements synchronisiert`);
+                                                                } else {
+                                                                    setToast(`${success} synchronisiert, ${failed} fehlgeschlagen`);
+                                                                }
+                                                                setTimeout(() => setToast(null), 3000);
+                                                            }}
+                                                            onSyncDisabled={() => {
+                                                                setToast('Kalender-Sync deaktiviert');
+                                                                setTimeout(() => setToast(null), 2000);
+                                                            }}
+                                                        />
+                                                        
+                                                        {/* Time Customizer Button */}
+                                                        <button
+                                                            onClick={() => setShowTimeCustomizer(true)}
+                                                            className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                                        >
+                                                            <div className="p-2 bg-white/5 rounded-lg">
+                                                                <Clock size={18} className="text-muted-foreground" />
+                                                            </div>
+                                                            <div className="flex-1 text-left">
+                                                                <span className="text-sm font-medium">Erinnerungszeiten anpassen</span>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    Morgens, Mittags, Abends, Schlafenszeit
+                                                                </p>
+                                                            </div>
+                                                            <ChevronRight size={18} className="text-muted-foreground" />
+                                                        </button>
+                                                    </div>
+                                                </div>
 
                                 {/* Journal Questions */}
                                 <div className="glass-panel p-4 rounded-xl">
@@ -1008,6 +1079,16 @@ export default function ProfilePage() {
                         } : null);
                         setStackMedications(addToStackMeds);
                         setToast('Medikamente aktualisiert');
+                        setTimeout(() => setToast(null), 2000);
+                    }}
+                />
+
+                {/* Time Customizer Modal */}
+                <TimeCustomizer
+                    isOpen={showTimeCustomizer}
+                    onClose={() => setShowTimeCustomizer(false)}
+                    onSave={() => {
+                        setToast('Erinnerungszeiten gespeichert');
                         setTimeout(() => setToast(null), 2000);
                     }}
                 />

@@ -9,6 +9,7 @@ import { I18nProvider } from '@/components/i18n';
 import { AuthProvider } from '@/components/auth';
 import { CookieBanner } from '@/components/consent';
 import { AppTourProvider, TourOverlay } from '@/components/tour';
+import { ThemeProvider } from '@/components/theme';
 
 // Plus Jakarta Sans - Premium, modern, cleaner Look
 const plusJakarta = Plus_Jakarta_Sans({ 
@@ -35,12 +36,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className="dark" suppressHydrationWarning>
+    <html lang="de" suppressHydrationWarning>
       <body className={clsx(
         plusJakarta.className, 
         "bg-background text-foreground min-h-screen selection:bg-primary selection:text-primary-foreground"
       )}>
-        <AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
           <I18nProvider>
             <HelixProvider>
               <AppTourProvider>
@@ -61,6 +63,7 @@ export default function RootLayout({
             </HelixProvider>
           </I18nProvider>
         </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

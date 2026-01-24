@@ -35,6 +35,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 import { SUPPLEMENT_LIBRARY } from '@/data/supplements';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -77,7 +78,7 @@ interface OnboardingData {
 // CONSTANTS
 // ============================================
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 const AGE_GROUPS = ['18-25', '26-35', '36-45', '46-55', '56+'];
 
@@ -160,8 +161,15 @@ const WEARABLES = [
 // Quick-Add Supplements (die beliebtesten)
 const QUICK_SUPPLEMENTS = [
   'vit-d3', 'magnesium', 'omega-3', 'creatine', 'ashwagandha', 
-  'zinc', 'b12', 'vitamin-c', 'theanine', 'caffeine'
+  'zinc', 'theanine', 'caffeine', 'melatonin', 'coq10'
 ];
+
+// Kurze Labels für Quick-Add Buttons (statt voller Namen)
+const QUICK_LABELS: Record<string, string> = {
+  'vit-d3': 'D3 + K2',
+  'omega-3': 'Omega-3',
+  'coq10': 'CoQ10',
+};
 
 // ============================================
 // HELPER COMPONENTS
@@ -523,7 +531,10 @@ function SupplementSearch({
       <div>
         <p className="text-xs text-muted-foreground mb-2">Schnell hinzufügen:</p>
         <div className="flex flex-wrap gap-2">
-          {quickSupplements.map((supp) => (
+          {quickSupplements.map((supp) => {
+            // Kurzes Label für Quick-Add oder Name
+            const label = QUICK_LABELS[supp.id] || supp.name;
+            return (
             <button
               key={supp.id}
               type="button"
@@ -535,9 +546,10 @@ function SupplementSearch({
                   : "bg-white/10 text-muted-foreground hover:bg-white/20"
               )}
             >
-              {supp.name.split(' ')[0]}
+              {label}
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
       
@@ -617,7 +629,176 @@ function Step1Welcome({ onNext }: { onNext: () => void }) {
   );
 }
 
-function Step2Basics({ 
+function Step2ThemeSelector({ 
+  onSelect 
+}: { 
+  onSelect: (theme: 'light' | 'dark') => void;
+}) {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [selected, setSelected] = useState<'light' | 'dark' | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    // Set initial selection based on current theme
+    if (theme === 'light' || theme === 'dark') {
+      setSelected(theme);
+    }
+  }, [theme]);
+
+  const handleSelect = (newTheme: 'light' | 'dark') => {
+    setSelected(newTheme);
+    setTheme(newTheme);
+    onSelect(newTheme);
+  };
+
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col items-center min-h-[60vh] px-2"
+    >
+      {/* Helix asks */}
+      <div className="flex items-start gap-3 mb-6 w-full">
+        <HelixMascot mood="happy" size="sm" />
+        <SpeechBubble className="flex-1">
+          <p className="text-sm">Wie möchtest du STAX nutzen? Wähle deinen bevorzugten Modus.</p>
+        </SpeechBubble>
+      </div>
+
+      {/* Split Screen Preview */}
+      <div className="grid grid-cols-2 gap-3 w-full mb-6">
+        {/* Light Mode Preview */}
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.98 }}
+          onClick={() => handleSelect('light')}
+          className={cn(
+            "relative rounded-2xl overflow-hidden border-2 transition-all",
+            selected === 'light'
+              ? "border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.3)]"
+              : "border-white/10 hover:border-white/20"
+          )}
+        >
+          {/* Light Mode Mock UI */}
+          <div className="bg-[#f8f8fc] p-3 space-y-2">
+            {/* Header */}
+            <div className="flex items-center gap-2">
+              <Sun size={14} className="text-amber-500" />
+              <span className="text-[10px] font-bold text-gray-800">Light</span>
+            </div>
+            
+            {/* Mock Card */}
+            <div className="bg-white rounded-lg p-2 shadow-sm border border-gray-100">
+              <div className="h-2 w-12 bg-gray-200 rounded mb-1.5" />
+              <div className="h-1.5 w-16 bg-gray-100 rounded" />
+            </div>
+            
+            {/* Mock Button */}
+            <div className="bg-emerald-500 rounded-lg py-1.5 px-2">
+              <div className="h-1.5 w-8 bg-white/80 rounded mx-auto" />
+            </div>
+            
+            {/* Mock Stats */}
+            <div className="flex gap-1">
+              <div className="flex-1 bg-white rounded p-1.5 border border-gray-100">
+                <div className="h-3 w-3 bg-amber-200 rounded-full mx-auto mb-1" />
+                <div className="h-1 w-6 bg-gray-200 rounded mx-auto" />
+              </div>
+              <div className="flex-1 bg-white rounded p-1.5 border border-gray-100">
+                <div className="h-3 w-3 bg-emerald-200 rounded-full mx-auto mb-1" />
+                <div className="h-1 w-6 bg-gray-200 rounded mx-auto" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Selection Indicator */}
+          {selected === 'light' && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute top-2 right-2 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center"
+            >
+              <Check size={14} className="text-white" />
+            </motion.div>
+          )}
+        </motion.button>
+
+        {/* Dark Mode Preview */}
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.98 }}
+          onClick={() => handleSelect('dark')}
+          className={cn(
+            "relative rounded-2xl overflow-hidden border-2 transition-all",
+            selected === 'dark'
+              ? "border-primary shadow-[0_0_20px_rgba(167,243,208,0.3)]"
+              : "border-white/10 hover:border-white/20"
+          )}
+        >
+          {/* Dark Mode Mock UI */}
+          <div className="bg-[#14141f] p-3 space-y-2">
+            {/* Header */}
+            <div className="flex items-center gap-2">
+              <Moon size={14} className="text-indigo-400" />
+              <span className="text-[10px] font-bold text-white">Dark</span>
+            </div>
+            
+            {/* Mock Card */}
+            <div className="bg-[#1e1e2e] rounded-lg p-2 border border-white/5">
+              <div className="h-2 w-12 bg-white/20 rounded mb-1.5" />
+              <div className="h-1.5 w-16 bg-white/10 rounded" />
+            </div>
+            
+            {/* Mock Button */}
+            <div className="bg-emerald-400 rounded-lg py-1.5 px-2">
+              <div className="h-1.5 w-8 bg-[#14141f]/80 rounded mx-auto" />
+            </div>
+            
+            {/* Mock Stats */}
+            <div className="flex gap-1">
+              <div className="flex-1 bg-[#1e1e2e] rounded p-1.5 border border-white/5">
+                <div className="h-3 w-3 bg-amber-400/30 rounded-full mx-auto mb-1" />
+                <div className="h-1 w-6 bg-white/20 rounded mx-auto" />
+              </div>
+              <div className="flex-1 bg-[#1e1e2e] rounded p-1.5 border border-white/5">
+                <div className="h-3 w-3 bg-emerald-400/30 rounded-full mx-auto mb-1" />
+                <div className="h-1 w-6 bg-white/20 rounded mx-auto" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Selection Indicator */}
+          {selected === 'dark' && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+            >
+              <Check size={14} className="text-primary-foreground" />
+            </motion.div>
+          )}
+        </motion.button>
+      </div>
+
+      {/* Info Text */}
+      <p className="text-xs text-muted-foreground text-center">
+        Du kannst den Modus später jederzeit in den Einstellungen ändern.
+      </p>
+    </motion.div>
+  );
+}
+
+function Step3Basics({ 
   data, 
   onChange 
 }: { 
@@ -712,7 +893,7 @@ function Step2Basics({
   );
 }
 
-function Step3Lifestyle({ 
+function Step4Lifestyle({ 
   data, 
   onChange 
 }: { 
@@ -792,7 +973,7 @@ function Step3Lifestyle({
   );
 }
 
-function Step4Nutrition({ 
+function Step5Nutrition({ 
   data, 
   onChange 
 }: { 
@@ -1063,7 +1244,7 @@ function Step4Nutrition({
   );
 }
 
-function Step5Goals({ 
+function Step6Goals({ 
   data, 
   onChange 
 }: { 
@@ -1202,7 +1383,7 @@ interface SignupData {
   acceptedHealthData: boolean;
 }
 
-function Step6Signup({ 
+function Step7Signup({ 
   data,
   signupData,
   onSignupChange,
@@ -1437,7 +1618,7 @@ function Step6Signup({
 // STEP 7: PAYWALL
 // ============================================
 
-function Step7Paywall({ 
+function Step8Paywall({ 
   data, 
   onComplete,
   isLoading 
@@ -1718,12 +1899,13 @@ export default function OnboardingPage() {
   const canProceed = useCallback(() => {
     switch (step) {
       case 1: return true;
-      case 2: return data.name.trim() !== '' && data.ageGroup !== '' && data.gender !== '';
-      case 3: return data.chronotype !== '' && data.activityLevel !== '' && data.caffeineLevel !== '';
-      case 4: return data.dietType !== '';
-      case 5: return data.goals.length > 0;
-      case 6: return isAuthenticated; // Nur weiter wenn eingeloggt
-      case 7: return true;
+      case 2: return true; // Theme selection - always can proceed (default is dark)
+      case 3: return data.name.trim() !== '' && data.ageGroup !== '' && data.gender !== '';
+      case 4: return data.chronotype !== '' && data.activityLevel !== '' && data.caffeineLevel !== '';
+      case 5: return data.dietType !== '';
+      case 6: return data.goals.length > 0;
+      case 7: return isAuthenticated; // Nur weiter wenn eingeloggt
+      case 8: return true;
       default: return true;
     }
   }, [step, data, isAuthenticated]);
@@ -1899,13 +2081,14 @@ export default function OnboardingPage() {
       <main className="flex-1 px-4 py-6 relative z-10">
         <AnimatePresence mode="wait">
           {step === 1 && <Step1Welcome key="step1" onNext={handleNext} />}
-          {step === 2 && <Step2Basics key="step2" data={data} onChange={updateData} />}
-          {step === 3 && <Step3Lifestyle key="step3" data={data} onChange={updateData} />}
-          {step === 4 && <Step4Nutrition key="step4" data={data} onChange={updateData} />}
-          {step === 5 && <Step5Goals key="step5" data={data} onChange={updateData} />}
-          {step === 6 && (
-            <Step6Signup 
-              key="step6" 
+          {step === 2 && <Step2ThemeSelector key="step2" onSelect={() => {}} />}
+          {step === 3 && <Step3Basics key="step3" data={data} onChange={updateData} />}
+          {step === 4 && <Step4Lifestyle key="step4" data={data} onChange={updateData} />}
+          {step === 5 && <Step5Nutrition key="step5" data={data} onChange={updateData} />}
+          {step === 6 && <Step6Goals key="step6" data={data} onChange={updateData} />}
+          {step === 7 && (
+            <Step7Signup 
+              key="step7" 
               data={data}
               signupData={signupData}
               onSignupChange={updateSignupData}
@@ -1916,12 +2099,12 @@ export default function OnboardingPage() {
               isAuthenticated={isAuthenticated}
             />
           )}
-          {step === 7 && <Step7Paywall key="step7" data={data} onComplete={handleComplete} isLoading={isLoading} />}
+          {step === 8 && <Step8Paywall key="step8" data={data} onComplete={handleComplete} isLoading={isLoading} />}
         </AnimatePresence>
       </main>
       
-      {/* Footer Navigation (Steps 2-5) */}
-      {step >= 2 && step <= 5 && (
+      {/* Footer Navigation (Steps 2-6) */}
+      {step >= 2 && step <= 6 && (
         <motion.footer
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1944,8 +2127,8 @@ export default function OnboardingPage() {
         </motion.footer>
       )}
       
-      {/* Footer for Step 6 (after signup success) */}
-      {step === 6 && isAuthenticated && (
+      {/* Footer for Step 7 (after signup success) */}
+      {step === 7 && isAuthenticated && (
         <motion.footer
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
