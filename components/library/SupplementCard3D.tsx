@@ -192,19 +192,30 @@ export function SupplementCard3D({
                     "transition-colors",
                     i < supplement.evidence_level
                         ? "fill-amber-400 text-amber-400"
-                        : "fill-transparent text-white/20"
+                        : "fill-transparent text-muted-foreground/30"
                 )}
             />
         ));
     };
 
+    // Farbe basierend auf Benefit-Text - Light Mode: stärkere Kontraste, Dark Mode: hellere Farben
+    const getBenefitColor = (benefit: string) => {
+        const b = benefit.toLowerCase();
+        if (b.includes('sleep') || b.includes('recovery') || b.includes('nervous')) 
+            return 'bg-indigo-200 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border-indigo-400 dark:border-indigo-500/30';
+        if (b.includes('energy') || b.includes('strength') || b.includes('testosterone') || b.includes('endurance')) 
+            return 'bg-amber-200 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-400 dark:border-amber-500/30';
+        if (b.includes('focus') || b.includes('cognition') || b.includes('memory') || b.includes('brain')) 
+            return 'bg-emerald-200 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-400 dark:border-emerald-500/30';
+        if (b.includes('stress') || b.includes('mood') || b.includes('anxiety') || b.includes('calm')) 
+            return 'bg-purple-200 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-400 dark:border-purple-500/30';
+        if (b.includes('immune') || b.includes('health') || b.includes('anti')) 
+            return 'bg-rose-200 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-400 dark:border-rose-500/30';
+        return 'bg-primary/20 dark:bg-primary/20 text-primary border-primary/40';
+    };
+
     const getCategoryColor = () => {
-        const benefits = supplement.benefits[0]?.toLowerCase() || '';
-        if (benefits.includes('sleep')) return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
-        if (benefits.includes('energy') || benefits.includes('strength')) return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-        if (benefits.includes('focus') || benefits.includes('cognition')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-        if (benefits.includes('stress') || benefits.includes('mood')) return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-        return 'bg-primary/20 text-primary border-primary/30';
+        return getBenefitColor(supplement.benefits[0] || '');
     };
 
     // Card thickness for 3D effect - glass-like tile
@@ -217,7 +228,9 @@ export function SupplementCard3D({
                 width: '280px',
                 height: '380px',
                 transformStyle: 'preserve-3d',
-                perspective: '1000px',
+                // Perspective entfernt - wird nur auf Carousel-Ebene gesetzt
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
                 ...style,
             }}
             onClick={handleCardClick}
@@ -239,21 +252,26 @@ export function SupplementCard3D({
                 {/* Front Face - Clean dark design */}
                 <div 
                     className={cn(
-                        "absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
+                        "absolute inset-0 w-full h-full rounded-3xl overflow-hidden bg-card"
                     )}
                     style={{
-                        background: '#0a0a0f',
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
-                        border: isCenter ? '2px solid rgba(20, 184, 166, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                        border: isCenter ? '2px solid rgba(20, 184, 166, 0.3)' : '1px solid var(--border)',
                         boxShadow: isCenter 
-                            ? '0 25px 50px -12px rgba(0, 0, 0, 0.8)' 
-                            : '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+                            ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' 
+                            : '0 10px 30px -10px rgba(0, 0, 0, 0.3)',
                     }}
                 >
 
-                    {/* Content */}
-                    <div className="p-6 flex flex-col items-center h-full">
+                    {/* Content - Text-Layer mit translateZ isoliert für Schärfe */}
+                    <div 
+                        className="p-6 flex flex-col items-center h-full"
+                        style={{ 
+                            transform: 'translateZ(1px)',
+                            transformStyle: 'flat',
+                        }}
+                    >
                         {/* Custom Badge */}
                         {isCustom && (
                             <div className="absolute top-4 left-4 px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/30 rounded-full">
@@ -270,7 +288,7 @@ export function SupplementCard3D({
                         </div>
 
                         {/* Name */}
-                        <h3 className="text-lg font-bold text-white text-center mb-2 leading-tight">
+                        <h3 className="text-lg font-bold text-foreground text-center mb-2 leading-tight">
                             {supplement.name}
                         </h3>
 
@@ -309,7 +327,7 @@ export function SupplementCard3D({
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="text-[10px] text-white/40 uppercase tracking-widest"
+                                className="text-[10px] text-muted-foreground uppercase tracking-widest"
                             >
                                 Tap für Details
                             </motion.div>
@@ -320,49 +338,60 @@ export function SupplementCard3D({
                 {/* Back Face - Clean dark design */}
                 <div 
                     className={cn(
-                        "absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
+                        "absolute inset-0 w-full h-full rounded-3xl overflow-hidden bg-card"
                     )}
                     style={{
-                        background: '#0a0a0f',
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
                         transform: 'rotateY(180deg)',
                         border: '2px solid rgba(20, 184, 166, 0.3)',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
                     }}
                 >
-                    {/* Top Bar with Name */}
-                    <div className="bg-primary/10 px-4 py-3 border-b border-white/5">
+                    {/* Top Bar with Name - Text-Layer isoliert */}
+                    <div 
+                        className="bg-primary/10 px-4 py-3 border-b border-border"
+                        style={{ 
+                            transform: 'translateZ(1px)',
+                            transformStyle: 'flat',
+                        }}
+                    >
                         <div className="flex items-center gap-2">
                             {(() => {
                                 const IconComponent = getSupplementIcon(supplement.icon);
                                 return <IconComponent size={18} className="text-primary" strokeWidth={1.5} />;
                             })()}
-                            <h3 className="text-sm font-bold text-white truncate flex-1">
+                            <h3 className="text-sm font-bold text-foreground truncate flex-1">
                                 {supplement.name}
                             </h3>
                         </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="p-4 flex flex-col h-[calc(100%-52px)] overflow-hidden">
+                    {/* Content - Text-Layer isoliert */}
+                    <div 
+                        className="p-4 flex flex-col h-[calc(100%-52px)] overflow-hidden"
+                        style={{ 
+                            transform: 'translateZ(1px)',
+                            transformStyle: 'flat',
+                        }}
+                    >
                         {/* Info Grid */}
                         <div className="grid grid-cols-2 gap-2 mb-3">
-                            <div className="bg-white/5 rounded-xl p-2.5">
-                                <div className="flex items-center gap-1.5 text-white/40 mb-1">
+                            <div className="bg-muted/50 rounded-xl p-2.5">
+                                <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
                                     <Beaker size={11} />
                                     <span className="text-[10px] uppercase">Dosierung</span>
                                 </div>
-                                <div className="text-xs font-medium text-white truncate">
+                                <div className="text-xs font-medium text-foreground truncate">
                                     {supplement.optimal_dosage}
                                 </div>
                             </div>
-                            <div className="bg-white/5 rounded-xl p-2.5">
-                                <div className="flex items-center gap-1.5 text-white/40 mb-1">
+                            <div className="bg-muted/50 rounded-xl p-2.5">
+                                <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
                                     <Clock size={11} />
                                     <span className="text-[10px] uppercase">Zeit</span>
                                 </div>
-                                <div className="text-xs font-medium text-white truncate">
+                                <div className="text-xs font-medium text-foreground truncate">
                                     {supplement.best_time}
                                 </div>
                             </div>
@@ -370,7 +399,7 @@ export function SupplementCard3D({
 
                         {/* Description */}
                         <div className="flex-1 min-h-0 overflow-y-auto mb-3">
-                            <p className="text-xs text-white/60 leading-relaxed">
+                            <p className="text-xs text-muted-foreground leading-relaxed">
                                 {supplement.description}
                             </p>
                         </div>
@@ -382,7 +411,10 @@ export function SupplementCard3D({
                                     {supplement.benefits.slice(0, 4).map((benefit, idx) => (
                                         <span
                                             key={idx}
-                                            className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] rounded-full font-medium"
+                                            className={cn(
+                                                "px-2 py-0.5 text-[10px] rounded-full font-medium border",
+                                                getBenefitColor(benefit)
+                                            )}
                                         >
                                             {benefit}
                                         </span>
@@ -393,8 +425,8 @@ export function SupplementCard3D({
 
                         {/* Warning */}
                         {supplement.warnings && (
-                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-2 mb-3">
-                                <p className="text-[10px] text-amber-400 leading-relaxed line-clamp-2">
+                            <div className="bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 rounded-xl p-2 mb-3">
+                                <p className="text-[10px] text-amber-700 dark:text-amber-400 leading-relaxed line-clamp-2">
                                     {supplement.warnings}
                                 </p>
                             </div>

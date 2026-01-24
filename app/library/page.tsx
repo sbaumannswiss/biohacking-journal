@@ -323,7 +323,7 @@ function LibraryContent() {
                     <motion.h1 
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-3xl font-black tracking-tighter text-white"
+                        className="text-3xl font-black tracking-tighter text-foreground"
                     >
                         {t('title').split('LAB')[0]}<span className="text-primary">LAB</span>
                     </motion.h1>

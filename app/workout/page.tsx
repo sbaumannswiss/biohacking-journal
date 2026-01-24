@@ -386,7 +386,7 @@ export default function WorkoutPage() {
               className="space-y-6"
             >
               {/* Workout Type Selection */}
-              <section className="glass-panel rounded-2xl p-5 border border-white/5">
+              <section className="glass-panel rounded-2xl p-5 border border-border">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                   Trainingsart
                 </h3>
@@ -400,7 +400,7 @@ export default function WorkoutPage() {
                         "flex flex-col items-center gap-2 p-3 rounded-xl transition-all",
                         selectedType === id
                           ? "bg-primary/20 border-2 border-primary"
-                          : "bg-white/5 border border-white/10 hover:bg-white/10"
+                          : "bg-muted/50 dark:bg-white/5 border border-border hover:bg-muted dark:hover:bg-white/10"
                       )}
                     >
                       <div className={cn("w-8 h-8 flex items-center justify-center", color)}>
@@ -415,7 +415,7 @@ export default function WorkoutPage() {
               </section>
 
               {/* Timing Selection - Presets + Custom Time */}
-              <section className="glass-panel rounded-2xl p-5 border border-white/5">
+              <section className="glass-panel rounded-2xl p-5 border border-border">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                   Wann?
                 </h3>
@@ -432,7 +432,7 @@ export default function WorkoutPage() {
                         "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all",
                         !useCustomTime && selectedTiming === minutes
                           ? "bg-primary text-primary-foreground"
-                          : "bg-white/5 text-foreground hover:bg-white/10"
+                          : "bg-muted/50 dark:bg-white/5 text-foreground hover:bg-muted dark:hover:bg-white/10"
                       )}
                     >
                       {label}
@@ -445,7 +445,7 @@ export default function WorkoutPage() {
                       "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1.5",
                       useCustomTime
                         ? "bg-primary text-primary-foreground"
-                        : "bg-white/5 text-foreground hover:bg-white/10"
+                        : "bg-muted/50 dark:bg-white/5 text-foreground hover:bg-muted dark:hover:bg-white/10"
                     )}
                   >
                     <Clock size={14} />
@@ -462,7 +462,7 @@ export default function WorkoutPage() {
                       exit={{ opacity: 0, height: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                      <div className="flex items-center gap-3 p-3 bg-muted/50 dark:bg-white/5 rounded-xl border border-border">
                         <Clock size={16} className="text-muted-foreground" />
                         <input
                           type="time"
@@ -498,7 +498,7 @@ export default function WorkoutPage() {
               </section>
 
               {/* Duration Selection - Presets + Slider + Manual Input */}
-              <section className="glass-panel rounded-2xl p-5 border border-white/5">
+              <section className="glass-panel rounded-2xl p-5 border border-border">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t('duration.title')}
@@ -522,7 +522,7 @@ export default function WorkoutPage() {
                         "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all",
                         !showDurationInput && selectedDuration === mins
                           ? "bg-primary text-primary-foreground"
-                          : "bg-white/5 text-foreground hover:bg-white/10"
+                          : "bg-muted/50 dark:bg-white/5 text-foreground hover:bg-muted dark:hover:bg-white/10"
                       )}
                     >
                       {mins}min
@@ -541,7 +541,7 @@ export default function WorkoutPage() {
                       "w-10 h-10 rounded-xl transition-all flex items-center justify-center",
                       showDurationInput || selectedDuration > 90
                         ? "bg-primary text-primary-foreground"
-                        : "bg-white/5 text-foreground hover:bg-white/10"
+                        : "bg-muted/50 dark:bg-white/5 text-foreground hover:bg-muted dark:hover:bg-white/10"
                     )}
                   >
                     <Clock size={16} />
@@ -557,7 +557,7 @@ export default function WorkoutPage() {
                       exit={{ opacity: 0, height: 0 }}
                       className="overflow-hidden mb-4"
                     >
-                      <div className="flex items-center gap-2 p-3 bg-white/5 rounded-xl">
+                      <div className="flex items-center gap-2 p-3 bg-muted/50 dark:bg-white/5 rounded-xl border border-border">
                         <div className="flex items-center gap-1.5 flex-1">
                           <input
                             type="text"
@@ -571,7 +571,7 @@ export default function WorkoutPage() {
                                 setCustomDurationHours(val);
                               }
                             }}
-                            className="w-14 bg-white/10 text-foreground text-xl font-mono focus:outline-none text-center rounded-xl py-2.5 border border-white/10 focus:border-primary/50 transition-colors"
+                            className="w-14 bg-muted dark:bg-white/10 text-foreground text-xl font-mono focus:outline-none text-center rounded-xl py-2.5 border border-border focus:border-primary/50 transition-colors"
                           />
                           <span className="text-muted-foreground text-sm">h</span>
                         </div>
@@ -589,7 +589,7 @@ export default function WorkoutPage() {
                                 setCustomDurationMinutes(val);
                               }
                             }}
-                            className="w-14 bg-white/10 text-foreground text-xl font-mono focus:outline-none text-center rounded-xl py-2.5 border border-white/10 focus:border-primary/50 transition-colors"
+                            className="w-14 bg-muted dark:bg-white/10 text-foreground text-xl font-mono focus:outline-none text-center rounded-xl py-2.5 border border-border focus:border-primary/50 transition-colors"
                           />
                           <span className="text-muted-foreground text-sm">min</span>
                         </div>
@@ -632,7 +632,7 @@ export default function WorkoutPage() {
                         step={5}
                         value={Math.min(selectedDuration, 240)}
                         onChange={(e) => setSelectedDuration(Number(e.target.value))}
-                        className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
+                        className="w-full h-2 bg-muted dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>15min</span>
@@ -648,7 +648,7 @@ export default function WorkoutPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedDuration(Math.max(15, selectedDuration - 5))}
-                        className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-foreground hover:bg-white/20"
+                        className="w-10 h-10 rounded-full bg-muted dark:bg-white/10 flex items-center justify-center text-foreground hover:bg-muted-foreground/20"
                       >
                         <Minus size={16} />
                       </button>
@@ -658,7 +658,7 @@ export default function WorkoutPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedDuration(selectedDuration + 5)}
-                        className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-foreground hover:bg-white/20"
+                        className="w-10 h-10 rounded-full bg-muted dark:bg-white/10 flex items-center justify-center text-foreground hover:bg-muted-foreground/20"
                       >
                         <Plus size={16} />
                       </button>
@@ -674,9 +674,9 @@ export default function WorkoutPage() {
                 whileTap={{ scale: 0.98 }}
                 className={cn(
                   "w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all",
-                  selectedType
+                    selectedType
                     ? "bg-gradient-to-r from-primary to-green-500 text-primary-foreground shadow-lg shadow-primary/20"
-                    : "bg-white/10 text-muted-foreground cursor-not-allowed"
+                    : "bg-muted dark:bg-white/10 text-muted-foreground cursor-not-allowed"
                 )}
               >
                 {isStarting ? (
@@ -756,7 +756,7 @@ export default function WorkoutPage() {
                   </div>
                   
                   {/* Integrated Hydration */}
-                  <div className="pt-4 border-t border-white/10">
+                    <div className="pt-4 border-t border-border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Droplets size={16} className="text-cyan-400" />
@@ -768,7 +768,7 @@ export default function WorkoutPage() {
                     </div>
                     
                     {/* Compact Progress Bar */}
-                    <div className="relative h-2 bg-white/10 rounded-full overflow-hidden mb-3">
+                    <div className="relative h-2 bg-muted dark:bg-white/10 rounded-full overflow-hidden mb-3">
                       <motion.div
                         className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
                         initial={{ width: 0 }}
@@ -782,8 +782,8 @@ export default function WorkoutPage() {
                       {/* Remove button - only show if hydration > 0 */}
                       {hydrationMl > 0 && (
                         <button
-                          onClick={() => addHydration(-250)}
-                          className="py-2 px-4 rounded-xl bg-white/5 text-muted-foreground text-sm font-medium flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+                        onClick={() => addHydration(-250)}
+                        className="py-2 px-4 rounded-xl bg-muted/50 dark:bg-white/5 text-muted-foreground text-sm font-medium flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
                         >
                           <Minus size={14} />
                           250ml
@@ -829,7 +829,7 @@ export default function WorkoutPage() {
                 {activeWorkout.phase === 'post' && (
                   <button
                     onClick={clearWorkout}
-                    className="flex-1 py-3.5 rounded-xl bg-white/10 text-foreground font-medium flex items-center justify-center gap-2"
+                    className="flex-1 py-3.5 rounded-xl bg-muted dark:bg-white/10 text-foreground font-medium flex items-center justify-center gap-2"
                   >
                     <Check size={16} />
                     Fertig
@@ -838,7 +838,7 @@ export default function WorkoutPage() {
               </div>
 
               {/* Phase Supplements from Stack */}
-              <section className="glass-panel rounded-2xl p-5 border border-white/5">
+              <section className="glass-panel rounded-2xl p-5 border border-border">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                   {t(`supplements.${activeWorkout.phase === 'pre' ? 'pre' : activeWorkout.phase === 'intra' ? 'intra' : 'post'}Workout`)}
                 </h3>
@@ -851,14 +851,14 @@ export default function WorkoutPage() {
                         className={cn(
                           "flex items-center justify-between p-3 rounded-xl",
                           supp.priority === 'essential' ? "bg-primary/10 border border-primary/20" :
-                          supp.priority === 'recommended' ? "bg-white/10 border border-white/10" :
-                          "bg-white/5"
+                          supp.priority === 'recommended' ? "bg-muted/50 dark:bg-white/10 border border-border" :
+                          "bg-muted/30 dark:bg-white/5"
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className={cn(
                             "w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center",
-                            supp.priority === 'essential' ? "bg-primary/20" : "bg-white/10"
+                            supp.priority === 'essential' ? "bg-primary/20" : "bg-muted dark:bg-white/10"
                           )}>
                             <Pill size={18} className={supp.priority === 'essential' ? "text-primary" : "text-muted-foreground"} />
                           </div>
@@ -901,7 +901,7 @@ export default function WorkoutPage() {
                     {libraryRecommendations.map(supp => (
                       <div 
                         key={supp.supplementId}
-                        className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-dashed border-white/10"
+                        className="flex items-center justify-between p-3 rounded-xl bg-muted/30 dark:bg-white/5 border border-dashed border-border"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-amber-500/10 flex items-center justify-center">

@@ -265,7 +265,7 @@ export default function StatsPage() {
 
             {/* Zeitraum-Buttons */}
             <div className="px-6 mb-4">
-                <div className="flex gap-2 p-1 bg-white/5 rounded-xl">
+                <div className="flex gap-2 p-1 bg-muted/50 rounded-xl">
                     {TIME_RANGES.map((range) => (
                         <button
                             key={range.days}
@@ -274,7 +274,7 @@ export default function StatsPage() {
                                 "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all",
                                 selectedRange === range.days
                                     ? "bg-primary text-primary-foreground"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                             )}
                         >
                             {range.label}
@@ -360,7 +360,7 @@ export default function StatsPage() {
                     {!hasWearableConnection && (
                         <button
                             onClick={() => router.push('/profile')}
-                            className="w-full glass-panel rounded-2xl p-4 border border-dashed border-white/10 hover:border-primary/30 hover:bg-white/5 transition-all text-left"
+                            className="w-full glass-panel rounded-2xl p-4 border border-dashed border-border hover:border-primary/30 hover:bg-muted/50 transition-all text-left"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-primary/10 rounded-lg">
@@ -389,7 +389,7 @@ export default function StatsPage() {
                                 onClick={() => setShowFilters(!showFilters)}
                                 className={cn(
                                     "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                                    showFilters ? "bg-primary text-primary-foreground" : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                                    showFilters ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
                                 )}
                             >
                                 <Filter size={14} />
@@ -407,7 +407,7 @@ export default function StatsPage() {
                                     exit={{ height: 0, opacity: 0 }}
                                     className="overflow-hidden mb-4"
                                 >
-                                    <div className="p-3 bg-white/5 rounded-xl space-y-3">
+                                    <div className="p-3 bg-muted/50 rounded-xl space-y-3">
                                         {/* Metriken */}
                                         <div>
                                             <div className="text-xs text-muted-foreground mb-2">Wohlbefinden</div>
@@ -419,7 +419,7 @@ export default function StatsPage() {
                                                         className={cn(
                                                             "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2",
                                                             visibleMetrics[key as keyof typeof visibleMetrics]
-                                                                ? "bg-white/10 text-foreground"
+                                                                ? "bg-muted text-foreground"
                                                                 : "bg-transparent text-muted-foreground/50"
                                                         )}
                                                     >
@@ -441,7 +441,7 @@ export default function StatsPage() {
                                                         className={cn(
                                                             "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2",
                                                             visibleSupplements.has(supp.supplementId)
-                                                                ? "bg-white/10 text-foreground"
+                                                                ? "bg-muted text-foreground"
                                                                 : "bg-transparent text-muted-foreground/50"
                                                         )}
                                                     >
@@ -471,7 +471,7 @@ export default function StatsPage() {
                         </div>
 
                         {/* Legende */}
-                        <div className="flex gap-3 flex-wrap mt-4 pt-3 border-t border-white/5">
+                        <div className="flex gap-3 flex-wrap mt-4 pt-3 border-t border-border">
                             {graphData.datasets.map((ds) => (
                                 <div key={ds.label} className="flex items-center gap-1.5">
                                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ds.color }} />
@@ -543,12 +543,12 @@ export default function StatsPage() {
                         
                         {/* Progress Bar wenn Daten gesammelt werden */}
                         {isCollectingData && dataPointsNeeded && (
-                            <div className="mt-4 pt-4 border-t border-white/5">
+                            <div className="mt-4 pt-4 border-t border-border">
                                 <div className="flex justify-between text-xs text-muted-foreground mb-2">
                                     <span>Fortschritt zur Analyse</span>
                                     <span>{Math.max(0, 7 - (dataPointsNeeded.days || 0))}/7 Tage</span>
                                 </div>
-                                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                                     <motion.div
                                         className="h-full bg-gradient-to-r from-amber-500/50 to-amber-400 rounded-full"
                                         initial={{ width: 0 }}
@@ -671,7 +671,7 @@ export default function StatsPage() {
                                             key={badge.id}
                                             type="button"
                                             onClick={() => setSelectedBadge(badge)}
-                                            className="glass-panel p-3 rounded-xl relative overflow-hidden text-left hover:bg-white/5 transition-colors active:scale-[0.98]"
+                                            className="glass-panel p-3 rounded-xl relative overflow-hidden text-left hover:bg-muted/50 transition-colors active:scale-[0.98]"
                                         >
                                             <div className="flex items-center gap-2 mb-2">
                                                 <span className="text-lg grayscale opacity-50">{badge.icon}</span>
@@ -682,7 +682,7 @@ export default function StatsPage() {
                                             </div>
                                             
                                             {/* Progress Bar */}
-                                            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                                            <div className="h-1 bg-muted rounded-full overflow-hidden">
                                                 <motion.div
                                                     className="h-full bg-primary/50 rounded-full"
                                                     initial={{ width: 0 }}
@@ -749,14 +749,14 @@ export default function StatsPage() {
                                 <button
                                     type="button"
                                     onClick={() => setSelectedBadge(null)}
-                                    className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                                    className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors"
                                 >
                                     <X size={18} className="text-muted-foreground" />
                                 </button>
                             </div>
 
                             {/* Description */}
-                            <div className="bg-white/5 rounded-xl p-4 mb-4">
+                            <div className="bg-muted/50 rounded-xl p-4 mb-4">
                                 <div className="flex items-start gap-2">
                                     <Info size={16} className="text-primary mt-0.5 flex-shrink-0" />
                                     <p className="text-sm text-muted-foreground leading-relaxed">
@@ -798,7 +798,7 @@ export default function StatsPage() {
                                     <span className="text-muted-foreground">Fortschritt</span>
                                     <span className="font-bold text-primary">{selectedBadge.progress}%</span>
                                 </div>
-                                <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-3 bg-muted rounded-full overflow-hidden">
                                     <motion.div
                                         className="h-full bg-gradient-to-r from-primary/70 to-primary rounded-full"
                                         initial={{ width: 0 }}
@@ -816,7 +816,7 @@ export default function StatsPage() {
                                     </span>
                                 </div>
                             ) : (
-                                <div className="mt-4 p-3 bg-white/5 border border-white/10 rounded-xl text-center">
+                                <div className="mt-4 p-3 bg-muted/50 border border-border rounded-xl text-center">
                                     <span className="text-muted-foreground text-sm flex items-center justify-center gap-2">
                                         <Lock size={14} />
                                         Noch nicht freigeschaltet
@@ -859,13 +859,13 @@ function MultiLineGraph({ data }: { data: { labels: string[]; datasets: { label:
                         y1={yScale(val)}
                         x2={width - padding.right}
                         y2={yScale(val)}
-                        stroke="rgba(255,255,255,0.05)"
+                        className="stroke-border"
                         strokeDasharray="2,2"
                     />
                     <text
                         x={padding.left - 5}
                         y={yScale(val)}
-                        fill="rgba(255,255,255,0.3)"
+                        className="fill-muted-foreground"
                         fontSize="8"
                         textAnchor="end"
                         dominantBaseline="middle"
@@ -883,7 +883,7 @@ function MultiLineGraph({ data }: { data: { labels: string[]; datasets: { label:
                         key={idx}
                         x={xScale(idx)}
                         y={height - 5}
-                        fill="rgba(255,255,255,0.3)"
+                        className="fill-muted-foreground"
                         fontSize="8"
                         textAnchor="middle"
                     >

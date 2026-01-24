@@ -8,18 +8,7 @@ const nextConfig: NextConfig = {
     output: 'export',
     distDir: 'out',
     trailingSlash: true,
-  } : {
-    // Redirect root to waitinglist (nur für Web)
-    async redirects() {
-      return [
-        {
-          source: '/',
-          destination: '/waitinglist',
-          permanent: false,
-        },
-      ];
-    },
-  }),
+  } : {}),
   images: {
     unoptimized: true,
   },

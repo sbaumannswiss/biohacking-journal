@@ -144,13 +144,12 @@ export function Carousel3D({
         // ZENTRUM-KARTE (absOffset === 0)
         if (absOffset === 0) {
             return {
-                transform: `translate3d(0, 0, 100px) rotateY(0deg) scale(1.08)`,
+                transform: `translate3d(0, 0, 0) rotateY(0deg) scale(1)`,
                 opacity: 1,
                 zIndex: 20,
                 transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s',
                 filter: 'none',
                 transformStyle: 'preserve-3d',
-                willChange: 'transform',
             };
         }
 
@@ -161,13 +160,12 @@ export function Carousel3D({
                 : -(cardWidth - peekAmount + 20); // Links
 
             return {
-                transform: `translate3d(${translateX}px, 0, -80px) rotateY(${offset * -25}deg) scale(0.88)`,
+                transform: `translate3d(${translateX}px, 0, -50px) rotateY(${offset * -15}deg) scale(0.88)`,
                 opacity: 0.75,
                 zIndex: 15,
                 transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s',
                 filter: 'brightness(0.85)',
                 transformStyle: 'preserve-3d',
-                willChange: 'transform',
             };
         }
 
@@ -177,13 +175,12 @@ export function Carousel3D({
             : -(cardWidth * 1.4); // Weiter links
 
         return {
-            transform: `translate3d(${translateX}px, 0, -200px) rotateY(${offset * -35}deg) scale(0.7)`,
+            transform: `translate3d(${translateX}px, 0, -100px) rotateY(${offset * -20}deg) scale(0.75)`,
             opacity: 0.4,
             zIndex: 10,
             transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s',
-            filter: 'brightness(0.6) blur(1px)',
+            filter: 'brightness(0.6)',
             transformStyle: 'preserve-3d',
-            willChange: 'transform',
         };
     };
 
@@ -203,9 +200,9 @@ export function Carousel3D({
                 ref={containerRef}
                 className="relative w-full h-[min(480px,60vh)] flex items-center justify-center"
                 style={{
-                    perspective: '1200px',
-                    WebkitPerspective: '1200px',
-                    perspectiveOrigin: '50% 45%',
+                    perspective: '1800px',
+                    WebkitPerspective: '1800px',
+                    perspectiveOrigin: '50% 50%',
                     transformStyle: 'preserve-3d',
                     WebkitTransformStyle: 'preserve-3d',
                 }}
@@ -259,24 +256,24 @@ export function Carousel3D({
                                     }}
                                     initial={{
                                         opacity: 0,
-                                        x: slideDirection * 500,
-                                        z: -200,
-                                        scale: 0.7,
-                                        rotateY: slideDirection * 25
+                                        x: slideDirection * 300,
+                                        z: -100,
+                                        scale: 0.8,
+                                        rotateY: slideDirection * 15
                                     }}
                                     animate={{
                                         opacity: cardStyle.opacity,
                                         x: absOffset === 0 ? 0 : (offset > 0 ? 80 : -80),
-                                        z: absOffset === 0 ? 50 : -120,
-                                        scale: absOffset === 0 ? 1.05 : 0.85,
-                                        rotateY: absOffset === 0 ? 0 : (offset > 0 ? -15 : 15)
+                                        z: absOffset === 0 ? 0 : -50,
+                                        scale: absOffset === 0 ? 1 : 0.88,
+                                        rotateY: absOffset === 0 ? 0 : (offset > 0 ? -10 : 10)
                                     }}
                                     exit={{
                                         opacity: 0,
-                                        x: -slideDirection * 500,
-                                        z: -200,
-                                        scale: 0.7,
-                                        rotateY: -slideDirection * 25
+                                        x: -slideDirection * 300,
+                                        z: -100,
+                                        scale: 0.8,
+                                        rotateY: -slideDirection * 15
                                     }}
                                     transition={{
                                         type: "spring",
@@ -310,10 +307,10 @@ export function Carousel3D({
                     disabled={activeIndex === 0}
                     className={cn(
                         "pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center transition-all",
-                        "bg-white/5 backdrop-blur-md border border-white/10",
+                        "bg-muted/50 backdrop-blur-md border border-border",
                         activeIndex === 0
                             ? "opacity-30 cursor-not-allowed"
-                            : "opacity-100 hover:bg-white/10"
+                            : "opacity-100 hover:bg-muted"
                     )}
                 >
                     <ChevronLeft size={24} className="text-foreground" />
@@ -326,10 +323,10 @@ export function Carousel3D({
                     disabled={activeIndex === supplements.length - 1}
                     className={cn(
                         "pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center transition-all",
-                        "bg-white/5 backdrop-blur-md border border-white/10",
+                        "bg-muted/50 backdrop-blur-md border border-border",
                         activeIndex === supplements.length - 1
                             ? "opacity-30 cursor-not-allowed"
-                            : "opacity-100 hover:bg-white/10"
+                            : "opacity-100 hover:bg-muted"
                     )}
                 >
                     <ChevronRight size={24} className="text-foreground" />
@@ -341,17 +338,17 @@ export function Carousel3D({
                 <button
                     onClick={goToPrevious}
                     disabled={activeIndex === 0}
-                    className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                 >
                     <ChevronLeft size={20} />
                 </button>
-                <span className="text-sm text-white/70 min-w-[6rem] text-center">
+                <span className="text-sm text-muted-foreground min-w-[6rem] text-center">
                     {t('pagination', { index: activeIndex + 1, total: supplements.length })}
                 </span>
                 <button
                     onClick={goToNext}
                     disabled={activeIndex === supplements.length - 1}
-                    className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                 >
                     <ChevronRight size={20} />
                 </button>

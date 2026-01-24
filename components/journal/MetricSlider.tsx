@@ -115,14 +115,14 @@ export function MetricSlider({
             >
                 {/* Track mit overflow-hidden für Effekte */}
                 <motion.div 
-                    className="absolute inset-0 bg-white/5 border rounded-xl overflow-hidden"
+                    className="absolute inset-0 bg-muted/50 dark:bg-white/5 border border-border rounded-xl overflow-hidden"
                     animate={{ 
                         scale: isDragging ? 1.01 : 1,
                         borderColor: value === max 
                             ? 'rgba(167,243,208,0.5)' 
                             : isDragging 
-                                ? 'rgba(167,243,208,0.2)' 
-                                : 'rgba(255,255,255,0.1)',
+                                ? 'rgba(167,243,208,0.3)' 
+                                : undefined,
                     }}
                     transition={{ 
                         type: "spring", 
@@ -141,7 +141,7 @@ export function MetricSlider({
                     {/* Shimmer Effect beim Draggen */}
                     {isDragging && (
                         <motion.div
-                            className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                            className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-transparent via-primary/20 to-transparent"
                             animate={{ x: ['-100%', '100%'] }}
                             transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                         />
@@ -173,7 +173,7 @@ export function MetricSlider({
                                     className="absolute top-1/2 -translate-y-1/2 w-0.5 h-2.5 rounded-full"
                                     style={{ left: `${tickPercent}%` }}
                                     animate={{
-                                        backgroundColor: isActive ? 'rgba(167,243,208,0.4)' : 'rgba(255,255,255,0.08)',
+                                        backgroundColor: isActive ? 'rgba(20,184,166,0.5)' : 'rgba(128,128,128,0.2)',
                                         scaleY: isActive ? 1.1 : 1,
                                     }}
                                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
