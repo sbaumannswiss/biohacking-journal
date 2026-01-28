@@ -73,9 +73,14 @@ export async function POST(request: Request) {
       .from('waitlist_emails')
       .select('*', { count: 'exact', head: true });
 
-    // Slack Notification (fire and forget)
-    notifyWaitlistSignup(email.toLowerCase(), (count || 0) + 847)
-      .catch(err => console.error('Slack notification failed:', err));
+    // Slack Notification - MUST await in serverless
+    try {
+      console.log('Sending Slack notification for:', email.toLowerCase());
+      const slackResult = await notifyWaitlistSignup(email.toLowerCase(), (count || 0) + 847);
+      console.log('Slack notification result:', slackResult);
+    } catch (err) {
+      console.error('Slack notification failed:', err);
+    }
 
     return NextResponse.json({ success: true, message: 'Erfolgreich registriert!' });
 
