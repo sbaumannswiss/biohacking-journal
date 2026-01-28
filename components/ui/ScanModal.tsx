@@ -3,11 +3,13 @@
 import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, X, Loader2, Check, RefreshCw, Plus, AlertCircle, Sparkles, FileText, Edit3, Send, Package, ExternalLink } from 'lucide-react';
+import { Camera, X, Loader2, Check, RefreshCw, Plus, AlertCircle, Sparkles, FileText, Edit3, Send, Package, ExternalLink, FlaskConical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScanResult, ComboIngredient } from '@/lib/agent/visionService';
 import { saveCustomSupplement, submitToCentralSystem, addCustomToStack } from '@/lib/customSupplementService';
 import { useTranslations } from 'next-intl';
+import { QualityAnalysis } from '@/lib/agent/qualityAnalysisService';
+import { QualityBadge } from './QualityBadge';
 
 interface ScanModalProps {
   isOpen: boolean;
@@ -49,6 +51,8 @@ export function ScanModal({
   const [manualIngredient, setManualIngredient] = useState({ name: '', dosage: '', unit: 'mg' });
   const [error, setError] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [qualityAnalysis, setQualityAnalysis] = useState<QualityAnalysis | null>(null);
+  const [isAnalyzingQuality, setIsAnalyzingQuality] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const ingredientInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,7 +64,41 @@ export function ScanModal({
     setManualIngredient({ name: '', dosage: '', unit: 'mg' });
     setError(null);
     setSavedId(null);
+    setQualityAnalysis(null);
+    setIsAnalyzingQuality(false);
   }, []);
+
+  const handleAnalyzeQuality = useCallback(async () => {
+    if (!imagePreview || !scanResult?.detected) return;
+    
+    setIsAnalyzingQuality(true);
+    
+    try {
+      const response = await fetch('/api/supplements/quality', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: imagePreview,
+          supplementName: scanResult.detected.name,
+          ingredients: scanResult.detected.ingredients,
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setQualityAnalysis({
+          certifications: result.certifications,
+          ingredientForm: result.ingredientForm,
+          disclaimer: result.disclaimer,
+        });
+      }
+    } catch (err) {
+      console.error('Quality analysis error:', err);
+    } finally {
+      setIsAnalyzingQuality(false);
+    }
+  }, [imagePreview, scanResult]);
 
   const handleClose = useCallback(() => {
     reset();
@@ -545,6 +583,26 @@ export function ScanModal({
                       )}
                       {scanResult.detected.dosage && (
                         <p className="text-sm text-primary">💊 {scanResult.detected.dosage}</p>
+                      )}
+                      
+                      {/* Qualitätsanalyse */}
+                      {qualityAnalysis ? (
+                        <div className="mt-3">
+                          <QualityBadge analysis={qualityAnalysis} />
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleAnalyzeQuality}
+                          disabled={isAnalyzingQuality}
+                          className="mt-3 w-full py-2 px-3 bg-white/5 border border-white/10 rounded-lg text-sm text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors flex items-center justify-center gap-2"
+                        >
+                          {isAnalyzingQuality ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <FlaskConical size={14} />
+                          )}
+                          {isAnalyzingQuality ? 'Analysiere...' : 'Qualität analysieren'}
+                        </button>
                       )}
                     </div>
                   )}
