@@ -14,9 +14,20 @@ import { BloodworkAnalysisResult } from './bloodworkTypes';
 // Re-export types for convenience
 export * from './bloodworkTypes';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization - nur Server-Side
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY not configured');
+    }
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 const BLOODWORK_VISION_PROMPT = `Du analysierst ein Blutbild-Dokument (Laborbefund) und extrahierst supplement-relevante Biomarker.
 
@@ -124,7 +135,7 @@ export async function analyzeBloodwork(base64Image: string): Promise<BloodworkAn
       }
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {

@@ -1,9 +1,20 @@
 import OpenAI from 'openai';
 import { SUPPLEMENT_LIBRARY } from '@/data/supplements';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization - nur Server-Side
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY not configured');
+    }
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 // Einzelner Inhaltsstoff eines Kombi-Präparats
 export interface ComboIngredient {
@@ -178,7 +189,7 @@ export async function analyzeSupplementImage(base64Image: string): Promise<ScanR
       }
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
@@ -299,7 +310,7 @@ export async function analyzeIngredientLabel(base64Image: string): Promise<{
       }
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {

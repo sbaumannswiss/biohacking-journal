@@ -1,9 +1,20 @@
 import OpenAI from 'openai';
 import { buildSystemPrompt, buildAnonymizedSystemPrompt } from './systemPrompt';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization - nur Server-Side
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY not configured');
+    }
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -30,7 +41,7 @@ export async function chat(
     { role: 'user', content: userMessage },
   ];
   
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages,
     temperature: 0.7,
@@ -60,7 +71,7 @@ export async function chatWithFullContext(
     { role: 'user', content: userMessage },
   ];
   
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages,
     temperature: 0.7,
@@ -90,7 +101,7 @@ export async function* chatStream(
     { role: 'user', content: userMessage },
   ];
   
-  const stream = await openai.chat.completions.create({
+  const stream = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages,
     temperature: 0.7,
