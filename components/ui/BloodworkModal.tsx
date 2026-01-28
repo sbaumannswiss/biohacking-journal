@@ -22,7 +22,7 @@ import {
   Biomarker,
   getStatusColor,
   getPriorityColor 
-} from '@/lib/agent/bloodworkService';
+} from '@/lib/agent/bloodworkTypes';
 
 interface BloodworkModalProps {
   isOpen: boolean;

@@ -5,44 +5,18 @@
  * supplement-relevante Biomarker.
  * 
  * WICHTIG: Keine medizinische Diagnose - nur Supplement-Orientierung!
+ * WICHTIG: Diese Datei darf NUR serverseitig verwendet werden!
  */
 
 import OpenAI from 'openai';
+import { BloodworkAnalysisResult } from './bloodworkTypes';
+
+// Re-export types for convenience
+export * from './bloodworkTypes';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-// Biomarker mit Supplement-Relevanz
-export interface Biomarker {
-  name: string;
-  value: number | string;
-  unit: string;
-  referenceRange: string;
-  status: 'low' | 'normal' | 'high' | 'optimal';
-  supplementRelevance: string | null;
-}
-
-export interface BloodworkAnalysisResult {
-  success: boolean;
-  error?: string;
-  
-  // Erkannte Biomarker
-  biomarkers: Biomarker[];
-  
-  // Supplement-Empfehlungen
-  supplementSuggestions: {
-    name: string;
-    reason: string;
-    priority: 'high' | 'medium' | 'low';
-  }[];
-  
-  // Helix Zusammenfassung
-  summary: string;
-  
-  // Disclaimer (immer vorhanden)
-  disclaimer: string;
-}
 
 const BLOODWORK_VISION_PROMPT = `Du analysierst ein Blutbild-Dokument (Laborbefund) und extrahierst supplement-relevante Biomarker.
 
@@ -231,35 +205,4 @@ export function isValidBloodworkImage(base64: string): boolean {
   }
   // Check for raw base64
   return /^[A-Za-z0-9+/]+={0,2}$/.test(base64) && base64.length > 100;
-}
-
-/**
- * Gibt den Status-Farbcode zurück
- */
-export function getStatusColor(status: Biomarker['status']): string {
-  switch (status) {
-    case 'optimal':
-      return 'text-green-400';
-    case 'normal':
-      return 'text-blue-400';
-    case 'low':
-    case 'high':
-      return 'text-yellow-400';
-    default:
-      return 'text-muted-foreground';
-  }
-}
-
-/**
- * Gibt die Prioritäts-Farbe zurück
- */
-export function getPriorityColor(priority: 'high' | 'medium' | 'low'): string {
-  switch (priority) {
-    case 'high':
-      return 'text-red-400 bg-red-500/10 border-red-500/30';
-    case 'medium':
-      return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30';
-    case 'low':
-      return 'text-blue-400 bg-blue-500/10 border-blue-500/30';
-  }
 }
