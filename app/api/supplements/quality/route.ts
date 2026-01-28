@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { analyzeQuality } from '@/lib/agent/qualityAnalysisService';
+import { analyzeQuality, getUnknownData } from '@/lib/agent/qualityAnalysisService';
+import { logUnknownQualityData } from '@/lib/agent/unknownLogger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +32,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Schritt 1: Qualitätsanalyse
     const analysis = await analyzeQuality(image, supplementName, ingredients);
+
+    // Schritt 2: Unbekannte Daten loggen (async, blockiert nicht die Response)
+    if (analysis.hasUnknownData) {
+      const unknownData = getUnknownData(analysis);
+      const context = supplementName ? `Supplement: ${supplementName}` : undefined;
+      
+      // Fire and forget - Logging im Hintergrund
+      logUnknownQualityData(
+        unknownData.unknownIngredients,
+        unknownData.unknownCertifications,
+        context
+      ).catch(err => console.error('Logging failed:', err));
+    }
 
     return NextResponse.json({
       success: true,

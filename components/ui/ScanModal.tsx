@@ -89,8 +89,10 @@ export function ScanModal({
       if (result.success) {
         setQualityAnalysis({
           certifications: result.certifications,
+          ingredients: result.ingredients || [],
           ingredientForm: result.ingredientForm,
           disclaimer: result.disclaimer,
+          hasUnknownData: result.hasUnknownData || false,
         });
       }
     } catch (err) {

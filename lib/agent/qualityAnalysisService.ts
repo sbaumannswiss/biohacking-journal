@@ -113,12 +113,36 @@ export const BIOAVAILABILITY_DATA: Record<string, {
   },
 };
 
+// OCR-Ergebnis von GPT (nur was auf dem Etikett steht)
+export interface OCRResult {
+  certifications: string[];
+  ingredients: {
+    name: string;
+    form: string;
+    dosage?: string;
+  }[];
+}
+
+// Bewertetes Ergebnis nach Lookup in unserer DB
+export interface IngredientAnalysis {
+  ingredient: string;
+  form: string;
+  dosage?: string;
+  bioavailability: 'low' | 'medium' | 'high' | 'unknown';
+  betterAlternatives?: string[];
+  reasoning: string;
+  isKnown: boolean; // false = muss geloggt werden
+}
+
 // Typen
 export interface QualityAnalysis {
   certifications: {
     detected: CertificationType[];
+    unknown: string[]; // Zertifizierungen die GPT erkannt hat aber nicht in unserer DB sind
     source: 'label' | 'unknown';
   };
+  ingredients: IngredientAnalysis[];
+  // Legacy-Support für einzelne ingredientForm
   ingredientForm: {
     ingredient: string;
     form: string;
@@ -127,179 +151,246 @@ export interface QualityAnalysis {
     reasoning: string;
   } | null;
   disclaimer: string;
+  // Logging-Info
+  hasUnknownData: boolean;
 }
 
-const QUALITY_ANALYSIS_PROMPT = `Du analysierst ein Supplement auf Qualitätsmerkmale.
+/**
+ * OCR-MODUS PROMPT
+ * 
+ * GPT soll NUR lesen was auf dem Etikett steht.
+ * KEINE Bewertungen, KEINE Interpretationen.
+ * Die Bewertung erfolgt durch unsere lokale Datenbank.
+ */
+const OCR_PROMPT = `Du bist ein OCR-System für Supplement-Etiketten. 
+Deine EINZIGE Aufgabe: Lies was auf dem Bild steht und extrahiere die Informationen.
 
-## Deine Aufgaben:
+## REGELN:
+1. Lies NUR was TATSÄCHLICH auf dem Etikett/Bild zu sehen ist
+2. ERFINDE NICHTS - wenn du etwas nicht siehst, gib es nicht an
+3. Keine Bewertungen, keine Interpretationen, keine Empfehlungen
+4. Bei Unsicherheit: lieber weglassen als raten
 
-### 1. Zertifizierungen erkennen
-Suche auf dem Bild/in der Beschreibung nach:
-- NSF Certified for Sport
-- USP Verified
-- GMP (Good Manufacturing Practice)
-- Informed Sport
-- Bio/Organic
-- Vegan
-- Non-GMO
+## ZERTIFIZIERUNGS-LOGOS die du erkennen sollst:
+- NSF (blauer Kreis mit "NSF" oder "NSF Certified for Sport")
+- USP (gelbes/goldenes "USP Verified" Logo)
+- GMP (verschiedene GMP Siegel)
+- Informed Sport (blaues Logo)
+- Bio/Organic (grünes EU-Bio-Logo, USDA Organic)
+- Vegan (V-Label, Vegan Society Logo)
+- Non-GMO (Schmetterling-Logo)
 
-### 2. Inhaltsstoff-Form analysieren
-Bewerte die Bioverfügbarkeit der verwendeten Form:
+## INHALTSSTOFFE:
+Lies die genaue chemische Form wie sie auf dem Etikett steht, z.B.:
+- "Magnesium (als Magnesiumoxid)" → ingredient: "Magnesium", form: "Oxid"
+- "Vitamin B12 (Methylcobalamin)" → ingredient: "B12", form: "Methylcobalamin"
+- "Zink-Bisglycinat" → ingredient: "Zink", form: "Bisglycinat"
 
-**Magnesium:**
-- HIGH: Glycinat, Bisglycinat, Taurinat, L-Threonat, Malat
-- MEDIUM: Citrat, Orotat
-- LOW: Oxid, Carbonat, Sulfat
-
-**Zink:**
-- HIGH: Picolinat, Bisglycinat
-- MEDIUM: Citrat, Gluconat
-- LOW: Oxid, Sulfat
-
-**B12:**
-- HIGH: Methylcobalamin, Adenosylcobalamin
-- MEDIUM: Hydroxocobalamin
-- LOW: Cyanocobalamin
-
-**Folat:**
-- HIGH: Methylfolat, 5-MTHF, Quatrefolic
-- MEDIUM: Folinsäure
-- LOW: Folsäure
-
-**CoQ10:**
-- HIGH: Ubiquinol
-- MEDIUM: Ubiquinon
-
-**Omega-3:**
-- HIGH: Triglycerid-Form (TG, rTG)
-- MEDIUM: Phospholipid (Krill)
-- LOW: Ethylester (EE)
-
-**Vitamin D:**
-- HIGH: D3 (Cholecalciferol)
-- LOW: D2 (Ergocalciferol)
-
-## Antwort-Format (NUR JSON):
+## ANTWORT-FORMAT (NUR JSON, sonst nichts):
 
 {
-  "certifications": ["NSF", "GMP"],
-  "ingredientForm": {
-    "ingredient": "Magnesium",
-    "form": "Glycinat",
-    "bioavailability": "high",
-    "betterAlternatives": null,
-    "reasoning": "Magnesium-Glycinat hat eine hohe Bioverfügbarkeit und ist gut verträglich."
-  }
+  "certifications": ["NSF", "VEGAN"],
+  "ingredients": [
+    { "name": "Magnesium", "form": "Oxid", "dosage": "400mg" },
+    { "name": "Zink", "form": "Gluconat", "dosage": "15mg" }
+  ]
 }
 
-Wenn keine Form erkennbar: ingredientForm = null
-Wenn keine Zertifizierungen: certifications = []
-
-WICHTIG: KEINE Markenbewertung! Nur objektive Fakten.
+Wenn keine Zertifizierungen sichtbar: certifications = []
+Wenn keine Inhaltsstoffe lesbar: ingredients = []
 `;
 
 const DISCLAIMER = 'Zertifizierungen wie auf dem Produkt angegeben. Für unabhängige Laboranalysen: ConsumerLab.com oder Labdoor.com';
 
 /**
+ * Schritt 1: OCR - GPT liest nur was auf dem Etikett steht
+ */
+async function performOCR(base64Image: string): Promise<OCRResult> {
+  // Detect image type
+  let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+  let imageData = base64Image;
+  
+  if (base64Image.startsWith('data:')) {
+    const match = base64Image.match(/^data:(image\/[a-z]+);base64,/);
+    if (match) {
+      mediaType = match[1] as typeof mediaType;
+      imageData = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
+    }
+  }
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: OCR_PROMPT,
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:${mediaType};base64,${imageData}`,
+              detail: 'high',
+            },
+          },
+          {
+            type: 'text',
+            text: 'Lies das Etikett und extrahiere Zertifizierungen und Inhaltsstoffe.',
+          },
+        ],
+      },
+    ],
+    max_tokens: 500,
+    temperature: 0.1, // Niedrig für konsistente OCR
+  });
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error('Keine Antwort von Vision API');
+  }
+
+  // Parse JSON
+  const jsonContent = content.replace(/```json\n?|\n?```/g, '').trim();
+  const parsed = JSON.parse(jsonContent);
+
+  return {
+    certifications: parsed.certifications || [],
+    ingredients: parsed.ingredients || [],
+  };
+}
+
+/**
+ * Schritt 2: Lookup - Bewerte OCR-Ergebnisse gegen unsere Datenbank
+ */
+function lookupIngredient(name: string, form: string, dosage?: string): IngredientAnalysis {
+  const bioResult = analyzeBioavailability(name, form);
+  
+  return {
+    ingredient: name,
+    form: form,
+    dosage: dosage,
+    bioavailability: bioResult.bioavailability,
+    betterAlternatives: bioResult.betterAlternatives,
+    reasoning: bioResult.reasoning,
+    isKnown: bioResult.bioavailability !== 'unknown',
+  };
+}
+
+/**
+ * Schritt 3: Zertifizierungen validieren
+ */
+function validateCertifications(detected: string[]): {
+  known: CertificationType[];
+  unknown: string[];
+} {
+  const known: CertificationType[] = [];
+  const unknown: string[] = [];
+
+  for (const cert of detected) {
+    const upperCert = cert.toUpperCase().replace(/[^A-Z_]/g, '_');
+    if (upperCert in CERTIFICATIONS) {
+      known.push(upperCert as CertificationType);
+    } else {
+      // Fuzzy match
+      const matchedKey = Object.keys(CERTIFICATIONS).find(key => 
+        cert.toUpperCase().includes(key) || key.includes(cert.toUpperCase())
+      );
+      if (matchedKey) {
+        known.push(matchedKey as CertificationType);
+      } else {
+        unknown.push(cert);
+      }
+    }
+  }
+
+  return { known, unknown };
+}
+
+/**
  * Analysiert Supplement-Qualität aus einem Bild
+ * 
+ * Ablauf:
+ * 1. GPT liest Etikett (OCR-Modus)
+ * 2. Lookup in unserer Datenbank
+ * 3. Unbekannte Daten werden markiert für Logging
  */
 export async function analyzeQuality(
   base64Image: string,
   supplementName?: string,
   detectedIngredients?: string[]
 ): Promise<QualityAnalysis> {
+  const emptyResult: QualityAnalysis = {
+    certifications: { detected: [], unknown: [], source: 'unknown' },
+    ingredients: [],
+    ingredientForm: null,
+    disclaimer: DISCLAIMER,
+    hasUnknownData: false,
+  };
+
   try {
     if (!process.env.OPENAI_API_KEY) {
-      return {
-        certifications: { detected: [], source: 'unknown' },
-        ingredientForm: null,
-        disclaimer: DISCLAIMER,
-      };
+      return emptyResult;
     }
 
-    // Detect image type
-    let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
-    if (base64Image.startsWith('data:')) {
-      const match = base64Image.match(/^data:(image\/[a-z]+);base64,/);
-      if (match) {
-        mediaType = match[1] as typeof mediaType;
-        base64Image = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
-      }
-    }
+    // Schritt 1: OCR
+    const ocrResult = await performOCR(base64Image);
 
-    const contextInfo = supplementName 
-      ? `Supplement: ${supplementName}${detectedIngredients?.length ? `, Inhaltsstoffe: ${detectedIngredients.join(', ')}` : ''}`
-      : 'Analysiere das Supplement auf dem Bild.';
+    // Schritt 2: Zertifizierungen validieren
+    const certValidation = validateCertifications(ocrResult.certifications);
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: QUALITY_ANALYSIS_PROMPT,
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:${mediaType};base64,${base64Image}`,
-                detail: 'high',
-              },
-            },
-            {
-              type: 'text',
-              text: contextInfo,
-            },
-          ],
-        },
-      ],
-      max_tokens: 500,
-      temperature: 0.2,
-    });
+    // Schritt 3: Inhaltsstoffe bewerten
+    const analyzedIngredients = ocrResult.ingredients.map(ing => 
+      lookupIngredient(ing.name, ing.form, ing.dosage)
+    );
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('Keine Antwort von Vision API');
-    }
+    // Prüfe ob unbekannte Daten vorhanden
+    const hasUnknownIngredients = analyzedIngredients.some(ing => !ing.isKnown);
+    const hasUnknownCerts = certValidation.unknown.length > 0;
+    const hasUnknownData = hasUnknownIngredients || hasUnknownCerts;
 
-    // Parse JSON
-    let parsed;
-    try {
-      const jsonContent = content.replace(/```json\n?|\n?```/g, '').trim();
-      parsed = JSON.parse(jsonContent);
-    } catch {
-      console.error('Failed to parse quality analysis:', content);
-      return {
-        certifications: { detected: [], source: 'unknown' },
-        ingredientForm: null,
-        disclaimer: DISCLAIMER,
-      };
-    }
-
-    // Validate certifications
-    const validCerts = (parsed.certifications || []).filter(
-      (cert: string) => cert in CERTIFICATIONS
-    ) as CertificationType[];
+    // Legacy: Erste Ingredient als ingredientForm
+    const firstKnownIngredient = analyzedIngredients.find(ing => ing.isKnown && ing.bioavailability !== 'unknown');
+    const legacyIngredientForm = firstKnownIngredient ? {
+      ingredient: firstKnownIngredient.ingredient,
+      form: firstKnownIngredient.form,
+      bioavailability: firstKnownIngredient.bioavailability as 'low' | 'medium' | 'high',
+      betterAlternatives: firstKnownIngredient.betterAlternatives,
+      reasoning: firstKnownIngredient.reasoning,
+    } : null;
 
     return {
       certifications: {
-        detected: validCerts,
-        source: validCerts.length > 0 ? 'label' : 'unknown',
+        detected: certValidation.known,
+        unknown: certValidation.unknown,
+        source: certValidation.known.length > 0 ? 'label' : 'unknown',
       },
-      ingredientForm: parsed.ingredientForm || null,
+      ingredients: analyzedIngredients,
+      ingredientForm: legacyIngredientForm,
       disclaimer: DISCLAIMER,
+      hasUnknownData,
     };
 
   } catch (error: any) {
     console.error('Quality Analysis Error:', error);
-    return {
-      certifications: { detected: [], source: 'unknown' },
-      ingredientForm: null,
-      disclaimer: DISCLAIMER,
-    };
+    return emptyResult;
   }
+}
+
+/**
+ * Gibt unbekannte Daten zurück für Logging
+ */
+export function getUnknownData(analysis: QualityAnalysis): {
+  unknownIngredients: { name: string; form: string }[];
+  unknownCertifications: string[];
+} {
+  return {
+    unknownIngredients: analysis.ingredients
+      .filter(ing => !ing.isKnown)
+      .map(ing => ({ name: ing.ingredient, form: ing.form })),
+    unknownCertifications: analysis.certifications.unknown,
+  };
 }
 
 /**
