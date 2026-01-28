@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { notifyWaitlistSignup } from '@/lib/slack';
 
 export async function POST(request: Request) {
   try {
@@ -66,6 +67,15 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    // Get total count for Slack notification
+    const { count } = await supabase
+      .from('waitlist_emails')
+      .select('*', { count: 'exact', head: true });
+
+    // Slack Notification (fire and forget)
+    notifyWaitlistSignup(email.toLowerCase(), (count || 0) + 847)
+      .catch(err => console.error('Slack notification failed:', err));
 
     return NextResponse.json({ success: true, message: 'Erfolgreich registriert!' });
 

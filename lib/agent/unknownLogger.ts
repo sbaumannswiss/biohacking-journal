@@ -6,13 +6,12 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { notifyUnknownIngredient, notifyUnknownCertification } from '@/lib/slack';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 );
-
-const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
 
 // Schwellenwert für Slack Notification (bei erstem Auftreten und dann alle X)
 const NOTIFICATION_THRESHOLDS = [1, 5, 10, 25, 50, 100];
@@ -154,56 +153,6 @@ export async function logUnknownCertification(
 }
 
 /**
- * Sendet Slack Notification
- */
-export async function sendSlackNotification(
-  type: 'ingredient' | 'certification',
-  name: string,
-  form?: string,
-  occurrences?: number
-): Promise<boolean> {
-  if (!SLACK_WEBHOOK_URL) {
-    console.log('Slack notification skipped: No webhook URL configured');
-    return false;
-  }
-
-  try {
-    const emoji = type === 'ingredient' ? '💊' : '🏅';
-    const typeLabel = type === 'ingredient' ? 'Inhaltsstoff' : 'Zertifizierung';
-    
-    let message = `${emoji} *Neuer unbekannter ${typeLabel}*\n`;
-    message += `> ${name}`;
-    if (form) message += ` (${form})`;
-    if (occurrences && occurrences > 1) {
-      message += `\n_${occurrences}x gescannt_`;
-    }
-    message += `\n\n<${process.env.NEXT_PUBLIC_APP_URL || 'https://stax.app'}/admin/unknown|Review in Admin>`;
-
-    const response = await fetch(SLACK_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: message,
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: message,
-            },
-          },
-        ],
-      }),
-    });
-
-    return response.ok;
-  } catch (err) {
-    console.error('Slack notification failed:', err);
-    return false;
-  }
-}
-
-/**
  * Loggt alle unbekannten Daten aus einer Qualitätsanalyse
  */
 export async function logUnknownQualityData(
@@ -225,7 +174,7 @@ export async function logUnknownQualityData(
     if (result.logged) ingredientsLogged++;
     
     if (result.shouldNotify) {
-      const sent = await sendSlackNotification('ingredient', ing.name, ing.form, result.occurrences);
+      const sent = await notifyUnknownIngredient(ing.name, ing.form, context, result.occurrences);
       if (sent) notificationsSent++;
     }
   }
@@ -236,7 +185,7 @@ export async function logUnknownQualityData(
     if (result.logged) certificationsLogged++;
     
     if (result.shouldNotify) {
-      const sent = await sendSlackNotification('certification', cert, undefined, result.occurrences);
+      const sent = await notifyUnknownCertification(cert, result.occurrences);
       if (sent) notificationsSent++;
     }
   }
