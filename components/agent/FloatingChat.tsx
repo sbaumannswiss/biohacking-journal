@@ -2,13 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Loader2, Target, Check, FlaskConical, Camera, Sparkles } from 'lucide-react';
+import { X, Send, Loader2, Target, Check, FlaskConical, Sparkles } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useAnonymousUser } from '@/hooks/useAnonymousUser';
 import { cn } from '@/lib/utils';
 import { parseQuestFromMessage, CreateQuestInput } from '@/lib/agent/questService';
 import { parseSupplementFromMessage, ParsedSupplementSuggestion } from '@/lib/agent/supplementService';
 import { ScanModal } from '@/components/ui/ScanModal';
+import { BloodworkModal } from '@/components/ui/BloodworkModal';
+import { ScanActionMenu } from '@/components/ui/ScanActionMenu';
 import { addToStack } from '@/lib/supabaseService';
 import { useHelix } from '@/components/coach';
 
@@ -30,6 +32,7 @@ export function FloatingChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPulse, setShowPulse] = useState(true);
   const [showScanModal, setShowScanModal] = useState(false);
+  const [showBloodworkModal, setShowBloodworkModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { userId } = useAnonymousUser();
@@ -226,7 +229,7 @@ export function FloatingChat() {
   };
 
   return (
-    <>
+    <div data-floating-chat>
       {/* Floating Helix Button - Top Right */}
       <motion.button
         data-tour-id="helix-chat"
@@ -492,16 +495,11 @@ export function FloatingChat() {
             {/* Input */}
             <div className="p-4 border-t border-white/10">
               <div className="flex gap-2">
-                {/* Camera Button */}
-                <motion.button
-                  onClick={() => setShowScanModal(true)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors"
-                  title="Supplement scannen"
-                >
-                  <Camera size={20} />
-                </motion.button>
+                {/* Scan Action Menu */}
+                <ScanActionMenu
+                  onSupplementScan={() => setShowScanModal(true)}
+                  onBloodworkAnalysis={() => setShowBloodworkModal(true)}
+                />
                 <input
                   ref={inputRef}
                   type="text"
@@ -570,7 +568,14 @@ export function FloatingChat() {
           }
         }}
       />
-    </>
+
+      {/* Bloodwork Modal */}
+      <BloodworkModal
+        isOpen={showBloodworkModal}
+        onClose={() => setShowBloodworkModal(false)}
+        userId={userId || undefined}
+      />
+    </div>
   );
 }
 
