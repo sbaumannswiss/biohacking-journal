@@ -4,6 +4,7 @@ import { useState, FormEvent, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { SocialAuthButtons, AuthDivider } from '@/components/auth';
 
 type AuthMode = 'login' | 'signup' | 'magic-link' | 'forgot-password';
 
@@ -119,6 +120,17 @@ function LoginContent() {
             {mode === 'magic-link' && 'Magic Link Login'}
             {mode === 'forgot-password' && 'Passwort zurücksetzen'}
           </h2>
+
+          {/* Social Auth Buttons - only for login/signup modes */}
+          {(mode === 'login' || mode === 'signup') && (
+            <>
+              <SocialAuthButtons 
+                onError={(err) => setError(err)}
+                disabled={isSubmitting}
+              />
+              <AuthDivider text="oder mit E-Mail" />
+            </>
+          )}
 
           {/* Error/Success Messages */}
           {error && (

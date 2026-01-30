@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
+import { User, Session, AuthError, Provider } from '@supabase/supabase-js';
+
+// Supported OAuth providers
+export type OAuthProvider = 'google' | 'apple';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { getAuthRedirectUrl, setupNativeAuthListener } from '@/lib/auth';
 
@@ -15,6 +18,7 @@ export interface AuthState {
 export interface AuthActions {
   signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signInWithOAuth: (provider: OAuthProvider) => Promise<{ error: AuthError | null }>;
   signInWithMagicLink: (email: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
@@ -94,6 +98,23 @@ export function useAuth(): AuthState & AuthActions {
     return { error };
   }, [supabase]);
 
+  const signInWithOAuth = useCallback(async (provider: OAuthProvider) => {
+    if (!supabase) return { error: new Error('Supabase not configured') as unknown as AuthError };
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: provider as Provider,
+      options: {
+        redirectTo: getAuthRedirectUrl(),
+        // Google-specific: request offline access for refresh tokens
+        queryParams: provider === 'google' ? {
+          access_type: 'offline',
+          prompt: 'consent',
+        } : undefined,
+      },
+    });
+    return { error };
+  }, [supabase]);
+
   const signInWithMagicLink = useCallback(async (email: string) => {
     if (!supabase) return { error: new Error('Supabase not configured') as unknown as AuthError };
     
@@ -143,6 +164,7 @@ export function useAuth(): AuthState & AuthActions {
     isAuthenticated: !!user,
     signUp,
     signIn,
+    signInWithOAuth,
     signInWithMagicLink,
     signOut,
     resetPassword,

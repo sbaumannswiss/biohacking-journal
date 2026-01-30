@@ -37,6 +37,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { SUPPLEMENT_LIBRARY } from '@/data/supplements';
+import { SocialAuthButtons, AuthDivider, OAuthConsentModal } from '@/components/auth';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
@@ -1457,6 +1458,17 @@ function Step7Signup({
           </p>
         </SpeechBubble>
       </div>
+      
+      {/* Social Auth Buttons - Primary Option */}
+      <SocialAuthButtons 
+        onError={(err) => {
+          // Error will be handled by parent component via auth state
+          console.error('OAuth error:', err);
+        }}
+        disabled={isLoading}
+      />
+      
+      <AuthDivider text="oder mit E-Mail registrieren" />
       
       {/* Error Message */}
       {error && (
