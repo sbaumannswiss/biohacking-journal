@@ -655,7 +655,7 @@ function Step2ThemeSelector({
 
   if (!mounted) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -666,18 +666,18 @@ function Step2ThemeSelector({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center min-h-[60vh] px-2"
+      className="flex flex-col items-center px-2"
     >
       {/* Helix asks */}
       <div className="flex items-start gap-3 mb-6 w-full">
         <HelixMascot mood="happy" size="sm" />
         <SpeechBubble className="flex-1">
-          <p className="text-sm">Wie möchtest du STAX nutzen? Wähle deinen bevorzugten Modus.</p>
+          <p className="text-sm">Wie möchtest du STAX nutzen? Tippe auf einen Modus um die Vorschau zu sehen.</p>
         </SpeechBubble>
       </div>
 
       {/* Split Screen Preview */}
-      <div className="grid grid-cols-2 gap-3 w-full mb-6">
+      <div className="grid grid-cols-2 gap-3 w-full mb-4">
         {/* Light Mode Preview */}
         <motion.button
           type="button"
@@ -792,9 +792,20 @@ function Step2ThemeSelector({
       </div>
 
       {/* Info Text */}
-      <p className="text-xs text-muted-foreground text-center">
+      <p className="text-xs text-muted-foreground text-center mb-4">
         Du kannst den Modus später jederzeit in den Einstellungen ändern.
       </p>
+      
+      {/* Selection hint */}
+      {selected && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm text-primary font-medium text-center"
+        >
+          {selected === 'light' ? 'Light Mode' : 'Dark Mode'} ausgewählt
+        </motion.p>
+      )}
     </motion.div>
   );
 }
@@ -2093,7 +2104,7 @@ export default function OnboardingPage() {
       <main className="flex-1 px-4 py-6 relative z-10">
         <AnimatePresence mode="wait">
           {step === 1 && <Step1Welcome key="step1" onNext={handleNext} />}
-          {step === 2 && <Step2ThemeSelector key="step2" onSelect={() => handleNext()} />}
+          {step === 2 && <Step2ThemeSelector key="step2" onSelect={() => {}} />}
           {step === 3 && <Step3Basics key="step3" data={data} onChange={updateData} />}
           {step === 4 && <Step4Lifestyle key="step4" data={data} onChange={updateData} />}
           {step === 5 && <Step5Nutrition key="step5" data={data} onChange={updateData} />}
