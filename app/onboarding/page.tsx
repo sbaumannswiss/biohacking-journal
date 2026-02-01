@@ -2093,7 +2093,7 @@ export default function OnboardingPage() {
       <main className="flex-1 px-4 py-6 relative z-10">
         <AnimatePresence mode="wait">
           {step === 1 && <Step1Welcome key="step1" onNext={handleNext} />}
-          {step === 2 && <Step2ThemeSelector key="step2" onSelect={() => {}} />}
+          {step === 2 && <Step2ThemeSelector key="step2" onSelect={() => handleNext()} />}
           {step === 3 && <Step3Basics key="step3" data={data} onChange={updateData} />}
           {step === 4 && <Step4Lifestyle key="step4" data={data} onChange={updateData} />}
           {step === 5 && <Step5Nutrition key="step5" data={data} onChange={updateData} />}
